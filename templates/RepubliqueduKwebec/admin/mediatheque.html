@@ -1,0 +1,344 @@
+{% extends "RepubliqueduKwebec/base.html" %}
+
+{% block title %}Administration - Médiathèque RDKQ{% endblock %}
+
+{% block head %}
+<style>
+    .admin-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 2rem;
+        margin-top: 100px; /* Compenser la navbar fixe */
+    }
+    
+    .media-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+    
+    .media-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+    
+    .media-card img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+    }
+    
+    .media-title {
+        font-size: 1.2rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        color: #fff;
+    }
+    
+    .media-meta {
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.7);
+        margin-bottom: 1rem;
+    }
+    
+    .media-actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    
+    .btn-admin {
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-edit {
+        background: rgba(33, 150, 243, 0.8);
+        color: white;
+    }
+    
+    .btn-delete {
+        background: rgba(244, 67, 54, 0.8);
+        color: white;
+    }
+    
+    .btn-toggle {
+        background: rgba(76, 175, 80, 0.8);
+        color: white;
+    }
+    
+    .btn-admin:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .add-btn {
+        background: rgba(76, 175, 80, 0.9);
+        color: white;
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 10px;
+        font-size: 1.1rem;
+        cursor: pointer;
+        margin-bottom: 2rem;
+    }
+    
+    .stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        padding: 1.5rem;
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #4CAF50;
+    }
+    
+    .stat-label {
+        color: rgba(255, 255, 255, 0.8);
+        margin-top: 0.5rem;
+    }
+    
+    .featured-badge {
+        background: #FFD700;
+        color: #000;
+        padding: 0.2rem 0.5rem;
+        border-radius: 5px;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+    
+    .private-badge {
+        background: #FF6B6B;
+        color: white;
+        padding: 0.2rem 0.5rem;
+        border-radius: 5px;
+        font-size: 0.8rem;
+    }
+    
+    .public-badge {
+        background: #4ECDC4;
+        color: white;
+        padding: 0.2rem 0.5rem;
+        border-radius: 5px;
+        font-size: 0.8rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <h1 style="color: white; text-align: center; margin-bottom: 2rem;">
+        <i class="fas fa-photo-video"></i> Administration - Médiathèque RDKQ
+    </h1>
+    
+    <!-- Statistiques -->
+    <div class="stats">
+        <div class="stat-card">
+            <div class="stat-number" id="total-media">0</div>
+            <div class="stat-label">Total Médias</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="public-media">0</div>
+            <div class="stat-label">Publics</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="featured-media">0</div>
+            <div class="stat-label">En Vedette</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="total-views">0</div>
+            <div class="stat-label">Vues Totales</div>
+        </div>
+    </div>
+    
+    <!-- Bouton d'ajout -->
+    <button class="add-btn" onclick="addNewMedia()">
+        <i class="fas fa-plus"></i> Ajouter un Nouveau Média
+    </button>
+    
+    <!-- Liste des médias -->
+    <div class="media-grid" id="media-grid">
+        <!-- Les médias seront chargés ici par JavaScript -->
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Charger les données de la médiathèque
+    async function loadMediatheque() {
+        try {
+            const response = await fetch('/rdkq/admin/mediatheque/data');
+            const data = await response.json();
+            
+            if (data.ok) {
+                displayStats(data.stats);
+                displayMedia(data.media);
+            } else {
+                console.error('Erreur:', data.error);
+                alert('Erreur lors du chargement des données');
+            }
+        } catch (error) {
+            console.error('Erreur de connexion:', error);
+            alert('Erreur de connexion au serveur');
+        }
+    }
+    
+    function displayStats(stats) {
+        document.getElementById('total-media').textContent = stats.total;
+        document.getElementById('public-media').textContent = stats.public;
+        document.getElementById('featured-media').textContent = stats.featured;
+        document.getElementById('total-views').textContent = stats.total_views;
+    }
+    
+    function displayMedia(mediaList) {
+        const grid = document.getElementById('media-grid');
+        grid.innerHTML = '';
+        
+        mediaList.forEach(media => {
+            const card = createMediaCard(media);
+            grid.appendChild(card);
+        });
+    }
+    
+    function createMediaCard(media) {
+        const card = document.createElement('div');
+        card.className = 'media-card';
+        
+        const badges = [];
+        if (media.is_featured) badges.push('<span class="featured-badge">VEDETTE</span>');
+        if (media.is_public) {
+            badges.push('<span class="public-badge">PUBLIC</span>');
+        } else {
+            badges.push('<span class="private-badge">PRIVÉ</span>');
+        }
+        
+        card.innerHTML = `
+            <img src="${media.image_url || '/static/image/default-media.png'}" alt="${media.title}">
+            <div class="media-title">${media.title}</div>
+            <div class="media-meta">
+                ${badges.join(' ')}
+                <br>
+                Catégorie: ${media.category || 'Non définie'}<br>
+                Auteur: ${media.author || 'Anonyme'}<br>
+                Vues: ${media.views_count || 0}<br>
+                Créé: ${new Date(media.created_at).toLocaleDateString('fr-FR')}
+            </div>
+            <div class="media-actions">
+                <button class="btn-admin btn-edit" onclick="editMedia(${media.id})">
+                    <i class="fas fa-edit"></i> Modifier
+                </button>
+                <button class="btn-admin btn-toggle" onclick="toggleVisibility(${media.id}, ${media.is_public})">
+                    <i class="fas fa-${media.is_public ? 'eye-slash' : 'eye'}"></i>
+                    ${media.is_public ? 'Rendre Privé' : 'Rendre Public'}
+                </button>
+                <button class="btn-admin btn-toggle" onclick="toggleFeatured(${media.id}, ${media.is_featured})">
+                    <i class="fas fa-${media.is_featured ? 'star' : 'star-o'}"></i>
+                    ${media.is_featured ? 'Retirer Vedette' : 'Mettre en Vedette'}
+                </button>
+                <button class="btn-admin btn-delete" onclick="deleteMedia(${media.id})">
+                    <i class="fas fa-trash"></i> Supprimer
+                </button>
+            </div>
+        `;
+        
+        return card;
+    }
+    
+    async function toggleVisibility(id, isPublic) {
+        try {
+            const response = await fetch(`/rdkq/admin/mediatheque/${id}/toggle-visibility`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({is_public: !isPublic})
+            });
+            
+            const result = await response.json();
+            if (result.ok) {
+                loadMediatheque(); // Recharger les données
+            } else {
+                alert('Erreur: ' + result.error);
+            }
+        } catch (error) {
+            console.error('Erreur:', error);
+            alert('Erreur de connexion');
+        }
+    }
+    
+    async function toggleFeatured(id, isFeatured) {
+        try {
+            const response = await fetch(`/rdkq/admin/mediatheque/${id}/toggle-featured`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({is_featured: !isFeatured})
+            });
+            
+            const result = await response.json();
+            if (result.ok) {
+                loadMediatheque(); // Recharger les données
+            } else {
+                alert('Erreur: ' + result.error);
+            }
+        } catch (error) {
+            console.error('Erreur:', error);
+            alert('Erreur de connexion');
+        }
+    }
+    
+    async function deleteMedia(id) {
+        if (confirm('Êtes-vous sûr de vouloir supprimer ce média ?')) {
+            try {
+                const response = await fetch(`/rdkq/admin/mediatheque/${id}`, {
+                    method: 'DELETE'
+                });
+                
+                const result = await response.json();
+                if (result.ok) {
+                    loadMediatheque(); // Recharger les données
+                } else {
+                    alert('Erreur: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                alert('Erreur de connexion');
+            }
+        }
+    }
+    
+    function editMedia(id) {
+        // Rediriger vers la page d'édition
+        window.location.href = `/rdkq/admin/mediatheque/${id}/edit`;
+    }
+    
+    function addNewMedia() {
+        // Rediriger vers la page d'ajout
+        window.location.href = '/rdkq/admin/mediatheque/new';
+    }
+    
+    // Charger les données au chargement de la page
+    document.addEventListener('DOMContentLoaded', loadMediatheque);
+</script>
+{% endblock %}

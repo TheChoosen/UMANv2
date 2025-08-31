@@ -1,0 +1,655 @@
+{% extends "RepubliqueduKwebec/base.html" %}
+
+{% block title %}{% if media %}Modifier{% else %}Ajouter{% endif %} un Média - RDKQ{% endblock %}
+
+{% block head %}
+<style>
+    .form-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 2rem;
+        margin-top: 100px; /* Compenser la navbar fixe */
+    }
+    
+    .form-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-label {
+        display: block;
+        color: white;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        font-size: 1rem;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #4CAF50;
+        box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+    }
+    
+    .form-control::placeholder {
+        color: rgba(255, 255, 255, 0.6);
+    }
+    
+    .form-check {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .form-check-input {
+        margin-right: 0.5rem;
+        transform: scale(1.2);
+    }
+    
+    .form-check-label {
+        color: white;
+        font-size: 0.95rem;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #4CAF50, #45a049);
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 8px;
+        color: white;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+    }
+    
+    .btn-secondary {
+        background: rgba(108, 117, 125, 0.8);
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 8px;
+        color: white;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-right: 1rem;
+    }
+    
+    .btn-secondary:hover {
+        background: rgba(108, 117, 125, 1);
+    }
+    
+    .preview-container {
+        margin-top: 1rem;
+        padding: 1rem;
+        border: 2px dashed rgba(255, 255, 255, 0.3);
+        border-radius: 8px;
+        text-align: center;
+    }
+    
+    .preview-image {
+        max-width: 200px;
+        max-height: 200px;
+        border-radius: 8px;
+        margin-top: 1rem;
+    }
+    
+    .file-upload {
+        position: relative;
+        display: inline-block;
+        cursor: pointer;
+    }
+    
+    .file-upload input[type=file] {
+        position: absolute;
+        left: -9999px;
+    }
+    
+    .file-upload-label {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        background: rgba(33, 150, 243, 0.8);
+        color: white;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .file-upload-label:hover {
+        background: rgba(33, 150, 243, 1);
+        transform: translateY(-2px);
+    }
+    
+    .alert {
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+    }
+    
+    .alert-success {
+        background: rgba(76, 175, 80, 0.2);
+        border: 1px solid rgba(76, 175, 80, 0.5);
+        color: #4CAF50;
+    }
+    
+    .alert-danger {
+        background: rgba(244, 67, 54, 0.2);
+        border: 1px solid rgba(244, 67, 54, 0.5);
+        color: #f44336;
+    }
+    
+    /* Styles pour la grille d'images */
+    .plaque-selector {
+        margin-bottom: 1rem;
+    }
+    
+    .image-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .image-option {
+        background: rgba(255, 255, 255, 0.1);
+        border: 2px solid transparent;
+        border-radius: 8px;
+        padding: 0.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+    }
+    
+    .image-option:hover {
+        border-color: rgba(76, 175, 80, 0.5);
+        background: rgba(255, 255, 255, 0.15);
+        transform: translateY(-2px);
+    }
+    
+    .image-option.selected {
+        border-color: #4CAF50;
+        background: rgba(76, 175, 80, 0.2);
+        box-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
+    }
+    
+    .image-option img {
+        width: 100%;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 4px;
+        margin-bottom: 0.5rem;
+    }
+    
+    .image-name {
+        color: white;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+    
+    .form-check-inline {
+        margin-right: 1.5rem;
+    }
+    
+    .form-check-label {
+        color: rgba(255, 255, 255, 0.9);
+        cursor: pointer;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="form-card">
+        <h1 style="color: white; text-align: center; margin-bottom: 2rem;">
+            <i class="fas fa-{% if media %}edit{% else %}plus{% endif %}"></i>
+            {% if media %}Modifier le Média{% else %}Ajouter un Nouveau Média{% endif %}
+        </h1>
+        
+        <div id="message-container"></div>
+        
+        <form id="media-form" enctype="multipart/form-data">
+            {% if media %}
+            <input type="hidden" id="media-id" value="{{ media.id }}">
+            {% endif %}
+            
+            <div class="form-group">
+                <label for="title" class="form-label">
+                    <i class="fas fa-heading"></i> Titre *
+                </label>
+                <input type="text" 
+                       id="title" 
+                       name="title" 
+                       class="form-control" 
+                       placeholder="Titre du média"
+                       value="{% if media %}{{ media.title }}{% endif %}"
+                       required>
+            </div>
+            
+            <div class="form-group">
+                <label for="description" class="form-label">
+                    <i class="fas fa-align-left"></i> Description
+                </label>
+                <textarea id="description" 
+                         name="description" 
+                         class="form-control" 
+                         rows="4"
+                         placeholder="Description détaillée du média">{% if media %}{{ media.description }}{% endif %}</textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="category" class="form-label">
+                    <i class="fas fa-tag"></i> Catégorie
+                </label>
+                <select id="category" name="category" class="form-control">
+                    <option value="">Sélectionner une catégorie</option>
+                    <option value="documentaire" {% if media and media.category == 'documentaire' %}selected{% endif %}>Documentaire</option>
+                    <option value="formation" {% if media and media.category == 'formation' %}selected{% endif %}>Formation</option>
+                    <option value="guide" {% if media and media.category == 'guide' %}selected{% endif %}>Guide</option>
+                    <option value="video" {% if media and media.category == 'video' %}selected{% endif %}>Vidéo</option>
+                    <option value="audio" {% if media and media.category == 'audio' %}selected{% endif %}>Audio</option>
+                    <option value="presentation" {% if media and media.category == 'presentation' %}selected{% endif %}>Présentation</option>
+                    <option value="info" {% if media and media.category == 'info' %}selected{% endif %}>Information</option>
+                    <option value="autre" {% if media and media.category == 'autre' %}selected{% endif %}>Autre</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="author" class="form-label">
+                    <i class="fas fa-user"></i> Auteur
+                </label>
+                <input type="text" 
+                       id="author" 
+                       name="author" 
+                       class="form-control" 
+                       placeholder="Nom de l'auteur"
+                       value="{% if media %}{{ media.author }}{% endif %}">
+            </div>
+            
+            <div class="form-group">
+                <label for="image_url" class="form-label">
+                    <i class="fas fa-image"></i> Image
+                </label>
+                
+                <!-- Options de sélection d'image -->
+                <div class="mb-3">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="image_source" id="image_source_plaque" value="plaque" checked>
+                        <label class="form-check-label" for="image_source_plaque">
+                            Plaques disponibles
+                        </label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="image_source" id="image_source_url" value="url">
+                        <label class="form-check-label" for="image_source_url">
+                            URL personnalisée
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Sélecteur de plaques -->
+                <div id="plaque-selector" class="plaque-selector">
+                    <div class="image-grid">
+                        <div class="image-option" data-url="/static/RepubliqueduKwebec/Photo/PLAQUE/Plaque Sublimation GN SQ.png">
+                            <img src="/static/RepubliqueduKwebec/Photo/PLAQUE/Plaque Sublimation GN SQ.png" alt="Plaque GN SQ">
+                            <div class="image-name">GN SQ</div>
+                        </div>
+                        <div class="image-option" data-url="/static/RepubliqueduKwebec/Photo/PLAQUE/Plaque Sublimation GN.png">
+                            <img src="/static/RepubliqueduKwebec/Photo/PLAQUE/Plaque Sublimation GN.png" alt="Plaque GN">
+                            <div class="image-name">GN</div>
+                        </div>
+                        <div class="image-option" data-url="/static/RepubliqueduKwebec/Photo/PLAQUE/Plaque Sublimation RQ.png">
+                            <img src="/static/RepubliqueduKwebec/Photo/PLAQUE/Plaque Sublimation RQ.png" alt="Plaque RQ">
+                            <div class="image-name">RQ</div>
+                        </div>
+                        <div class="image-option" data-url="/static/RepubliqueduKwebec/Photo/PLAQUE/Plaque Sublimation SQ ETOILE.png">
+                            <img src="/static/RepubliqueduKwebec/Photo/PLAQUE/Plaque Sublimation SQ ETOILE.png" alt="Plaque SQ Étoile">
+                            <div class="image-name">SQ ÉTOILE</div>
+                        </div>
+                        <div class="image-option" data-url="/static/RepubliqueduKwebec/Photo/PLAQUE/Plaque Sublimation TRIBUNAUX.png">
+                            <img src="/static/RepubliqueduKwebec/Photo/PLAQUE/Plaque Sublimation TRIBUNAUX.png" alt="Plaque Tribunaux">
+                            <div class="image-name">TRIBUNAUX</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Champ URL personnalisée -->
+                <div id="url-input" style="display: none;">
+                    <input type="url" 
+                           id="custom_image_url" 
+                           name="custom_image_url" 
+                           class="form-control" 
+                           placeholder="https://exemple.com/image.jpg">
+                </div>
+                
+                <!-- Champ caché pour l'URL finale -->
+                <input type="hidden" id="image_url" name="image_url" value="{% if media %}{{ media.image_url }}{% endif %}">
+                
+                <!-- Aperçu de l'image sélectionnée -->
+                <div class="preview-container" id="image-preview" style="display: none;">
+                    <p style="color: rgba(255,255,255,0.7);">Aperçu de l'image sélectionnée :</p>
+                    <img id="preview-img" class="preview-image" src="{% if media %}{{ media.image_url }}{% endif %}" alt="Aperçu">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="document_url" class="form-label">
+                    <i class="fas fa-link"></i> URL du document/lien
+                </label>
+                <input type="url" 
+                       id="document_url" 
+                       name="document_url" 
+                       class="form-control" 
+                       placeholder="https://exemple.com/document.pdf"
+                       value="{% if media %}{{ media.document_url }}{% endif %}">
+            </div>
+            
+            <div class="form-group">
+                <div class="form-check">
+                    <input type="checkbox" 
+                           id="is_public" 
+                           name="is_public" 
+                           class="form-check-input"
+                           {% if not media or media.is_public %}checked{% endif %}>
+                    <label for="is_public" class="form-check-label">
+                        <i class="fas fa-eye"></i> Rendre public (visible par tous)
+                    </label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <div class="form-check">
+                    <input type="checkbox" 
+                           id="is_featured" 
+                           name="is_featured" 
+                           class="form-check-input"
+                           {% if media and media.is_featured %}checked{% endif %}>
+                    <label for="is_featured" class="form-check-label">
+                        <i class="fas fa-star"></i> Mettre en vedette
+                    </label>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 2rem;">
+                <button type="button" class="btn-secondary" onclick="goBack()">
+                    <i class="fas fa-arrow-left"></i> Annuler
+                </button>
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-save"></i> 
+                    {% if media %}Mettre à Jour{% else %}Créer le Média{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Gestion de la sélection d'images
+    document.addEventListener('DOMContentLoaded', function() {
+        const plaqueSelector = document.getElementById('plaque-selector');
+        const urlInput = document.getElementById('url-input');
+        const imageSourceRadios = document.querySelectorAll('input[name="image_source"]');
+        const imageOptions = document.querySelectorAll('.image-option');
+        const hiddenImageUrl = document.getElementById('image_url');
+        const customImageUrl = document.getElementById('custom_image_url');
+        const preview = document.getElementById('image-preview');
+        const previewImg = document.getElementById('preview-img');
+        
+        // Gestion du changement de source d'image
+        imageSourceRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.value === 'plaque') {
+                    plaqueSelector.style.display = 'block';
+                    urlInput.style.display = 'none';
+                    // Sélectionner la première plaque par défaut si aucune n'est sélectionnée
+                    const selectedOption = document.querySelector('.image-option.selected');
+                    if (!selectedOption && imageOptions.length > 0) {
+                        selectImage(imageOptions[0]);
+                    }
+                } else {
+                    plaqueSelector.style.display = 'none';
+                    urlInput.style.display = 'block';
+                    // Désélectionner toutes les options de plaque
+                    imageOptions.forEach(option => option.classList.remove('selected'));
+                    hiddenImageUrl.value = customImageUrl.value;
+                    updatePreview(customImageUrl.value);
+                }
+            });
+        });
+        
+        // Gestion de la sélection d'une plaque
+        imageOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                selectImage(this);
+            });
+        });
+        
+        function selectImage(option) {
+            // Désélectionner toutes les options
+            imageOptions.forEach(opt => opt.classList.remove('selected'));
+            // Sélectionner l'option cliquée
+            option.classList.add('selected');
+            // Mettre à jour l'URL cachée
+            const imageUrl = option.dataset.url;
+            hiddenImageUrl.value = imageUrl;
+            // Mettre à jour l'aperçu
+            updatePreview(imageUrl);
+        }
+        
+        // Gestion de l'URL personnalisée
+        customImageUrl.addEventListener('input', function() {
+            const url = this.value;
+            hiddenImageUrl.value = url;
+            updatePreview(url);
+        });
+        
+        // Fonction pour mettre à jour l'aperçu
+        function updatePreview(url) {
+            if (url && isValidUrl(url)) {
+                previewImg.src = url;
+                previewImg.onload = function() {
+                    preview.style.display = 'block';
+                };
+                previewImg.onerror = function() {
+                    preview.style.display = 'none';
+                };
+            } else if (url && url.startsWith('/static/')) {
+                // Pour les URLs locales
+                previewImg.src = url;
+                preview.style.display = 'block';
+            } else {
+                preview.style.display = 'none';
+            }
+        }
+        
+        // Initialisation basée sur la valeur existante
+        const currentImageUrl = hiddenImageUrl.value;
+        if (currentImageUrl) {
+            if (currentImageUrl.includes('/static/RepubliqueduKwebec/Photo/PLAQUE/')) {
+                // C'est une plaque
+                document.getElementById('image_source_plaque').checked = true;
+                plaqueSelector.style.display = 'block';
+                urlInput.style.display = 'none';
+                
+                // Sélectionner la plaque correspondante
+                imageOptions.forEach(option => {
+                    if (option.dataset.url === currentImageUrl) {
+                        option.classList.add('selected');
+                    }
+                });
+            } else {
+                // C'est une URL personnalisée
+                document.getElementById('image_source_url').checked = true;
+                plaqueSelector.style.display = 'none';
+                urlInput.style.display = 'block';
+                customImageUrl.value = currentImageUrl;
+            }
+            updatePreview(currentImageUrl);
+        } else {
+            // Pas d'image sélectionnée, sélectionner la première plaque par défaut
+            document.getElementById('image_source_plaque').checked = true;
+            plaqueSelector.style.display = 'block';
+            urlInput.style.display = 'none';
+            
+            // Sélectionner automatiquement la première plaque
+            if (imageOptions.length > 0) {
+                selectImage(imageOptions[0]);
+            }
+        }
+    });
+    
+    // Validation URL (fonction existante)
+    function isValidUrl(string) {
+        try {
+            new URL(string);
+            return true;
+        } catch (_) {
+            return false;
+        }
+    }
+    
+    // Soumission du formulaire (fonction existante modifiée)
+    document.getElementById('media-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        console.log('🚀 Soumission du formulaire déclenchée');
+        
+        const mediaId = document.getElementById('media-id');
+        console.log('🔍 Élément media-id:', mediaId);
+        console.log('🔍 Valeur media-id:', mediaId ? mediaId.value : 'NULL');
+        
+        const isEdit = mediaId && mediaId.value;
+        console.log('🔍 Mode édition détecté:', isEdit);
+        
+        const formData = {
+            title: document.getElementById('title').value,
+            description: document.getElementById('description').value,
+            category: document.getElementById('category').value,
+            author: document.getElementById('author').value,
+            image_url: document.getElementById('image_url').value, // Utilise la valeur du champ caché
+            document_url: document.getElementById('document_url').value,
+            is_public: document.getElementById('is_public').checked,
+            is_featured: document.getElementById('is_featured').checked
+        };
+        
+        console.log('📝 Données du formulaire:', formData);
+        
+        try {
+            const url = isEdit 
+                ? `/rdkq/admin/mediatheque/${mediaId.value}/edit`
+                : '/rdkq/admin/mediatheque/new';
+                
+            console.log('🌐 URL de soumission:', url);
+            console.log('🌐 Méthode déterminée:', isEdit ? 'ÉDITION' : 'CRÉATION');
+            
+            // Ajouter un indicateur de chargement
+            const submitBtn = document.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sauvegarde...';
+            submitBtn.disabled = true;
+            
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            });
+            
+            console.log('📡 Réponse du serveur:', response.status, response.statusText);
+            console.log('📡 Headers de réponse:', Object.fromEntries(response.headers.entries()));
+            
+            if (response.status === 302 || response.redirected) {
+                console.log('🔄 Redirection détectée - probablement pas connecté');
+                showMessage('danger', 'Session expirée. Veuillez vous reconnecter.');
+                setTimeout(() => {
+                    window.location.href = '/rdkq/login';
+                }, 2000);
+                return;
+            }
+            
+            // Vérifier si la réponse est du JSON
+            const contentType = response.headers.get('content-type');
+            console.log('📡 Content-Type:', contentType);
+            
+            if (!contentType || !contentType.includes('application/json')) {
+                console.log('⚠️ Réponse non-JSON reçue');
+                const text = await response.text();
+                console.log('📄 Contenu de la réponse:', text.substring(0, 500) + '...');
+                
+                // Restaurer le bouton
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                
+                showMessage('danger', 'Erreur de format de réponse du serveur');
+                return;
+            }
+            
+            const result = await response.json();
+            console.log('✅ Résultat JSON:', result);
+            
+            // Restaurer le bouton
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+            
+            if (result.ok) {
+                showMessage('success', isEdit ? 'Média mis à jour avec succès!' : 'Média créé avec succès!');
+                setTimeout(() => {
+                    window.location.href = '/rdkq/admin/mediatheque';
+                }, 1500);
+            } else {
+                showMessage('danger', 'Erreur: ' + result.error);
+            }
+        } catch (error) {
+            console.error('❌ Erreur:', error);
+            console.error('❌ Stack trace:', error.stack);
+            
+            // Restaurer le bouton en cas d'erreur
+            const submitBtn = document.querySelector('button[type="submit"]');
+            const originalText = isEdit ? 
+                '<i class="fas fa-save"></i> Mettre à Jour' : 
+                '<i class="fas fa-save"></i> Créer le Média';
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+            
+            showMessage('danger', 'Erreur de connexion au serveur: ' + error.message);
+        }
+    });
+    
+    function showMessage(type, text) {
+        const container = document.getElementById('message-container');
+        container.innerHTML = `<div class="alert alert-${type}">${text}</div>`;
+        
+        // Faire défiler vers le message
+        container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    
+    function goBack() {
+        window.location.href = '/rdkq/admin/mediatheque';
+    }
+</script>
+{% endblock %}

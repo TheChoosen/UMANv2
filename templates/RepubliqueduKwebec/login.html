@@ -1,0 +1,166 @@
+{% extends "RepubliqueduKwebec/base.html" %}
+{% block title %}Connexion - Re-Publique Kwébec{% endblock %}
+
+{% block content %}
+<div class="container-fluid d-flex align-items-center justify-content-center min-vh-100" style="padding-top: 80px;">
+    <div class="row w-100 justify-content-center">
+        <div class="col-md-6 col-lg-4">
+            
+            <!-- Formulaire de connexion -->
+            <div class="glass glass--ultra p-5 text-center">
+                <!-- Logo et titre -->
+                <div class="mb-4">
+                    <img src="/static/RepubliqueduKwebec/Photo/Peupleun.png" alt="Re-Publique Kwébec" 
+                        <img src="/static/RepubliqueduKwebec/Photo/Peupleun.png" alt="Re-Publique Kwébec" 
+                         style="height: 64px; margin-bottom: 16px; filter: drop-shadow(0 2px 8px rgba(0, 230, 195, 0.4));">
+                    <h2 class="text-gradient mb-2" 
+                        style="font-weight: 900; font-size: 1.8rem; letter-spacing: 1px; 
+                               background: linear-gradient(90deg, #00e6c3 20%, #fff 60%, #00e6c3 100%);
+                               background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                        Re-Publique Kwébec
+                    </h2>
+                    <p class="text-muted mb-4">Espace Membres</p>
+                </div>
+
+                <!-- Messages Flash -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <!-- Formulaire de connexion -->
+                <form method="POST" action="/rdkq/login" class="text-start">
+                    <div class="mb-3">
+                        <label for="email" class="form-label text-light">
+                            <i class="fas fa-envelope me-2"></i>Adresse email
+                        </label>
+                        <input type="email" class="form-control form-control-lg" id="email" name="email" 
+                               placeholder="votre@email.com" required 
+                               style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(0, 230, 195, 0.3); color: white;">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="password" class="form-label text-light">
+                            <i class="fas fa-lock me-2"></i>Mot de passe
+                        </label>
+                        <input type="password" class="form-control form-control-lg" id="password" name="password" 
+                               placeholder="••••••••" required
+                               style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(0, 230, 195, 0.3); color: white;">
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="remember" name="remember">
+                            <label class="form-check-label text-light" for="remember">
+                                Se souvenir de moi
+                            </label>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100 mb-3" 
+                            style="background: linear-gradient(135deg, #00e6c3, #0099ff); 
+                                   border: none; font-weight: 600; text-transform: uppercase; 
+                                   letter-spacing: 1px; padding: 12px;">
+                        <i class="fas fa-sign-in-alt me-2"></i>Se connecter
+                    </button>
+                </form>
+
+                <!-- Liens utiles -->
+                <div class="mt-4 pt-3 border-top border-secondary">
+                    <p class="text-muted mb-2">Pas encore membre ?</p>
+                    <a href="/rdkq/register" class="btn btn-outline-light btn-sm me-2">
+                        <i class="fas fa-user-plus me-1"></i>S'inscrire
+                    </a>
+                    <a href="/rdkq/forgot-password" class="btn btn-link btn-sm text-light">
+                        Mot de passe oublié ?
+                    </a>
+                </div>
+
+                <!-- Lien de retour -->
+                <div class="mt-4">
+                    <a href="/rdkq" class="text-muted">
+                        <i class="fas fa-arrow-left me-1"></i>Retour à l'accueil
+                    </a>
+                </div>
+            </div>
+
+            <!-- Informations supplémentaires -->
+            <div class="glass glass--pro p-3 mt-4 text-center" style="background: rgba(255, 255, 255, 0.05);">
+                <small class="text-muted">
+                    <i class="fas fa-shield-alt me-1"></i>
+                    Connexion sécurisée - Vos données sont protégées
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Style personnalisé pour les formulaires -->
+<style>
+    .form-control:focus {
+        background: rgba(255, 255, 255, 0.15) !important;
+        border-color: #00e6c3 !important;
+        box-shadow: 0 0 15px rgba(0, 230, 195, 0.3) !important;
+        color: white !important;
+    }
+    
+    .form-control::placeholder {
+        color: rgba(255, 255, 255, 0.6) !important;
+    }
+    
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #00d4ad, #0088ee) !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(0, 230, 195, 0.4);
+    }
+    
+    .btn-outline-light:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: #00e6c3;
+        color: #00e6c3 !important;
+    }
+    
+    .alert {
+        background: rgba(220, 53, 69, 0.1);
+        border: 1px solid rgba(220, 53, 69, 0.3);
+        color: #fff;
+    }
+    
+    .alert-success {
+        background: rgba(25, 135, 84, 0.1);
+        border: 1px solid rgba(25, 135, 84, 0.3);
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Auto-focus sur le champ email
+document.addEventListener('DOMContentLoaded', function() {
+    const emailField = document.getElementById('email');
+    if (emailField) {
+        emailField.focus();
+    }
+});
+
+// Animation d'entrée pour les éléments
+document.addEventListener('DOMContentLoaded', function() {
+    const elements = document.querySelectorAll('.glass');
+    elements.forEach((el, index) => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+            el.style.transition = 'all 0.6s ease';
+            el.style.opacity = '1';
+            el.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+});
+</script>
+{% endblock %}

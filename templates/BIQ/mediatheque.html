@@ -1,0 +1,165 @@
+{% extends "BIQ/base.html" %}
+{% block biq_title %}Médiathèque — BIQ{% endblock %}
+{% block biq_page %}
+<section class="container container-wide mt-5">
+  <!-- Header -->
+  <div class="glass glass--pro p-4 mb-4">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <h1 class="h2 text-gradient mb-2">Médiathèque BIQ</h1>
+        <p class="card-text mb-0">Ressources, documents et contenus de l'Alliance BIQ</p>
+      </div>
+      <div class="col-md-4 text-md-end">
+        <a href="/biq/prd" class="btn btn-primary">Consulter le PRD</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Categories Filter -->
+  <div class="glass glass--lite p-3 mb-4">
+    <div class="d-flex flex-wrap gap-2 align-items-center">
+      <span class="fw-bold me-2">Catégories :</span>
+      <a href="#" class="badge badge-primary phase-badge active">Tous</a>
+      <a href="#" class="badge badge-secondary phase-badge">Rapports</a>
+      <a href="#" class="badge badge-warning phase-badge">Communiqués</a>
+      <a href="#" class="badge badge-success phase-badge">Formations</a>
+      <a href="#" class="badge badge-info phase-badge">Vidéos</a>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Featured Content -->
+    <div class="col-lg-8">
+      <div class="card glass--pro h-100">
+        <div class="card-header">
+          <h2 class="h5 mb-0">Documents principaux</h2>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <!-- PRD Document -->
+            <div class="col-md-6">
+              <div class="card glass--lite h-100">
+                <div class="card-body text-center">
+                  <div class="mb-3">
+                    <i class="fs-1 text-gradient">📋</i>
+                  </div>
+                  <h3 class="h6">PRD Bureau Indépendance Québec</h3>
+                  <p class="card-text small">Document de référence définissant la plateforme BIQ</p>
+                  <a href="/biq/prd" class="btn btn-primary btn-sm">Consulter</a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Manifesto -->
+            <div class="col-md-6">
+              <div class="card glass--lite h-100">
+                <div class="card-body text-center">
+                  <div class="mb-3">
+                    <i class="fs-1 text-gradient">📜</i>
+                  </div>
+                  <h3 class="h6">Manifeste de l'Alliance</h3>
+                  <p class="card-text small">Valeurs et objectifs de l'Alliance citoyenne</p>
+                  <a href="/biq#mission" class="btn btn-glass btn-sm">Lire</a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Investigation Report -->
+            <div class="col-md-6">
+              <div class="card glass--lite h-100">
+                <div class="card-body text-center">
+                  <div class="mb-3">
+                    <i class="fs-1 text-gradient">🔍</i>
+                  </div>
+                  <h3 class="h6">Rapport d'Enquête DPJ</h3>
+                  <p class="card-text small">Mise sous tutelle DPJ Mauricie-Centre-du-Québec</p>
+                  <a href="/biq#rapport-enquete" class="btn btn-glass btn-sm">Consulter</a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Communication Strategy -->
+            <div class="col-md-6">
+              <div class="card glass--lite h-100">
+                <div class="card-body text-center">
+                  <div class="mb-3">
+                    <i class="fs-1 text-gradient">📢</i>
+                  </div>
+                  <h3 class="h6">Stratégie de Communication</h3>
+                  <p class="card-text small">Plan de mobilisation et communication citoyenne</p>
+                  <a href="/biq#mobilisation" class="btn btn-glass btn-sm">Voir</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Access -->
+    <div class="col-lg-4">
+      <div class="card glass--pro h-100">
+        <div class="card-header">
+          <h2 class="h5 mb-0">Accès rapide</h2>
+        </div>
+        <div class="card-body">
+          <div class="d-grid gap-2">
+            <a href="/biq/signalement" class="btn btn-primary">Déposer un signalement</a>
+            <a href="/biq#communique" class="btn btn-glass">Communiqué de presse</a>
+            <a href="/biq#problemes-solutions" class="btn btn-glass">Solutions proposées</a>
+            <a href="/biq#whitehats-missions" class="btn btn-glass">Missions WhiteHats</a>
+          </div>
+          
+          <hr class="my-3">
+          
+          <h3 class="h6 mb-2">Contact & Support</h3>
+          <div class="small text-muted">
+            <p class="mb-1"><strong>Téléphone :</strong> (819) 452-2995</p>
+            <p class="mb-1"><strong>Email :</strong> <a href="mailto:ginodesrosiers6@gmail.com" class="text-muted">ginodesrosiers6@gmail.com</a></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Latest Updates -->
+    <div class="col-12">
+      <div class="card glass--lite">
+        <div class="card-header">
+          <h2 class="h5 mb-0">Dernières mises à jour</h2>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <div class="glass glass--pro p-3 h-100">
+                <h3 class="h6">Communiqué - Manifestation Servantes écarlates</h3>
+                <p class="card-text small">3 mai 2025 - Trois-Rivières</p>
+                <a href="/biq#communique" class="btn btn-glass btn-sm">Lire</a>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="glass glass--pro p-3 h-100">
+                <h3 class="h6">Programme parallèle DPJ</h3>
+                <p class="card-text small">WhiteHats au service des familles</p>
+                <a href="/biq#programme-parallele" class="btn btn-glass btn-sm">Découvrir</a>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="glass glass--pro p-3 h-100">
+                <h3 class="h6">Alliance canadienne</h3>
+                <p class="card-text small">Défense des intérêts canadiens</p>
+                <a href="/biq#alliance-canadienne" class="btn btn-glass btn-sm">En savoir plus</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="text-center mt-4">
+    <small class="text-muted">
+      <a href="/biq" class="text-muted">← Retour à l'accueil</a>
+    </small>
+  </div>
+</section>
+{% endblock %}

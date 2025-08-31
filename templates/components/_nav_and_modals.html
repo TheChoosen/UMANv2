@@ -1,0 +1,21 @@
+{% import 'components/_modal.html' as modal %}
+
+
+{% call modal.modal('modalRegisterConfirm','Confirmer votre code') %}
+<form id="confirmForm">
+	<div class="form-group">
+		<label for="confirmEmail">Courriel</label>
+		<input type="email" id="confirmEmail" name="email" class="form-control" required>
+	</div>
+	<div class="form-group">
+		<label for="confirmCode">Code de confirmation</label>
+		<input type="text" id="confirmCode" name="code" class="form-control" required>
+	</div>
+	<div id="confirmFeedback" class="mt-2"></div>
+	<div class="text-right mt-3">
+		<button type="submit" class="btn hero-btn hero-btn--primary">Confirmer</button>
+	</div>
+</form>
+{% endcall %}
+
+

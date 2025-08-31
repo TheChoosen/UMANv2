@@ -1,0 +1,585 @@
+{% extends "base.html" %}
+
+{% block title %}Accueil - U-MAN API{% endblock %}
+
+{% block content %}
+<div class="glass glass--ultra p-4 mb-5">
+    <h1 class="display-3 font-weight-bold text-center hero-title mb-3"
+        style="font-size:2.7rem;background:linear-gradient(90deg,#00e6c3 20%,#fff 60%,#00e6c3 100%);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 4px 32px #00e6c355,0 2px 8px #10141a99;letter-spacing:1.5px;">
+        UMan
+        API Inc.</h1>
+    <p class="lead text-center hero-lead mb-4"
+        style="color:#eafaf7;font-size:1.25rem;text-shadow:0 2px 12px #10141a99;max-width:700px;margin:auto;">
+        La
+        plateforme qui place l’humain au cœur de chaque décision.<br>Rejoignez une communauté mondiale pour
+        transformer votre organisation, votre entreprise ou votre milieu de vie grâce à la cyberdémocratie
+        et à
+        l’IA.</p>
+    <div class="d-flex justify-content-center align-items-center flex-wrap mb-4 gap-2 hero-badges">
+        <button type="button" class="badge badge-primary phase-badge mx-2" data-toggle="modal"
+            data-target="#modalPhase1">
+            <i class="fas fa-briefcase mr-2"></i>Phase 1 : B2B
+        </button>
+        <button type="button" class="badge badge-warning phase-badge mx-2" data-toggle="modal"
+            data-target="#modalPhase2">
+            <i class="fas fa-users mr-2"></i>Phase 2 : B2C
+        </button>
+        <button type="button" class="badge badge-success phase-badge mx-2" data-toggle="modal"
+            data-target="#modalPhase3">
+            <i class="fas fa-globe mr-2"></i>Phase 3 : International
+        </button>
+    </div>
+    <div class="text-center mt-3">
+        <div class="d-flex flex-column flex-sm-row justify-content-center align-items-center gap-3">
+            <!-- Bouton mission qui ouvre une modal -->
+            <a class="btn btn-lg hero-btn hero-btn--primary" href="#" data-toggle="modal" data-target="#modalMission">
+                <i class="fas fa-rocket mr-2"></i>Découvrir notre mission
+            </a>
+            <!-- Bouton cryptomonnaie qui ouvre une modal -->
+            <a class="btn btn-lg hero-btn hero-btn--gold" href="#" data-toggle="modal" data-target="#modalUmanCrypto">
+                <i class="fab fa-bitcoin mr-2"></i>Cryptomonnaie
+            </a>
+            <!-- Lien vers la documentation DemocratieDirecte -->
+            <a class="btn btn-lg hero-btn hero-btn--secondary" href="/democratie/documentation"
+                title="Documentation DemocratieDirecte">
+                <i class="fas fa-book mr-2"></i>Documentation
+            </a>
+        </div>
+    </div>
+    <div class="row py-4 py-md-5 text-center justify-content-center align-items-stretch">
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="paul-glass-inner stat-card"
+                style="min-height:235px;padding:1.3rem 0.7rem;transition:transform .18s,box-shadow .18s;">
+                <h5 class="card-title paul-name" style="font-size:1.25rem;"><i class="fas fa-users mr-2"></i>+1000
+                    utilisateurs</h5>
+                <p class="card-text paul-desc">Déjà convaincus par la gestion participative et l’innovation
+                    U-MAN.
+                </p>
+                <button type="button" class="btn btn-lg hero-btn hero-btn--info" data-toggle="modal"
+                    data-target="#modalCyberdemocratie">
+                    <i class="fas fa-vote-yea mr-2"></i>En savoir plus
+                </button>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="paul-glass-inner stat-card h-100 d-flex flex-column justify-content-between"
+                style="padding:1.3rem 0.7rem;transition:transform .18s,box-shadow .18s;">
+                <div>
+                    <h5 class="card-title paul-name mb-3" style="font-size:1.25rem;"><i
+                            class="fas fa-puzzle-piece mr-2"></i>Modules sur-mesure</h5>
+                    <p class="card-text paul-desc mb-4">Événements, campagnes, comités, crypto, IA, et bien plus pour
+                        tous
+                        vos besoins.</p>
+                </div>
+                <div class="mt-auto">
+                    <button type="button" class="btn btn-lg hero-btn hero-btn--warning" data-toggle="modal"
+                        data-target="#modalModulesSurMesure">
+                        <i class="fas fa-puzzle-piece mr-2"></i>En savoir plus
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="paul-glass-inner stat-card"
+                style="min-height:235px;padding:1.3rem 0.7rem;min-height:110px;transition:transform .18s,box-shadow .18s;">
+                <h5 class="card-title paul-name" style="font-size:1.25rem;"><i class="fas fa-lightbulb mr-2"></i>Impact
+                    social & innovation</h5>
+                <p class="card-text paul-desc">Favorisez la transparence, l’inclusion et la motivation dans
+                    votre
+                    organisation.</p>
+                <button type="button" class="btn btn-lg hero-btn hero-btn--success" data-toggle="modal"
+                    data-target="#modalImpactSocial">
+                    <i class="fas fa-lightbulb mr-2"></i>En savoir plus
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="glass glass--ultra p-4 mb-5">
+    <h1 class="display-3 font-weight-bold text-center hero-title mb-3"
+        style="font-size:2.7rem;background:linear-gradient(90deg,#00e6c3 20%,#fff 60%,#00e6c3 100%);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 4px 32px #00e6c355,0 2px 8px #10141a99;letter-spacing:1.5px;">
+        UMan API – Kit de base professionnel</h1>
+    <h2 class="mb-4"></h2>
+    <div class="row">
+        <!-- Module Cards -->
+        <div class="col-md-4 col-sm-6 mb-4">
+            <div class="glass card h-100 text-center p-3 d-flex flex-column justify-content-between">
+                <div>
+                    <div class="mb-2" style="font-size:2.2rem;">
+                        <i class="fas fa-balance-scale"></i>
+                    </div>
+                    <span class="badge badge-primary mb-2">Propositions</span>
+                    <h5 class="card-title">Propositions, Lois, Référendum</h5>
+                    <p class="card-text">Démocratie participative, vote électronique, impact réel sur la
+                        gouvernance.
+                    </p>
+                </div>
+                <button class="btn btn-lg hero-btn hero-btn--primary mt-3" data-toggle="modal"
+                    data-target="#modalPropositions">
+                    <i class="fas fa-balance-scale mr-2"></i>En savoir plus
+                </button>
+            </div>
+        </div>
+        <div class="col-md-4 col-sm-6 mb-4">
+            <div class="glass card h-100 text-center p-3 d-flex flex-column justify-content-between">
+                <div>
+                    <div class="mb-2" style="font-size:2.2rem;">
+                        <i class="fas fa-users-cog"></i>
+                    </div>
+                    <span class="badge badge-success mb-2">Comité</span>
+                    <h5 class="card-title">Comité, Département, Engagement</h5>
+                    <p class="card-text">Collaboration, feedback rapide, implication active de chaque membre.
+                    </p>
+                </div>
+                <button class="btn btn-lg hero-btn hero-btn--success mt-3" data-toggle="modal"
+                    data-target="#modalComite">
+                    <i class="fas fa-users-cog mr-2"></i>En savoir plus
+                </button>
+            </div>
+        </div>
+        <div class="col-md-4 col-sm-6 mb-4">
+            <div class="glass card h-100 text-center p-3 d-flex flex-column justify-content-between">
+                <div>
+                    <div class="mb-2" style="font-size:2.2rem;">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <span class="badge badge-info mb-2">Étude</span>
+                    <h5 class="card-title">Étude & Analyse</h5>
+                    <p class="card-text">Analyse quantitative, insights, amélioration continue et innovation.
+                    </p>
+                </div>
+                <button class="btn btn-lg hero-btn hero-btn--info mt-3" data-toggle="modal" data-target="#modalEtude">
+                    <i class="fas fa-chart-line mr-2"></i>En savoir plus
+                </button>
+            </div>
+        </div>
+        <div class="col-md-4 col-sm-6 mb-4">
+            <div class="glass card h-100 text-center p-3 d-flex flex-column justify-content-between">
+                <div>
+                    <div class="mb-2" style="font-size:2.2rem;">
+                        <i class="fas fa-user-astronaut"></i>
+                    </div>
+                    <span class="badge badge-warning mb-2">Humain</span>
+                    <h5 class="card-title">Humain & Communauté</h5>
+                    <p class="card-text">Liberté créative, monétisation, communauté engagée et inclusive.</p>
+                </div>
+                <button class="btn btn-lg hero-btn hero-btn--warning mt-3" data-toggle="modal"
+                    data-target="#modalHumain">
+                    <i class="fas fa-user-astronaut mr-2"></i>En savoir plus
+                </button>
+            </div>
+        </div>
+        <div class="col-md-4 col-sm-6 mb-4">
+            <div class="glass card h-100 text-center p-3 d-flex flex-column justify-content-between">
+                <div>
+                    <div class="mb-2" style="font-size:2.2rem;">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                    <span class="badge badge-secondary mb-2">Médiathèque</span>
+                    <h5 class="card-title">Médiathèque</h5>
+                    <p class="card-text">Transparence, accès à l'information, mémoire collective UMan.</p>
+                </div>
+                <button class="btn btn-lg hero-btn hero-btn--danger mt-3" data-toggle="modal"
+                    data-target="#modalMediatheque">
+                    <i class="fas fa-book-open mr-2"></i>En savoir plus
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Section équipe / contact principal - Présentation moderne du co-fondateur -->
+<div class="glass glass--ultra p-5 mb-5">
+    <div class="row align-items-center">
+        <!-- Colonne photo -->
+        <div class="col-lg-4 text-center mb-4 mb-lg-0">
+            <div class="founder-photo-container position-relative">
+                <img src="/static/image/Paul Lynes-Crop-460px_4.jpg" alt="Paul Lynes"
+                    class="founder-photo rounded-circle shadow-lg mb-3"
+                    style="width: 200px; height: 200px; object-fit: cover; border: 4px solid var(--uman-primary); box-shadow: 0 8px 32px rgba(0, 230, 195, 0.4);">
+                <div class="founder-badge position-absolute"
+                    style="bottom: 10px; right: 10px; background: var(--uman-primary); color: white; padding: 8px 12px; border-radius: var(--radius-full); font-size: 0.75rem; font-weight: 700; box-shadow: 0 4px 16px rgba(0, 230, 195, 0.5);">
+                    <i class="fas fa-crown mr-1"></i>Co-Fondateur
+                </div>
+            </div>
+        </div>
+
+        <!-- Colonne informations -->
+        <div class="col-lg-8">
+            <div class="founder-info">
+                <!-- Nom et titre principal -->
+                <h1 class="founder-name mb-2"
+                    style="font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 900; color: var(--uman-primary); text-shadow: 0 2px 8px rgba(0, 230, 195, 0.3); letter-spacing: 1px;">
+                    PAUL LYNES
+                </h1>
+
+                <!-- Logo entreprise -->
+                <div class="company-logo mb-3">
+                    <img src="/static/image/UMan-API_logotype_01-eng_w.png" alt="UMan API"
+                        style="height: 40px; filter: drop-shadow(0 2px 8px rgba(0, 230, 195, 0.4));">
+                </div>
+
+                <!-- Rôles et responsabilités -->
+                <div class="founder-roles mb-4">
+                    <div class="role-badge-container d-flex flex-wrap gap-2 mb-3">
+                        <h3 class="founder-name mb-2"
+                            style="font-weight: 900; color: var(--uman-primary); text-shadow: 0 2px 8px rgba(0, 230, 195, 0.3); letter-spacing: 1px;">
+                            <i class="fas fa-handshake mr-2"></i>Directeur des ventes
+                        </h3>
+                        <h3 class="founder-name mb-2"
+                            style="font-weight: 900; color: var(--uman-warning); text-shadow: 0 2px 8px rgba(255, 193, 7, 0.3); letter-spacing: 1px;">
+                            <i class="fas fa-chalkboard-teacher mr-2"></i>Formateur expert
+                        </h3>
+                        <h3 class="founder-name mb-2"
+                            style="font-weight: 900; color: var(--uman-success); text-shadow: 0 2px 8px rgba(16, 185, 129, 0.3); letter-spacing: 1px;">
+                            <i class="fas fa-vote-yea mr-2"></i>Éthique cyberdémocratie
+                        </h3>
+                    </div>
+
+
+                </div>
+
+                <!-- Contact actions -->
+                <div class="contact-actions">
+                    <div class="contact-buttons d-flex flex-wrap gap-3 mb-3">
+                        <a href="tel:+15148925297" class="btn btn-lg hero-btn hero-btn--primary">
+                            <i class="fas fa-phone mr-2"></i>514 892.5297
+                        </a>
+                        <a href="mailto:info@uman-api.com" class="btn btn-lg hero-btn hero-btn--info">
+                            <i class="fas fa-envelope mr-2"></i>Nous contacter
+                        </a>
+                    </div>
+
+                    <div class="contact-note text-center"
+                        style="color: var(--uman-light); font-style: italic; font-size: 0.95rem;">
+                        <i class="fas fa-clock mr-1"></i>
+                        Disponible pour consultations et formations sur la cyberdémocratie
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Citation ou mission personnelle -->
+    <div class="founder-quote mt-5 pt-4" style="border-top: 1px solid rgba(0, 230, 195, 0.2);">
+        <blockquote class="text-center">
+            <p class="quote-text mb-3"
+                style="font-size: 1.2rem; font-style: italic; color: var(--uman-light); line-height: 1.6;">
+                "Notre mission est de placer l'humain au cœur de chaque décision organisationnelle,
+                en utilisant la technologie comme un pont vers une démocratie plus participative et inclusive."
+            </p>
+            <footer class="quote-author" style="color: var(--uman-primary); font-weight: 600;">
+                — Paul Lynes, Co-Fondateur UMan-API Inc.
+            </footer>
+        </blockquote>
+    </div>
+</div>
+
+<!-- Section Tarification -->
+<div class="glass glass--ultra p-4 mb-5">
+    <h1 class="display-3 font-weight-bold text-center hero-title mb-3"
+        style="font-size:2.7rem;background:linear-gradient(90deg,#00e6c3 20%,#fff 60%,#00e6c3 100%);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 4px 32px #00e6c355,0 2px 8px #10141a99;letter-spacing:1.5px;">
+        Tarification & Packages</h1>
+
+    <div class="row">
+        <!-- Package Starter -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="glass card h-100 text-center p-4 d-flex flex-column justify-content-between">
+                <div>
+                    <div class="mb-3" style="font-size:2.5rem; color: var(--uman-info);">
+                        <i class="fas fa-seedling"></i>
+                    </div>
+                    <span class="badge badge-info mb-3 phase-badge">Starter</span>
+                    <h4 class="card-title mb-3" style="color: var(--uman-primary);">Package Démarrage</h4>
+                    <div class="price-section mb-4">
+                        <div style="font-size: 2.5rem; font-weight: 900; color: var(--uman-primary);">$2,999</div>
+                        <div style="color: var(--uman-light); font-size: 0.9rem;">Installation unique</div>
+                    </div>
+                    <ul class="text-left mb-4" style="color: var(--uman-light);">
+                        <li><i class="fas fa-check text-success mr-2"></i>3 modules de base</li>
+                        <li><i class="fas fa-check text-success mr-2"></i>Jusqu'à 100 utilisateurs</li>
+                        <li><i class="fas fa-check text-success mr-2"></i>Support par email</li>
+                        <li><i class="fas fa-check text-success mr-2"></i>Formation en ligne</li>
+                        <li><i class="fas fa-check text-success mr-2"></i>Hébergement de base</li>
+                    </ul>
+                </div>
+                <button class="btn btn-lg hero-btn hero-btn--info mt-auto" data-toggle="modal"
+                    data-target="#modalContactVente">
+                    <i class="fas fa-shopping-cart mr-2"></i>Choisir ce package
+                </button>
+            </div>
+        </div>
+
+        <!-- Package Professional -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="glass card h-100 text-center p-4 d-flex flex-column justify-content-between position-relative">
+                <!-- Badge Populaire -->
+                <div class="position-absolute py-3"
+                    style=" left: 50%; transform: translateX(-50%); background: var(--uman-warning); color: white; padding: 8px 20px; border-radius: var(--radius-full); font-size: 0.8rem; font-weight: 700; box-shadow: 0 4px 16px rgba(255, 193, 7, 0.5);">
+                    <i class="fas fa-star mr-1"></i>POPULAIRE
+                </div>
+                <div>
+                    <div class="mb-3" style="font-size:2.5rem; color: var(--uman-primary);">
+                        <i class="fas fa-rocket"></i>
+                    </div>
+                    <span class="badge badge-primary mb-3 phase-badge">Professional</span>
+                    <h4 class="card-title mb-3" style="color: var(--uman-primary);">Package Professionnel</h4>
+                    <div class="price-section mb-4">
+                        <div style="font-size: 2.5rem; font-weight: 900; color: var(--uman-primary);">$7,999</div>
+                        <div style="color: var(--uman-light); font-size: 0.9rem;">Installation unique</div>
+                    </div>
+                    <ul class="text-left mb-4" style="color: var(--uman-light);">
+                        <li><i class="fas fa-check text-success mr-2"></i>5 modules complets</li>
+                        <li><i class="fas fa-check text-success mr-2"></i>Utilisateurs illimités</li>
+                        <li><i class="fas fa-check text-success mr-2"></i>Support prioritaire</li>
+                        <li><i class="fas fa-check text-success mr-2"></i>Formation sur site</li>
+                        <li><i class="fas fa-check text-success mr-2"></i>Hébergement premium</li>
+                        <li><i class="fas fa-check text-success mr-2"></i>Intégrations API</li>
+                    </ul>
+                </div>
+                <button class="btn btn-lg hero-btn hero-btn--primary mt-auto" data-toggle="modal"
+                    data-target="#modalContactVente">
+                    <i class="fas fa-crown mr-2"></i>Choisir ce package
+                </button>
+            </div>
+        </div>
+
+        <!-- Package Enterprise -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="glass card h-100 text-center p-4 d-flex flex-column justify-content-between">
+                <div>
+                    <div class="mb-3" style="font-size:2.5rem; color: var(--uman-gold);">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <span class="badge badge-warning mb-3 phase-badge">Enterprise</span>
+                    <h4 class="card-title mb-3" style="color: var(--uman-primary);">Package Entreprise</h4>
+                    <div class="price-section mb-4">
+                        <div style="font-size: 2.5rem; font-weight: 900; color: var(--uman-primary);">Sur mesure</div>
+                        <div style="color: var(--uman-light); font-size: 0.9rem;">Contactez-nous</div>
+                    </div>
+                    <ul class="text-left mb-4" style="color: var(--uman-light);">
+                        <li><i class="fas fa-check text-success mr-2"></i>Modules sur-mesure</li>
+                        <li><i class="fas fa-check text-success mr-2"></i>Multi-organisations</li>
+                        <li><i class="fas fa-check text-success mr-2"></i>Support dédié 24/7</li>
+                        <li><i class="fas fa-check text-success mr-2"></i>Coaching personnalisé</li>
+                        <li><i class="fas fa-check text-success mr-2"></i>Hébergement cyber sécurisé</li>
+                        <li><i class="fas fa-check text-success mr-2"></i>SLA garantie</li>
+                    </ul>
+                </div>
+                <button class="btn btn-lg hero-btn hero-btn--gold mt-auto" data-toggle="modal"
+                    data-target="#modalContactVente">
+                    <i class="fas fa-phone mr-2"></i>Nous contacter
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section services annuels -->
+    <div class="text-center mt-5 pt-4" style="border-top: 1px solid rgba(0, 230, 195, 0.2);">
+        <h3 class="mb-4" style="color: var(--uman-primary);">Services de Maintenance & Support</h3>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <div class="glass--lite p-3 h-100">
+                    <h5 style="color: var(--uman-primary);"><i class="fas fa-tools mr-2"></i>Maintenance Annuelle</h5>
+                    <p style="color: var(--uman-light);">À partir de la 2e année : 15% du coût d'installation</p>
+                    <small style="color: var(--uman-secondary);">Mises à jour, support technique, sauvegardes</small>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="glass--lite p-3 h-100">
+                    <h5 style="color: var(--uman-primary);"><i class="fas fa-graduation-cap mr-2"></i>Formation Continue
+                    </h5>
+                    <p style="color: var(--uman-light);">Sessions mensuelles incluses dans la maintenance</p>
+                    <small style="color: var(--uman-secondary);">Optimisation, nouvelles fonctionnalités,
+                        coaching</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Section Témoignages et Cas d'Usage -->
+<div class="glass glass--ultra p-4 mb-5">
+    <h1 class="display-3 font-weight-bold text-center hero-title mb-4"
+        style="font-size:2.7rem;background:linear-gradient(90deg,#00e6c3 20%,#fff 60%,#00e6c3 100%);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 4px 32px #00e6c355,0 2px 8px #10141a99;letter-spacing:1.5px;">
+        Témoignages & Cas d'Usage</h1>
+
+    <div class="row">
+        <!-- Témoignage 1 -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="glass--lite p-4 h-100 text-center">
+                <div class="testimonial-avatar mb-3">
+                    <div
+                        style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(45deg, var(--uman-primary), var(--uman-info)); margin: 0 auto; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: white;">
+                        <i class="fas fa-building"></i>
+                    </div>
+                </div>
+                <h5 style="color: var(--uman-primary); margin-bottom: 1rem;">Coopérative Habitat Montréal</h5>
+                <blockquote
+                    style="color: var(--uman-light); font-style: italic; margin-bottom: 1rem; line-height: 1.6;">
+                    "UMan API a révolutionné notre prise de décision. Nos 200 membres participent maintenant activement
+                    aux votes et propositions. La transparence est totale."
+                </blockquote>
+                <div class="testimonial-stats">
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <div style="color: var(--uman-primary); font-weight: 700; font-size: 1.2rem;">+85%</div>
+                            <small style="color: var(--uman-secondary);">Participation</small>
+                        </div>
+                        <div class="col-4">
+                            <div style="color: var(--uman-success); font-weight: 700; font-size: 1.2rem;">200</div>
+                            <small style="color: var(--uman-secondary);">Membres</small>
+                        </div>
+                        <div class="col-4">
+                            <div style="color: var(--uman-warning); font-weight: 700; font-size: 1.2rem;">15</div>
+                            <small style="color: var(--uman-secondary);">Projets</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Témoignage 2 -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="glass--lite p-4 h-100 text-center">
+                <div class="testimonial-avatar mb-3">
+                    <div
+                        style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(45deg, var(--uman-warning), var(--uman-gold)); margin: 0 auto; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: white;">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                </div>
+                <h5 style="color: var(--uman-primary); margin-bottom: 1rem;">CÉGEP Innovation Québec</h5>
+                <blockquote
+                    style="color: var(--uman-light); font-style: italic; margin-bottom: 1rem; line-height: 1.6;">
+                    "Les étudiants co-créent maintenant les politiques étudiantes. L'engagement et la satisfaction ont
+                    explosé depuis l'implémentation."
+                </blockquote>
+                <div class="testimonial-stats">
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <div style="color: var(--uman-primary); font-weight: 700; font-size: 1.2rem;">+120%</div>
+                            <small style="color: var(--uman-secondary);">Engagement</small>
+                        </div>
+                        <div class="col-4">
+                            <div style="color: var(--uman-success); font-weight: 700; font-size: 1.2rem;">1,500</div>
+                            <small style="color: var(--uman-secondary);">Étudiants</small>
+                        </div>
+                        <div class="col-4">
+                            <div style="color: var(--uman-warning); font-weight: 700; font-size: 1.2rem;">8</div>
+                            <small style="color: var(--uman-secondary);">Départements</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Témoignage 3 -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="glass--lite p-4 h-100 text-center">
+                <div class="testimonial-avatar mb-3">
+                    <div
+                        style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(45deg, var(--uman-success), var(--uman-primary)); margin: 0 auto; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: white;">
+                        <i class="fas fa-users"></i>
+                    </div>
+                </div>
+                <h5 style="color: var(--uman-primary); margin-bottom: 1rem;">OBNL Environnement Action</h5>
+                <blockquote
+                    style="color: var(--uman-light); font-style: italic; margin-bottom: 1rem; line-height: 1.6;">
+                    "Nous mobilisons maintenant 10x plus de bénévoles grâce à la participation démocratique. Chaque voix
+                    compte vraiment."
+                </blockquote>
+                <div class="testimonial-stats">
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <div style="color: var(--uman-primary); font-weight: 700; font-size: 1.2rem;">+900%</div>
+                            <small style="color: var(--uman-secondary);">Bénévoles</small>
+                        </div>
+                        <div class="col-4">
+                            <div style="color: var(--uman-success); font-weight: 700; font-size: 1.2rem;">500</div>
+                            <small style="color: var(--uman-secondary);">Membres</small>
+                        </div>
+                        <div class="col-4">
+                            <div style="color: var(--uman-warning); font-weight: 700; font-size: 1.2rem;">25</div>
+                            <small style="color: var(--uman-secondary);">Campagnes</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Call to Action -->
+    <div class="text-center mt-5 pt-4" style="border-top: 1px solid rgba(0, 230, 195, 0.2);">
+        <h3 class="mb-3" style="color: var(--uman-primary);">Rejoignez plus de 1000+ organisations qui transforment leur
+            gouvernance</h3>
+        <p style="color: var(--uman-light); font-size: 1.1rem; margin-bottom: 2rem;">
+            Coopératives, OBNL, PME, institutions d'enseignement... Ils ont tous choisi UMan API pour révolutionner leur
+            démocratie interne.
+        </p>
+        <div class="d-flex flex-column flex-sm-row justify-content-center align-items-center gap-3">
+            <button class="btn btn-lg hero-btn hero-btn--primary" data-toggle="modal" data-target="#modalContactVente">
+                <i class="fas fa-rocket mr-2"></i>Démarrer votre transformation
+            </button>
+            <button class="btn btn-lg hero-btn hero-btn--info" data-toggle="modal" data-target="#modalCyberdemocratie">
+                <i class="fas fa-play-circle mr-2"></i>Voir une démo
+            </button>
+        </div>
+    </div>
+
+</div>
+
+
+<div class="glass glass--ultra p-4 mb-5">
+    <h1 class="display-3 font-weight-bold text-center hero-title mb-3"
+        style="font-size:2.7rem;background:linear-gradient(90deg,#00e6c3 20%,#fff 60%,#00e6c3 100%);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 4px 32px #00e6c355,0 2px 8px #10141a99;letter-spacing:1.5px;">
+        Questions / Réponses</h1>
+    <div class="d-flex flex-wrap justify-content-center align-items-center">
+        <button type="button" class="btn btn-lg hero-btn hero-btn--info m-2" data-toggle="modal"
+            data-target="#modalFaqLicenceManager">
+            <i class="fas fa-crown mr-2"></i>Que veux dire une licence Manager ?
+        </button>
+        <button type="button" class="btn btn-lg hero-btn hero-btn--success m-2" data-toggle="modal"
+            data-target="#modalFaqUtilisateurIllimite">
+            <i class="fas fa-infinity mr-2"></i>Que veux dire utilisateur illimité ?
+        </button>
+        <button type="button" class="btn btn-lg hero-btn hero-btn--primary m-2" data-toggle="modal"
+            data-target="#modalFaqHebergement">
+            <i class="fas fa-cloud mr-2"></i>Que veux dire un hébergement de base, premium et cyber ?
+        </button>
+        <button type="button" class="btn btn-lg hero-btn hero-btn--warning m-2" data-toggle="modal"
+            data-target="#modalFaqServices">
+            <i class="fas fa-graduation-cap mr-2"></i>Offrez-vous les services de formations, consultations et de
+            coaching ?
+        </button>
+        <button type="button" class="btn btn-lg hero-btn hero-btn--gold m-2" data-toggle="modal"
+            data-target="#modalFaqFrais">
+            <i class="fas fa-dollar-sign mr-2"></i>Avez-vous des frais récurrents ?
+        </button>
+    </div>
+
+    <h1 class="display-3 font-weight-bold text-center hero-title mb-3 pt-5"
+        style="font-size:2.7rem;background:linear-gradient(90deg,#00e6c3 20%,#fff 60%,#00e6c3 100%);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 4px 32px #00e6c355,0 2px 8px #10141a99;letter-spacing:1.5px;">
+        Compatibilité &
+        intégration</h1>
+
+
+    <p class="text-center mb-4 paul-desc" style="color:#fff;font-size:1.08rem;">UMan API s’intègre avec les
+        outils
+        numériques de référence pour accompagner la transformation collaborative et l’innovation dans votre
+        organisation.</p>
+    <div class="d-flex flex-wrap justify-content-center align-items-center">
+        <img src="/static/compatibilite/Adobe.svg" alt="Adobe" height="36" class="mx-3 my-2 compat-logo">
+        <img src="/static/compatibilite/CloudFlare.svg" alt="Cloudflare" height="36" class="mx-3 my-2 compat-logo">
+        <img src="/static/compatibilite/DropBox.svg" alt="Dropbox" height="36" class="mx-3 my-2 compat-logo">
+        <img src="/static/compatibilite/Google.svg" alt="Google" height="36" class="mx-3 my-2 compat-logo">
+        <img src="/static/compatibilite/Metronic.png" alt="Metronic" height="36" class="mx-3 my-2 compat-logo">
+        <img src="/static/compatibilite/mySQL.svg" alt="MySQL" height="36" class="mx-3 my-2 compat-logo">
+        <img src="/static/compatibilite/Visual studio.svg" alt="Visual Studio" height="36"
+            class="mx-3 my-2 compat-logo">
+    </div>
+
+</div>
+
+{% endblock %}

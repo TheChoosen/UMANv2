@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Documentation — Démocratie Directe</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/static/democratie.css">
+</head>
+<body>
+  <main class="container my-5">
+    <header class="mb-4">
+      <h1>Démocratie Directe — Documentation & Ressources</h1>
+      <p class="text-muted">Ressources disponibles : mandats, glossaire, images, vidéos et plans de match.</p>
+    </header>
+
+    <section class="mb-4">
+      <h2>Résumé</h2>
+      <p>Cette page rassemble la documentation fournie : les mandats impératifs, le glossaire, le plan de match et la galerie d'assets (images / vidéos) présents dans le dossier <code>templates/DemocratieDirecte/DD</code>. Utilisez ces ressources pour enrichir le site, créer visuels, brochures ou pages détaillées.</p>
+    </section>
+
+    <section class="mb-4">
+      <h2>Documents clés</h2>
+      <ul>
+        <li><a href="/democratie/mandats">Mandats impératifs (page)</a> — résumé et détails (voir <code>MandatImperatif.md</code>).</li>
+        <li><a href="/democratie/documentation#glossaire">Glossaire</a> — définitions (fichier <code>Glossaire.md</code>).</li>
+        <li><a href="/democratie/documentation#plandematch">Plan de match</a> — feuille de route (fichier <code>Plandematch.md</code>).</li>
+      </ul>
+    </section>
+
+    <section id="glossaire" class="mb-4">
+      <h2>Glossaire</h2>
+      <div class="card p-3">
+        <pre style="white-space:pre-wrap;">{% filter safe %}{{ (open('templates/DemocratieDirecte/Glossaire.md').read()) | e }}{% endfilter %}</pre>
+      </div>
+    </section>
+
+    <section id="plandematch" class="mb-4">
+      <h2>Plan de match</h2>
+      <div class="card p-3">
+        <pre style="white-space:pre-wrap;">{% filter safe %}{{ (open('templates/DemocratieDirecte/Plandematch.md').read()) | e }}{% endfilter %}</pre>
+      </div>
+    </section>
+
+    <section id="gallery" class="mb-4">
+      <h2>Galerie d'assets</h2>
+      <p class="text-muted">Aperçu des images/vidéos disponibles (depuis <code>templates/DemocratieDirecte/DD</code>).</p>
+      <div class="row">
+        {% set dd = [] %}
+        {% for f in [] %}{% endfor %}
+        <!-- We'll render a small gallery client-side to avoid server-side listing here -->
+        <div id="ddGallery" class="col-12"></div>
+      </div>
+    </section>
+
+    <section class="mb-4">
+      <h2>Tâches suggérées</h2>
+      <ol>
+        <li>Rédiger des pages dédiées pour chaque mandat (utilisez <code>MandatImperatif.md</code>).</li>
+        <li>Créer versions téléchargeables (PDF) des documents clefs.</li>
+        <li>Ajouter une galerie côté serveur si vous voulez lister automatiquement tous les fichiers DD.</li>
+        <li>Utiliser les images (logos, backgrounds) pour les bannières et la landing page.</li>
+      </ol>
+    </section>
+
+    <footer class="mt-5 mb-5 text-muted small">Documentation générée automatiquement à partir des fichiers fournis.</footer>
+  </main>
+
+  <script>
+    // client-side gallery sample: list a handful of known assets
+    const samples = [
+      'DEMOCRATIEDIRECTE.png', 'DEMOCRATIE.jpg', 'DEMOCRATIE.mp4', 'DEMOCRATIE.webm', 'DEMA1.jpeg'
+    ];
+    const container = document.getElementById('ddGallery');
+    samples.forEach(function(fn){
+      const ext = fn.split('.').pop().toLowerCase();
+      const wrap = document.createElement('div'); wrap.className='d-inline-block m-2 text-center';
+      if(['jpg','jpeg','png','webp','gif'].includes(ext)){
+        const img = document.createElement('img'); img.src = '/democratie/assets/'+fn; img.style.maxWidth='160px'; img.style.height='auto'; img.className='img-thumbnail'; wrap.appendChild(img);
+      } else if(['mp4','webm'].includes(ext)){
+        const v = document.createElement('video'); v.src = '/democratie/assets/'+fn; v.controls=true; v.style.maxWidth='240px'; v.style.height='auto'; wrap.appendChild(v);
+      }
+      const caption = document.createElement('div'); caption.className='small mt-1'; caption.textContent = fn; wrap.appendChild(caption);
+      container.appendChild(wrap);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,296 @@
+{% extends "BIQ/base.html" %}
+{% block biq_title %}Gestion Signalements — BIQ Admin{% endblock %}
+{% block biq_page %}
+<section class="container container-wide mt-5">
+  <!-- Header -->
+  <div class="glass glass--pro p-4 mb-4">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <h1 class="h2 text-gradient mb-2">
+          <i class="me-2">📋</i>Gestion des signalements
+        </h1>
+        <p class="card-text mb-0">Audit et traitement des signalements citoyens</p>
+      </div>
+      <div class="col-md-4 text-md-end">
+        <div class="d-flex flex-wrap gap-2 justify-content-md-end">
+          <a href="/biq/admin" class="btn btn-glass btn-sm">← Retour admin</a>
+          <a href="/biq/signalement" class="btn btn-primary btn-sm">Nouveau signalement</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="row g-4 mb-4">
+    <div class="col-lg-3 col-md-6">
+      <div class="card glass--lite text-center h-100">
+        <div class="card-body">
+          <div class="mb-2">
+            <span class="h4 text-warning">0</span>
+          </div>
+          <h3 class="h6 mb-1">En attente</h3>
+          <small class="text-muted">Nouveaux signalements</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+      <div class="card glass--lite text-center h-100">
+        <div class="card-body">
+          <div class="mb-2">
+            <span class="h4 text-info">0</span>
+          </div>
+          <h3 class="h6 mb-1">En cours</h3>
+          <small class="text-muted">Sous investigation</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+      <div class="card glass--lite text-center h-100">
+        <div class="card-body">
+          <div class="mb-2">
+            <span class="h4 text-success">0</span>
+          </div>
+          <h3 class="h6 mb-1">Traités</h3>
+          <small class="text-muted">Complétés</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+      <div class="card glass--lite text-center h-100">
+        <div class="card-body">
+          <div class="mb-2">
+            <span class="h4 text-gradient">0</span>
+          </div>
+          <h3 class="h6 mb-1">Total</h3>
+          <small class="text-muted">Tous signalements</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="glass glass--lite p-3 mb-4">
+    <div class="row g-3 align-items-end">
+      <div class="col-lg-3">
+        <label for="search-signalements" class="form-label">Rechercher</label>
+        <input 
+          id="search-signalements" 
+          type="text" 
+          class="form-control" 
+          placeholder="Titre, description, ID..."
+        />
+      </div>
+      <div class="col-lg-2">
+        <label for="filter-type" class="form-label">Type</label>
+        <select id="filter-type" class="form-control">
+          <option value="">Tous types</option>
+          <option value="abus_dpj">Abus DPJ</option>
+          <option value="falsification">Falsification</option>
+          <option value="violation_droits">Violation droits</option>
+          <option value="negligence">Négligence</option>
+          <option value="autre">Autre</option>
+        </select>
+      </div>
+      <div class="col-lg-2">
+        <label for="filter-status" class="form-label">Statut</label>
+        <select id="filter-status" class="form-control">
+          <option value="">Tous statuts</option>
+          <option value="pending">En attente</option>
+          <option value="investigating">En cours</option>
+          <option value="mediation">Médiation</option>
+          <option value="completed">Complété</option>
+          <option value="closed">Fermé</option>
+        </select>
+      </div>
+      <div class="col-lg-2">
+        <label for="filter-priority" class="form-label">Priorité</label>
+        <select id="filter-priority" class="form-control">
+          <option value="">Toutes</option>
+          <option value="urgent">Urgent</option>
+          <option value="high">Élevée</option>
+          <option value="normal">Normale</option>
+          <option value="low">Faible</option>
+        </select>
+      </div>
+      <div class="col-lg-2">
+        <label for="filter-whitehat" class="form-label">WhiteHat</label>
+        <select id="filter-whitehat" class="form-control">
+          <option value="">Non assigné</option>
+          <option value="whitehat1">WhiteHat 1</option>
+          <option value="whitehat2">WhiteHat 2</option>
+        </select>
+      </div>
+      <div class="col-lg-1">
+        <button class="btn btn-glass w-100">Filtrer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Signalements List -->
+  <div class="card glass--pro">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h2 class="h5 mb-0">Liste des signalements</h2>
+      <small class="text-muted">0 signalement(s) trouvé(s)</small>
+    </div>
+    <div class="card-body p-0">
+      <!-- Empty State -->
+      <div class="text-center py-5">
+        <i class="fs-1 text-muted">📋</i>
+        <h3 class="h5 mt-3 mb-2">Aucun signalement trouvé</h3>
+        <p class="text-muted mb-3">
+          Il n'y a pas encore de signalements soumis au système.
+        </p>
+        <a href="/biq/signalement" class="btn btn-primary">
+          Créer un signalement de test
+        </a>
+      </div>
+
+      <!-- Table Template (hidden until signalements exist) -->
+      <div class="table-responsive d-none" id="signalements-table">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Titre</th>
+              <th>Type</th>
+              <th>Statut</th>
+              <th>Priorité</th>
+              <th>WhiteHat</th>
+              <th>Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Sample row template -->
+            <tr class="sample-row d-none">
+              <td><span class="badge badge-secondary">#001</span></td>
+              <td>
+                <div>
+                  <div class="fw-bold">Titre du signalement</div>
+                  <small class="text-muted">Par : utilisateur@exemple.com</small>
+                </div>
+              </td>
+              <td><span class="badge badge-warning">Abus DPJ</span></td>
+              <td><span class="badge badge-warning">En attente</span></td>
+              <td><span class="badge badge-danger">Urgent</span></td>
+              <td>
+                <small class="text-muted">Non assigné</small>
+              </td>
+              <td><small class="text-muted">25 août 2025</small></td>
+              <td>
+                <div class="d-flex gap-1">
+                  <button class="btn btn-glass btn-sm" data-bs-toggle="modal" data-bs-target="#viewSignalementModal">
+                    Voir
+                  </button>
+                  <button class="btn btn-primary btn-sm">Assigner</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- WhiteHat Assignment Panel -->
+  <div class="row g-4 mt-4">
+    <div class="col-lg-8">
+      <div class="card glass--lite">
+        <div class="card-header">
+          <h3 class="h6 mb-0">Guide de traitement WhiteHat</h3>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <h4 class="h6">Procédure d'investigation</h4>
+              <ol class="small">
+                <li>Évaluation initiale du signalement</li>
+                <li>Collecte des preuves et documents</li>
+                <li>Vérification des faits</li>
+                <li>Rédaction du rapport d'audit</li>
+                <li>Recommandations d'actions</li>
+              </ol>
+            </div>
+            <div class="col-md-6">
+              <h4 class="h6">Types de priorité</h4>
+              <ul class="small">
+                <li><span class="badge badge-danger">Urgent</span> - Traitement immédiat</li>
+                <li><span class="badge badge-warning">Élevée</span> - Dans les 48h</li>
+                <li><span class="badge badge-info">Normale</span> - Dans la semaine</li>
+                <li><span class="badge badge-secondary">Faible</span> - Selon disponibilité</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card glass--lite">
+        <div class="card-header">
+          <h3 class="h6 mb-0">WhiteHats disponibles</h3>
+        </div>
+        <div class="card-body">
+          <div class="text-center py-3">
+            <i class="fs-3 text-muted">🛡️</i>
+            <p class="small text-muted mb-2">Aucun WhiteHat enregistré</p>
+            <button class="btn btn-glass btn-sm" disabled>Assigner</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="text-center mt-4">
+    <small class="text-muted">
+      <a href="/biq/admin" class="text-muted">← Retour à l'administration</a>
+    </small>
+  </div>
+</section>
+
+<!-- View Signalement Modal -->
+<div class="modal fade" id="viewSignalementModal" tabindex="-1" aria-labelledby="viewSignalementModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="glass glass--pro">
+        <div class="modal-header">
+          <h5 class="modal-title" id="viewSignalementModalLabel">Détails du signalement #001</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Type</label>
+              <div><span class="badge badge-warning">Abus DPJ</span></div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Statut</label>
+              <div><span class="badge badge-warning">En attente</span></div>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Titre</label>
+              <p class="card-text">Titre du signalement exemple</p>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Description</label>
+              <p class="card-text">Description détaillée du signalement...</p>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Soumis par</label>
+              <p class="card-text">utilisateur@exemple.com</p>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Date</label>
+              <p class="card-text">25 août 2025</p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+          <button type="button" class="btn btn-primary">Assigner à un WhiteHat</button>
+          <button type="button" class="btn btn-warning">Changer le statut</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,97 @@
+{% extends "BIQ/base.html" %}
+{% block biq_title %}Gestion Utilisateurs — BIQ Admin{% endblock %}
+{% block biq_page %}
+<section class="container container-wide mt-5">
+  <!-- Header -->
+  <div class="glass glass--pro p-4 mb-4">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <h1 class="h2 text-gradient mb-2">
+          <i class="me-2">👥</i>Gestion des utilisateurs
+        </h1>
+        <p class="card-text mb-0">Administration des comptes membres de l'Alliance BIQ</p>
+      </div>
+      <div class="col-md-4 text-md-end">
+        <div class="d-flex flex-wrap gap-2 justify-content-md-end">
+          <a href="/biq/admin" class="btn btn-glass btn-sm">← Retour admin</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Users Table -->
+  <div class="card glass--pro">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h2 class="h5 mb-0">Liste des utilisateurs</h2>
+      <small class="text-muted">{{ users|length }} utilisateur(s) trouvé(s)</small>
+    </div>
+    <div class="card-body p-0">
+      {% if users %}
+      <!-- Users Table -->
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nom d'utilisateur</th>
+              <th>Email</th>
+              <th>Nom complet</th>
+              <th>Rôle</th>
+              <th>Inscrit le</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for user in users %}
+            <tr>
+              <td>{{ user.id }}</td>
+              <td>
+                <strong>{{ user.username or 'N/A' }}</strong>
+              </td>
+              <td>{{ user.email }}</td>
+              <td>{{ user.prenom or '' }} {{ user.nom or '' }}</td>
+              <td>
+                {% if user.is_admin %}
+                  <span class="badge badge-warning">Admin</span>
+                {% else %}
+                  <span class="badge badge-primary">Membre</span>
+                {% endif %}
+              </td>
+              <td>{{ user.created_at.strftime('%d/%m/%Y') if user.created_at else 'N/A' }}</td>
+              <td>
+                <div class="btn-group btn-group-sm">
+                  <button class="btn btn-glass" title="Voir profil">👁️</button>
+                  <button class="btn btn-glass" title="Modifier">✏️</button>
+                  {% if not user.is_admin %}
+                    <button class="btn btn-warning" title="Promouvoir admin">⬆️</button>
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <!-- Empty State -->
+      <div class="text-center py-5">
+        <i class="fs-1 text-muted">👤</i>
+        <h3 class="h5 mt-3 mb-2">Aucun utilisateur trouvé</h3>
+        <p class="text-muted mb-3">
+          Aucun membre n'est encore inscrit dans l'Alliance BIQ.
+        </p>
+        <a href="/biq/register" class="btn btn-primary">
+          Créer le premier compte
+        </a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  
+  <div class="text-center mt-4">
+    <small class="text-muted">
+      <a href="/biq/admin" class="text-muted">← Retour à l'administration</a>
+    </small>
+  </div>
+</section>
+{% endblock %}

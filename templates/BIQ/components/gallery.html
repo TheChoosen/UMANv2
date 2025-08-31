@@ -1,0 +1,55 @@
+<!-- Visual Gallery Section: Responsive grid with proper elevation -->
+<section class="container" style="padding: 4rem 0;">
+    <div class="row g-4 mb-5" id="galerie-biq" aria-labelledby="galerie-biq-title">
+        <h2 id="galerie-biq-title" class="visually-hidden">Galerie introductive BIQ</h2>
+
+        <!-- Main feature image: 6/12 desktop → 12/12 mobile -->
+        <div class="col-lg-6 col-12">
+            <article class="glass glass--pro h-100 p-0 overflow-hidden position-relative">
+                <img src="/static/BIQ/Photo/BIQ1.jpg" alt="Manifestation citoyenne pacifique soutenue par le BIQ"
+                     class="img-fluid w-100 h-100 object-fit-cover" loading="lazy" decoding="async"
+                     style="min-height: 280px;">
+                <div class="position-absolute bottom-0 start-0 end-0 p-3"
+                     style="background: linear-gradient(transparent, rgba(0,0,0,0.7));">
+                    <p class="text-white mb-0 small fw-medium">Mobilisation citoyenne – Défense des familles</p>
+                </div>
+            </article>
+        </div>
+
+        <!-- Secondary images: 3/12 each desktop → 6/12 tablet → 12/12 mobile -->
+        <div class="col-lg-3 col-md-6">
+            <article class="glass glass--lite h-100 p-0 overflow-hidden">
+                <img src="/static/BIQ/Photo/BIQ2.jpg" alt="Analyse stratégique et coordination des WhiteHats"
+                     class="img-fluid w-100 h-100 object-fit-cover" loading="lazy" decoding="async"
+                     style="min-height: 200px;">
+                <figcaption class="p-2 small text-center">Coordination WhiteHats</figcaption>
+            </article>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <article class="glass glass--lite h-100 p-0 overflow-hidden">
+                <img src="/static/BIQ/Photo/BIQ3.jpg" alt="Veille et audit des institutions pour la transparence"
+                     class="img-fluid w-100 h-100 object-fit-cover" loading="lazy" decoding="async"
+                     style="min-height: 200px;">
+                <figcaption class="p-2 small text-center">Surveillance & transparence</figcaption>
+            </article>
+        </div>
+
+        <!-- Vision statement card: Replaces image on smaller screens -->
+        <div class="col-12">
+            <article class="glass glass--ultra p-4 text-center">
+                <h2 class="h4 text-gradient mb-3">Une vision concrète pour l'indépendance</h2>
+                <p class="fine-print mb-4" style="max-width: 60ch; margin: 0 auto;">
+                    Ces images illustrent l'essence de notre mission : mobilisation pacifique, coordination experte,
+                    audit transparent et coopération citoyenne. Le BIQ structure une souveraineté numérique, sociale
+                    et territoriale durable.
+                </p>
+                <div class="d-flex flex-wrap gap-2 justify-content-center">
+                    <a href="#projets" class="btn btn-glass btn-sm">Découvrir nos projets</a>
+                    <a href="#problemes-solutions" class="btn btn-secondary btn-sm">Voir nos solutions</a>
+                    <a href="/biq/register" class="btn btn-primary btn-sm">Participer</a>
+                </div>
+            </article>
+        </div>
+    </div>
+</section>

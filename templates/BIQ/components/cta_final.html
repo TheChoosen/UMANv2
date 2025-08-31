@@ -1,0 +1,57 @@
+<!-- Final Call-to-Action Section -->
+<section class="container text-center" style="padding: 4rem 0;" id="cta-final">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="glass glass--ultra p-5">
+                <h2 class="h3 text-gradient mb-4">Agir maintenant pour la justice et la transparence</h2>
+                <p class="lead mb-4" style="max-width: 60ch; margin: 0 auto;">
+                    Rejoignez l'Alliance BIQ et participez activement à la transformation du système de protection de la jeunesse au Québec.
+                </p>
+                <div class="d-flex flex-wrap gap-3 justify-content-center">
+                    <a href="/biq/register" class="btn btn-primary btn-lg">
+                        <i class="bi bi-person-plus me-2" aria-hidden="true"></i>
+                        S'inscrire à l'Alliance
+                    </a>
+                    {% if session.get('user_id') %}
+                        <a href="/biq/signalement" class="btn btn-outline-light btn-lg">
+                            <i class="bi bi-flag me-2" aria-hidden="true"></i>
+                            Déposer un signalement
+                        </a>
+                    {% endif %}
+                    <a href="/biq/login" class="btn btn-glass btn-lg">
+                        <i class="bi bi-box-arrow-in-right me-2" aria-hidden="true"></i>
+                        Espace membre
+                    </a>
+                </div>
+                
+                <!-- Contact Information -->
+                <div class="row g-4 mt-4 pt-4 border-top border-light border-opacity-10">
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center justify-content-center gap-3">
+                            <i class="bi bi-telephone text-primary" aria-hidden="true"></i>
+                            <div class="text-start">
+                                <p class="mb-0 small text-secondary">Téléphone</p>
+                                <a href="tel:+18194522995" class="link-light fw-medium">(819) 452-2995</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center justify-content-center gap-3">
+                            <i class="bi bi-envelope text-primary" aria-hidden="true"></i>
+                            <div class="text-start">
+                                <p class="mb-0 small text-secondary">Email</p>
+                                <a href="mailto:ginodesrosiers6@gmail.com" class="link-light fw-medium">ginodesrosiers6@gmail.com</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4 pt-3">
+                    <p class="small text-muted mb-0">
+                        © 2024 Alliance Canadienne des Whitehats. Tous droits réservés.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

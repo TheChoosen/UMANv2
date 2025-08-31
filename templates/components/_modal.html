@@ -1,0 +1,17 @@
+{%- macro modal(id, title='', size='lg') -%}
+<div class="modal fade" id="{{ id }}" tabindex="-1" role="dialog" aria-labelledby="{{ id }}Label" aria-hidden="true">
+  <div class="modal-dialog modal-{{ size }} modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="glass--pro p-4">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Fermer" style="font-size: 2rem; color: var(--uman-primary); opacity: 0.8; float: right;">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        {% if title %}
+        <h2 class="text-gradient mb-3" id="{{ id }}Label">{{ title }}</h2>
+        {% endif %}
+        {{ caller() }}
+      </div>
+    </div>
+  </div>
+</div>
+{%- endmacro -%}

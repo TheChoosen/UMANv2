@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}Accueil - U-MAN API{% endblock %}
+
+{% block content %}
+
+
+<h1>Bienvenue sur votre profil</h1>
+<div class="glass glass--lite p-4 mt-4" style="max-width:760px;margin:auto;">
+	<h2 class="mb-3">Créer votre profil UMAN</h2>
+	<p class="mb-3" style="color:var(--uman-light);">Nos profils n'utilisent pas de mot de passe. Après l'inscription vous recevrez un code aléatoire par courriel que vous devrez confirmer pour activer votre profil.</p>
+
+	{# flash messages (optional, requires server to set flashes) #}
+	{% if get_flashed_messages() %}
+	<div class="mb-3">
+		{% for msg in get_flashed_messages() %}
+		<div class="alert alert-info">{{ msg }}</div>
+		{% endfor %}
+	</div>
+	{% endif %}
+
+	<form id="registerForm" action="/register" method="post" class="needs-validation" novalidate>
+		<div class="form-row">
+			<div class="form-group col-md-6">
+				<label for="prenom">Prénom</label>
+				<input type="text" class="form-control" id="prenom" name="prenom" required>
+				<div class="invalid-feedback">Veuillez entrer votre prénom.</div>
+			</div>
+			<div class="form-group col-md-6">
+				<label for="nom">Nom</label>
+				<input type="text" class="form-control" id="nom" name="nom" required>
+				<div class="invalid-feedback">Veuillez entrer votre nom.</div>
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label for="email">Courriel</label>
+			<input type="email" class="form-control" id="email" name="email" required>
+			<div class="invalid-feedback">Veuillez entrer une adresse courriel valide.</div>
+		</div>
+
+		<div class="form-group">
+			<label for="organisation">Organisation (facultatif)</label>
+			<input type="text" class="form-control" id="organisation" name="organisation">
+		</div>
+
+		<div class="form-group">
+			<label for="telephone">Téléphone (facultatif)</label>
+			<input type="tel" class="form-control" id="telephone" name="telephone">
+		</div>
+
+		<div class="form-group">
+			<small class="text-muted">En soumettant ce formulaire nous enverrons un code de confirmation à l'adresse fournie. Saisissez ce code pour activer votre profil.</small>
+		</div>
+
+		<div class="d-flex justify-content-end align-items-center">
+			<button id="submitBtn" class="btn hero-btn hero-btn--primary" type="submit">
+				<span id="btnText">Recevoir le code par courriel</span>
+				<span id="btnSpinner" class="spinner-border spinner-border-sm ml-2" role="status" aria-hidden="true" style="display:none;"></span>
+			</button>
+		</div>
+	</form>
+</div>
+
+<script>
+// Bootstrap simple validation + disable submit UX
+(function() {
+	'use strict';
+	var form = document.getElementById('registerForm');
+	var btn = document.getElementById('submitBtn');
+	var spinner = document.getElementById('btnSpinner');
+	form.addEventListener('submit', function(event) {
+		if (!form.checkValidity()) {
+			event.preventDefault();
+			event.stopPropagation();
+			form.classList.add('was-validated');
+			return;
+		}
+
+		// Attempt AJAX submit to keep user on the page and open confirm modal
+		event.preventDefault();
+		btn.setAttribute('disabled','disabled');
+		spinner.style.display = 'inline-block';
+
+		var formData = new URLSearchParams(new FormData(form));
+		fetch(form.action, {
+			method: form.method || 'POST',
+			headers: { 'X-Requested-With': 'XMLHttpRequest' },
+			body: formData
+		}).then(function(res) {
+			return res.json().then(function(payload) {
+				if (!res.ok) throw payload;
+				// open confirm modal and prefill email
+				if (window.openConfirmModal) window.openConfirmModal(formData.get('email'));
+				// show a small transient success flash
+				var parent = form.closest('.glass');
+				var alert = document.createElement('div');
+				alert.className = 'alert alert-success mt-3';
+				alert.textContent = 'Code envoyé. Vérifiez votre courriel.';
+				parent.insertBefore(alert, parent.firstChild);
+			});
+		}).catch(function(err) {
+			var parent = form.closest('.glass');
+			var alert = document.createElement('div');
+			alert.className = 'alert alert-danger mt-3';
+			alert.textContent = (err && err.error) ? err.error : 'Impossible d\'envoyer le code.';
+			parent.insertBefore(alert, parent.firstChild);
+		}).finally(function() {
+			btn.removeAttribute('disabled');
+			spinner.style.display = 'none';
+		});
+	}, false);
+})();
+</script>
+
+<script>
+// Wire up opening the confirm modal automatically after registration (optional) and handle AJAX confirm
+document.addEventListener('DOMContentLoaded', function() {
+	var confirmForm = document.getElementById('confirmForm');
+	if (!confirmForm) return;
+
+	confirmForm.addEventListener('submit', function(e) {
+		e.preventDefault();
+		var email = document.getElementById('confirmEmail').value;
+		var code = document.getElementById('confirmCode').value;
+		var feedback = document.getElementById('confirmFeedback');
+		feedback.innerHTML = '';
+
+		fetch('/register/confirm', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+			body: new URLSearchParams({ email: email, code: code })
+		}).then(function(res) {
+			return res.json().then(function(payload) {
+				if (!res.ok) throw payload;
+				feedback.innerHTML = '<div class="alert alert-success">' + (payload.message || 'Profil activé') + '</div>';
+			});
+		}).catch(function(err) {
+			var msg = (err && err.error) ? err.error : 'Erreur lors de la confirmation';
+			feedback.innerHTML = '<div class="alert alert-danger">' + msg + '</div>';
+		});
+	});
+
+	// Optional: expose a global function to open the modal and prefills the email field
+	window.openConfirmModal = function(prefillEmail) {
+		var modalEl = document.getElementById('modal-modalRegisterConfirm');
+		if (!modalEl) return;
+		if (prefillEmail) document.getElementById('confirmEmail').value = prefillEmail;
+		// Using Bootstrap 4 modal show via jQuery if available
+		if (window.jQuery) {
+			window.jQuery(modalEl).modal('show');
+		} else {
+			modalEl.style.display = 'block';
+		}
+	}
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends "BIQ/base.html" %}
+{% block biq_title %}Connexion — BIQ{% endblock %}
+{% block biq_page %}
+<section class="container container-narrow mt-5">
+  <div class="glass glass--pro p-4">
+    <header class="text-center mb-4">
+      <h1 class="h2 text-gradient">Connexion</h1>
+      <p class="card-text">Accédez à votre espace membre BIQ</p>
+    </header>
+    
+    <form method="post" action="/biq/login" novalidate>
+      <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <input 
+          id="email" 
+          name="email" 
+          type="email" 
+          class="form-control" 
+          required 
+          autocomplete="email"
+          placeholder="votre.email@exemple.com"
+        />
+      </div>
+      
+      <div class="mb-4">
+        <label for="password" class="form-label">Mot de passe</label>
+        <input 
+          id="password" 
+          name="password" 
+          type="password" 
+          class="form-control" 
+          required 
+          autocomplete="current-password"
+          placeholder="Votre mot de passe"
+        />
+      </div>
+      
+      <div class="d-flex flex-column gap-3">
+        <button type="submit" class="btn btn-primary">Se connecter</button>
+        <div class="text-center">
+          <a href="/biq/register" class="btn btn-glass btn-sm">Créer un compte</a>
+        </div>
+      </div>
+    </form>
+  </div>
+  
+  <div class="text-center mt-4">
+    <small class="text-muted">
+      <a href="/biq" class="text-muted">← Retour à l'accueil</a>
+    </small>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,194 @@
+{% extends "BIQ/base.html" %}
+{% block biq_title %}PRD — Bureau Indépendance Québec{% endblock %}
+{% block biq_page %}
+<section class="container container-wide mt-5">
+  <!-- Header -->
+  <div class="glass glass--pro p-4 mb-4">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <h1 class="h2 text-gradient mb-2">PRD — Bureau de l'Indépendance du Québec</h1>
+        <p class="card-text mb-0">Document de référence pour la plateforme BIQ</p>
+      </div>
+      <div class="col-md-4 text-md-end">
+        <div class="d-flex flex-wrap gap-2 justify-content-md-end">
+          <span class="badge badge-primary">Version 1.0</span>
+          <span class="badge badge-info">25 août 2025</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Area -->
+  <div class="row g-4">
+    <div class="col-lg-9">
+      <div class="card glass--pro">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h2 class="h5 mb-0">Document PRD</h2>
+          <div class="d-flex gap-2">
+            <button id="toggle-toc" class="btn btn-glass btn-sm">Sommaire</button>
+            <a href="/static/BIQ/BureauIndependance.md" class="btn btn-primary btn-sm" target="_blank" download>
+              Télécharger MD
+            </a>
+          </div>
+        </div>
+        <div class="card-body">
+          <div id="loading-indicator" class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Chargement...</span>
+            </div>
+            <p class="mt-2 text-muted">Chargement du document...</p>
+          </div>
+          <div id="prd-content" class="d-none">
+            <!-- Content will be loaded here -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-lg-3">
+      <!-- Quick Navigation -->
+      <div class="card glass--lite mb-4">
+        <div class="card-header">
+          <h3 class="h6 mb-0">Navigation rapide</h3>
+        </div>
+        <div class="card-body">
+          <div id="toc-sidebar" class="d-none">
+            <!-- Table of contents will be generated here -->
+          </div>
+          <div id="default-nav">
+            <div class="d-grid gap-2">
+              <a href="/biq" class="btn btn-glass btn-sm">Retour accueil</a>
+              <a href="/biq/mediatheque" class="btn btn-glass btn-sm">Médiathèque</a>
+              <a href="/biq/signalement" class="btn btn-primary btn-sm">Signalement</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Document Info -->
+      <div class="card glass--lite">
+        <div class="card-header">
+          <h3 class="h6 mb-0">À propos</h3>
+        </div>
+        <div class="card-body">
+          <div class="small">
+            <p class="mb-2"><strong>Version :</strong> 1.0</p>
+            <p class="mb-2"><strong>Date :</strong> 25 août 2025</p>
+            <p class="mb-2"><strong>Format :</strong> Markdown</p>
+            <p class="mb-0"><strong>Statut :</strong> <span class="badge badge-success">Actuel</span></p>
+          </div>
+          
+          <hr class="my-3">
+          
+          <h4 class="h6 mb-2">Sections principales</h4>
+          <ul class="small mb-0">
+            <li>Contexte et objectif</li>
+            <li>Valeur produit</li>
+            <li>Utilisateurs et rôles</li>
+            <li>Routes / Endpoints</li>
+            <li>Modèles de données</li>
+            <li>Contraintes techniques</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="text-center mt-4">
+    <small class="text-muted">
+      <a href="/biq" class="text-muted">← Retour à l'accueil</a>
+    </small>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async function() {
+  const loadingIndicator = document.getElementById('loading-indicator');
+  const contentDiv = document.getElementById('prd-content');
+  const tocSidebar = document.getElementById('toc-sidebar');
+  const defaultNav = document.getElementById('default-nav');
+  const toggleTocBtn = document.getElementById('toggle-toc');
+  
+  try {
+    // Load markdown content
+    const response = await fetch('/static/BIQ/BureauIndependance.md');
+    if (!response.ok) throw new Error('Document non trouvé');
+    
+    const markdown = await response.text();
+    const html = marked.parse(markdown);
+    
+    // Hide loading and show content
+    loadingIndicator.classList.add('d-none');
+    contentDiv.innerHTML = html;
+    contentDiv.classList.remove('d-none');
+    
+    // Generate table of contents
+    generateTOC();
+    
+  } catch (error) {
+    loadingIndicator.innerHTML = `
+      <div class="text-danger">
+        <i class="fs-1">⚠️</i>
+        <p class="mt-2">Erreur de chargement du document</p>
+        <small>${error.message}</small>
+      </div>
+    `;
+    console.error('Erreur:', error);
+  }
+  
+  // Toggle TOC functionality
+  toggleTocBtn.addEventListener('click', function() {
+    const isVisible = !tocSidebar.classList.contains('d-none');
+    if (isVisible) {
+      tocSidebar.classList.add('d-none');
+      defaultNav.classList.remove('d-none');
+      toggleTocBtn.textContent = 'Sommaire';
+    } else {
+      tocSidebar.classList.remove('d-none');
+      defaultNav.classList.add('d-none');
+      toggleTocBtn.textContent = 'Masquer';
+    }
+  });
+  
+  function generateTOC() {
+    const headings = contentDiv.querySelectorAll('h1, h2, h3, h4');
+    if (headings.length === 0) return;
+    
+    let tocHTML = '<nav class="toc"><ul class="list-unstyled">';
+    headings.forEach((heading, index) => {
+      const id = `heading-${index}`;
+      heading.id = id;
+      const level = parseInt(heading.tagName.charAt(1));
+      const indent = level > 2 ? 'ms-3' : '';
+      
+      tocHTML += `
+        <li class="${indent}">
+          <a href="#${id}" class="text-decoration-none text-muted small d-block py-1 toc-link" 
+             data-level="${level}">
+            ${heading.textContent}
+          </a>
+        </li>
+      `;
+    });
+    tocHTML += '</ul></nav>';
+    
+    tocSidebar.innerHTML = tocHTML;
+    
+    // Add smooth scrolling for TOC links
+    tocSidebar.querySelectorAll('.toc-link').forEach(link => {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+  }
+});
+</script>
+{% endblock %}

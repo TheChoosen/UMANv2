@@ -1,0 +1,89 @@
+{% extends "BIQ/base.html" %}
+{% block biq_title %}Signalement — BIQ{% endblock %}
+{% block biq_page %}
+<section class="container container-narrow mt-5">
+  <div class="glass glass--pro p-4">
+    <header class="text-center mb-4">
+      <h1 class="h2 text-gradient">Déposer un signalement</h1>
+      <p class="card-text">Signalez un incident ou un abus pour qu'il soit traité par notre équipe</p>
+    </header>
+    
+    <form method="post" action="/biq/signalement" novalidate>
+      <div class="mb-3">
+        <label for="title" class="form-label">Titre du signalement</label>
+        <input 
+          id="title" 
+          name="title" 
+          type="text" 
+          class="form-control" 
+          required
+          placeholder="Résumé en quelques mots"
+          maxlength="200"
+        />
+        <small class="text-muted">Maximum 200 caractères</small>
+      </div>
+      
+      <div class="mb-3">
+        <label for="type" class="form-label">Type d'incident</label>
+        <select id="type" name="type" class="form-control" required>
+          <option value="">Sélectionnez le type</option>
+          <option value="abus_dpj">Abus de la DPJ</option>
+          <option value="falsification">Falsification de documents</option>
+          <option value="violation_droits">Violation des droits</option>
+          <option value="negligence">Négligence institutionnelle</option>
+          <option value="autre">Autre</option>
+        </select>
+      </div>
+      
+      <div class="mb-4">
+        <label for="description" class="form-label">Description détaillée</label>
+        <textarea 
+          id="description" 
+          name="description" 
+          class="form-control" 
+          rows="8" 
+          required
+          placeholder="Décrivez les faits de manière détaillée : dates, lieux, personnes impliquées, documents de référence..."
+          maxlength="5000"
+        ></textarea>
+        <small class="text-muted">Maximum 5000 caractères. Soyez précis et factuel.</small>
+      </div>
+      
+      <div class="mb-4">
+        <label for="contact" class="form-label">Contact (optionnel)</label>
+        <input 
+          id="contact" 
+          name="contact" 
+          type="text" 
+          class="form-control"
+          placeholder="Email ou téléphone pour suivi"
+        />
+        <small class="text-muted">Ces informations ne seront utilisées que pour le suivi de votre signalement</small>
+      </div>
+      
+      <div class="d-flex flex-column gap-3">
+        <button type="submit" class="btn btn-primary">Envoyer le signalement</button>
+        <div class="text-center">
+          <a href="/biq" class="btn btn-glass btn-sm">Annuler</a>
+        </div>
+      </div>
+    </form>
+    
+    <div class="mt-4 p-3 glass--lite">
+      <h3 class="h6 mb-2">Confidentialité & suivi</h3>
+      <ul class="small mb-0">
+        <li>Votre signalement sera traité de manière confidentielle</li>
+        <li>Un WhiteHat sera assigné pour étudier votre dossier</li>
+        <li>Vous recevrez un suivi de l'avancement de votre signalement</li>
+        <li>En cas d'urgence, contactez directement : (819) 452-2995</li>
+      </ul>
+    </div>
+  </div>
+  
+  <div class="text-center mt-4">
+    <small class="text-muted">
+      <a href="/biq" class="text-muted">← Retour à l'accueil</a>
+    </small>
+  </div>
+</section>
+{% endblock %}

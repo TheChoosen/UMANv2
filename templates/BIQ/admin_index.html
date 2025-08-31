@@ -1,0 +1,222 @@
+{% extends "BIQ/base.html" %}
+{% block biq_title %}BIQ — Administration{% endblock %}
+{% block biq_page %}
+<section class="container container-wide mt-5">
+  <!-- Admin Header -->
+  <div class="glass glass--ultra p-4 mb-4">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <h1 class="h2 text-gradient mb-2">
+          <i class="me-2">🛡️</i>Administration BIQ
+        </h1>
+        <p class="card-text mb-0">Console de gestion pour les administrateurs BIQ</p>
+      </div>
+      <div class="col-md-4 text-md-end">
+        <div class="d-flex flex-wrap gap-2 justify-content-md-end">
+          <span class="badge badge-warning">Admin</span>
+          <span class="badge badge-primary">WhiteHat</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Stats -->
+  <div class="row g-4 mb-4">
+    <div class="col-lg-3 col-md-6">
+      <div class="card glass--pro text-center h-100">
+        <div class="card-body">
+          <div class="mb-2">
+            <span class="h3 text-gradient">{{ stats.total_membres }}</span>
+          </div>
+          <h3 class="h6 mb-1">Utilisateurs</h3>
+          <small class="text-muted">Membres actifs</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+      <div class="card glass--pro text-center h-100">
+        <div class="card-body">
+          <div class="mb-2">
+            <span class="h3 text-gradient">{{ stats.nouveaux_signalements }}</span>
+          </div>
+          <h3 class="h6 mb-1">Signalements</h3>
+          <small class="text-muted">En attente</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+      <div class="card glass--pro text-center h-100">
+        <div class="card-body">
+          <div class="mb-2">
+            <span class="h3 text-gradient">{{ stats.medias_publics }}</span>
+          </div>
+          <h3 class="h6 mb-1">Médias</h3>
+          <small class="text-muted">Publiés</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+      <div class="card glass--pro text-center h-100">
+        <div class="card-body">
+          <div class="mb-2">
+            <span class="h3 text-gradient">{{ stats.total_signalements }}</span>
+          </div>
+          <h3 class="h6 mb-1">Total Signalements</h3>
+          <small class="text-muted">Tous statuts</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Main Actions -->
+    <div class="col-lg-8">
+      <div class="card glass--pro h-100">
+        <div class="card-header">
+          <h2 class="h5 mb-0">Gestion principale</h2>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <!-- Users Management -->
+            <div class="col-md-6">
+              <div class="card glass--lite h-100">
+                <div class="card-body text-center">
+                  <div class="mb-3">
+                    <i class="fs-1">👥</i>
+                  </div>
+                  <h3 class="h6">Gestion des utilisateurs</h3>
+                  <p class="card-text small">Créer, modifier et gérer les comptes membres</p>
+                  <a href="/biq/admin/users" class="btn btn-primary btn-sm">Gérer les utilisateurs</a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Signalements Management -->
+            <div class="col-md-6">
+              <div class="card glass--lite h-100">
+                <div class="card-body text-center">
+                  <div class="mb-3">
+                    <i class="fs-1">📋</i>
+                  </div>
+                  <h3 class="h6">Signalements</h3>
+                  <p class="card-text small">Traiter et auditer les signalements citoyens</p>
+                  <a href="/biq/admin/signalements" class="btn btn-primary btn-sm">Voir signalements</a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Media Management -->
+            <div class="col-md-6">
+              <div class="card glass--lite h-100">
+                <div class="card-body text-center">
+                  <div class="mb-3">
+                    <i class="fs-1">📁</i>
+                  </div>
+                  <h3 class="h6">Médiathèque</h3>
+                  <p class="card-text small">Gérer documents, vidéos et ressources</p>
+                  <a href="/biq/mediatheque" class="btn btn-glass btn-sm">Accéder</a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Reports -->
+            <div class="col-md-6">
+              <div class="card glass--lite h-100">
+                <div class="card-body text-center">
+                  <div class="mb-3">
+                    <i class="fs-1">📊</i>
+                  </div>
+                  <h3 class="h6">Rapports</h3>
+                  <p class="card-text small">Statistiques et analyses des activités</p>
+                  <button class="btn btn-glass btn-sm" disabled>Bientôt disponible</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="col-lg-4">
+      <div class="card glass--pro h-100">
+        <div class="card-header">
+          <h2 class="h5 mb-0">Actions rapides</h2>
+        </div>
+        <div class="card-body">
+          <div class="d-grid gap-2">
+            <a href="/biq/admin/users" class="btn btn-primary">Nouveaux utilisateurs</a>
+            <a href="/biq/admin/signalements" class="btn btn-warning">Signalements urgents</a>
+            <a href="/biq/prd" class="btn btn-glass">Consulter PRD</a>
+            <a href="/biq" class="btn btn-glass">Retour public</a>
+          </div>
+          
+          <hr class="my-3">
+          
+          <h3 class="h6 mb-2">Système</h3>
+          <div class="small">
+            <div class="d-flex justify-content-between mb-1">
+              <span>Serveur :</span>
+              <span class="badge badge-success">En ligne</span>
+            </div>
+            <div class="d-flex justify-content-between mb-1">
+              <span>Base de données :</span>
+              <span class="badge badge-success">Connectée</span>
+            </div>
+            <div class="d-flex justify-content-between">
+              <span>Dernière sauvegarde :</span>
+              <span class="text-muted">Aujourd'hui</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="col-12">
+      <div class="card glass--lite">
+        <div class="card-header">
+          <h2 class="h5 mb-0">Activité récente</h2>
+        </div>
+        <div class="card-body">
+          <div class="text-center py-4">
+            <i class="fs-1 text-muted">📋</i>
+            <p class="text-muted mb-3">Aucune activité récente</p>
+            <small class="text-muted">
+              Les dernières actions des utilisateurs et administrateurs apparaîtront ici
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WhiteHat Mission Info -->
+    <div class="col-12">
+      <div class="card glass--ultra">
+        <div class="card-header">
+          <h2 class="h5 mb-0">
+            <i class="me-2">🛡️</i>Mission WhiteHat
+          </h2>
+        </div>
+        <div class="card-body">
+          <p class="card-text">
+            En tant qu'administrateur BIQ, vous représentez l'Alliance des WhiteHats dans la mission de 
+            protection des droits, supervision indépendante, et transparence institutionnelle pour le bien commun du Québec.
+          </p>
+          <div class="d-flex flex-wrap gap-2">
+            <a href="/biq#whitehats-missions" class="btn btn-glass btn-sm">Consulter missions</a>
+            <a href="/biq#programme-parallele" class="btn btn-glass btn-sm">Programme DPJ</a>
+            <a href="/biq#alliance-canadienne" class="btn btn-glass btn-sm">Alliance canadienne</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="text-center mt-4">
+    <small class="text-muted">
+      <a href="/biq" class="text-muted">← Retour au site public</a>
+    </small>
+  </div>
+</section>
+{% endblock %}

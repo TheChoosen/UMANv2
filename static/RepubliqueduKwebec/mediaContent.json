@@ -1,0 +1,5 @@
+[
+  {"id": 1, "title": "Documentaire 1", "desc": "Présentation du projet.", "img": "/static/image/Plateforme Construction.png", "src": "/static/RepubliqueduKwebec/doc1.pdf"},
+  {"id": 2, "title": "Capsule vidéo", "desc": "Capsule citoyenne.", "img": "/static/image/Plateforme Fabrication.png", "src": "/static/RepubliqueduKwebec/doc2.pdf"},
+  {"id": 3, "title": "Cours", "desc": "Cours sur la souveraineté.", "img": "/static/image/Plateforme Hotellerie.png", "src": "/static/RepubliqueduKwebec/doc3.pdf"}
+]

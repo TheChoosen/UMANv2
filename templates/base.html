@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>{% block title %}UMan API - Plateforme de Cyberdémocratie{% endblock %}</title>
+
+    <!-- External Resources -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+    <!-- Modern Glassmorphism Theme -->
+    <link rel="stylesheet" href="/static/glass.css">
+    {% if request.path.startswith('/democratie') %}
+    <link rel="stylesheet" href="/static/democratie.css">
+    {% endif %}
+</head>
+
+<body>
+    {% import 'components/_modal.html' as modal %}
+    <div class="content-wrapper">
+        <!-- Enhanced Navigation Bar -->
+        <nav class="navbar navbar-expand-lg fixed-top glass--pro">
+            <div class="container-fluid d-flex justify-content-between align-items-center px-4">
+                <!-- Brand Logo -->
+                <div class="navbar-brand-wrapper">
+                    <a class="navbar-brand" href="/">
+                        <img src="/static/image/UMan-API_logotype_01-eng_w.png" alt="UMan API"
+                            style="height: 42px; margin-right: 12px; filter: drop-shadow(0 2px 8px rgba(0, 230, 195, 0.4));">
+                        <span class="text-gradient" style="font-weight: 900; font-size: 1.5rem; letter-spacing: 1.5px;">
+                            U-MAN API
+                        </span>
+                    </a>
+                </div>
+
+                <!-- Navigation Buttons (imported component) -->
+                <!-- Navigation Buttons -->
+                {% import 'components/_modal.html' as modal %}
+                <div class="nav-buttons-wrapper" style="display: flex; gap: 16px; align-items: center;">
+                    <a href="/" class="btn btn-glass">
+                        <i class="fas fa-home mr-2"></i>Accueil
+                    </a>
+                    <a href="/profil" class="btn btn-glass">
+                        <i class="fas fa-user mr-2"></i>Mon Profil
+                    </a>
+                </div>
+
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <div class="container mt-5">
+            {% block content %}{% endblock %}
+        </div>
+
+    </div>
+
+
+    {# Phase modals #}
+    {% call modal.modal('modalPhase1','Phase 1 : B2B') %}
+    <p>Phase 1 — Solutions pour entreprises et organisations : déploiement, intégration et formation.</p>
+    {% endcall %}
+
+    {% call modal.modal('modalPhase2','Phase 2 : B2C') %}
+    <p>Phase 2 — Mise à l'échelle vers les utilisateurs individuels, onboarding et monétisation.</p>
+    {% endcall %}
+
+    {% call modal.modal('modalPhase3','Phase 3 : International') %}
+    <p>Phase 3 — Internationalisation, compatibilités réglementaires et partenariats mondiaux.</p>
+    {% endcall %}
+
+    {# Mission and product info #}
+    {% call modal.modal('modalMission','Notre mission') %}
+    <p>Placer l'humain au cœur de la décision grâce à la technologie, la transparence et l'inclusion.</p>
+    {% endcall %}
+
+    {% call modal.modal('modalCyberdemocratie','Cyberdémocratie') %}
+    <p>Explication courte : principes, sécurité, anonymat et gouvernance participative.</p>
+    {% endcall %}
+
+    {% call modal.modal('modalModulesSurMesure','Modules sur-mesure') %}
+    <p>Personnalisez les modules : événements, comités, crypto, IA, sondages, etc.</p>
+    {% endcall %}
+
+    {% call modal.modal('modalImpactSocial','Impact social & innovation') %}
+    <p>Comment UMan favorise la transparence, l'inclusion et l'innovation sociale.</p>
+    {% endcall %}
+
+    {% call modal.modal('modalPropositions','Propositions, Lois, Référendum') %}
+    <p>Fonctionnalités : dépôt de propositions, cycles de consultation, vote électronique sécurisé.</p>
+    {% endcall %}
+
+    {% call modal.modal('modalComite','Comités & Engagement') %}
+    <p>Gestion de comités, délégation, suivis de décisions et traçabilité.</p>
+    {% endcall %}
+
+    {% call modal.modal('modalEtude','Étude & Analyse') %}
+    <p>Outils d'analyse, tableaux de bord et reporting pour mesurer l'impact.</p>
+    {% endcall %}
+
+    {% call modal.modal('modalHumain','Humain & Communauté') %}
+    <p>Monétisation, reconnaissance, programmes pour impliquer et fidéliser vos membres.</p>
+    {% endcall %}
+
+    {% call modal.modal('modalMediatheque','Médiathèque') %}
+    <p>Base de ressources, vidéos, documents et archives pour vos utilisateurs.</p>
+    {% endcall %}
+
+
+    {% call modal.modal('modalFaqLicenceManager','Que veut dire une licence Manager ?') %}
+    <p>Cette licence vous donne le contrôle absolu sur votre plateforme, en vous permettant de personnaliser, gérer et
+        faire évoluer son contenu en fonction de vos besoins.</p>
+
+    <p>Grâce à notre "Licence Manager", vous pouvez mettre en valeur le potentiel de vos employés, membres ou
+        collaborateurs, en leur offrant une voix active dans l'élaboration des politiques et des pratiques de votre
+        organisation.</p>
+
+    <p>Elle permet d'enflammer l'engagement en incitant chaque partie prenante à contribuer à la direction de votre
+        entreprise, OSBL ou parti politique.</p>
+    {% endcall %}
+    {% call modal.modal('modalFaqUtilisateurIllimite','Que veux dire utilisateur illimité ?') %}
+    <p>Découvrez le pouvoir de la démocratie participative avec notre système innovant sans limites d'utilisateurs qui
+        transforme vos démarches en engagements approuvés par tous. Peu importe la taille de votre organisation, chaque
+        employé, membre ou partisan peut devenir un contributeur actif à l'élaboration des politiques et des pratiques.
+        L'ampleur de l'engagement que vous pouvez inciter est véritablement sans bornes.
+        Mettez en valeur le potentiel de chaque individu, en leur offrant une voix active dans votre organisation. Notre
+        système, en effaçant les contraintes de capacité, permet à chaque partie prenante de contribuer à la direction
+        que prendra votre entreprise, OSBL ou parti politique. Plus il y a de voix, plus il y a d'idées et d'innovation.
+        Imaginez un espace où les idées et les perspectives foisonnent sans entraves, générant des solutions créatives
+        et avant-gardistes qui définissent votre organisation. Notre système promeut un processus transparent et ouvert
+        qui renforce non seulement la confiance et la crédibilité de votre organisation, mais encourage aussi
+        l'innovation de chaque membre de votre vaste communauté.
+        Avec notre système, un engagement collectif n'est pas seulement une idée, mais une réalité. Les décisions prises
+        engendrent un sens de responsabilité partagée parmi tous les utilisateurs, assurant une mise en œuvre efficace
+        des engagements pris. Cela favorise la cohésion et la solidarité, créant une communauté unie où chaque membre,
+        quels que soient leur nombre, se sent valorisé.
+        Notre système offre une adaptabilité sans précédent, capable d'évoluer avec votre organisation et de répondre
+        rapidement aux changements et défis. En écoutant et en valorisant les voix de l'ensemble de vos parties
+        prenantes, sans se soucier des contraintes de capacité, vous augmenterez leur satisfaction et leur engagement à
+        long terme.
+    </p>
+    {% endcall %}
+    {% call modal.modal('modalFaqHebergement','Que veux dire un hébergement de base, premium et cyber ?') %}
+    <p>
+        Découvrez le pouvoir de la démocratie participative avec notre système innovant hébergé dans le nuage, qui
+        transforme vos démarches en engagements approuvés par tous. L'hébergement sur le nuage offre une flexibilité
+        inégalée, une sécurité renforcée, ainsi qu'une disponibilité et une accessibilité constantes, peu importe où
+        vous vous trouvez ou le moment de la journée.
+        Mettez en valeur le potentiel de vos employés, membres ou partisans, en leur offrant une voix active dans
+        l'élaboration des politiques et des pratiques de votre organisation. Le nuage permet une collaboration
+        transparente et en temps réel, permettant à chacun de contribuer quand et où cela convient le mieux.
+        Enflammez la passion de l'engagement en incitant chaque partie prenante à contribuer à la direction que prendra
+        votre entreprise, OSBL ou parti politique. Notre système, soutenu par la robustesse et la fiabilité de
+        l'hébergement sur le nuage, propose un processus transparent et ouvert qui renforce non seulement la confiance
+        et la crédibilité de votre organisation, mais encourage aussi l'innovation.
+        Imaginez un espace où les idées et les perspectives foisonnent, générant des solutions créatives et
+        avant-gardistes qui définissent votre organisation. Grâce au nuage, cet espace est accessible à tout moment et
+        en tout lieu, stimulant la productivité et l'engagement.
+        Enfin, en écoutant et en valorisant les voix de vos parties prenantes, vous augmenterez leur satisfaction et
+        leur engagement à long terme. Le cloud facilite la connectivité, permettant à ces voix d'être entendues
+        clairement et sans délai.
+    </p>
+    {% endcall %}
+
+    <!-- modalFaqServices -->
+    {% call modal.modal('modalFaqServices','Offrez-vous les services de formations, consultations et de coaching ?') %}
+    <p>Enflammant la passion de l'engagement, nous incitons chaque partie prenante à contribuer à la direction que
+        prendra votre entreprise, OSBL ou parti politique. Nos consultants experts sont là pour faciliter ce processus,
+        offrant des conseils et des stratégies sur mesure pour optimiser l'utilisation de notre système.</p>
+    <p>Notre système propose un processus transparent et ouvert qui renforce non seulement la confiance et la
+        crédibilité de votre organisation, mais encourage aussi l'innovation. Nos coaches sont là pour vous guider à
+        travers ce voyage, en vous aidant à identifier et à exploiter les idées et les perspectives qui foisonnent au
+        sein de votre organisation.</p>
+    <p>Avec un engagement collectif vient une responsabilité collective. Nos formations vous fournissent les outils
+        nécessaires pour assurer une mise en œuvre efficace des engagements pris, en veillant à ce que chaque membre de
+        votre organisation comprenne leur rôle dans la réalisation des objectifs communs.</p>
+    <p>Notre système offre une adaptabilité sans précédent, permettant à votre organisation de répondre rapidement aux
+        changements et défis. Nos formations, consultations et coaching sont conçus pour vous aider à naviguer dans ces
+        moments de changement, en vous fournissant les compétences et la connaissance nécessaires pour utiliser notre
+        système de manière optimale.</p>
+    <p>Enfin, en écoutant et en valorisant les voix de vos parties prenantes, vous augmenterez leur satisfaction et leur
+        engagement à long terme. Nos services d'accompagnement sont là pour garantir que chaque voix est entendue et
+        valorisée, en veillant à ce que chaque utilisateur se sente à l'aise et compétent avec notre système.</p>
+    <p>Adoptez notre système et faites l'expérience d'une véritable démocratie participative au sein de votre
+        organisation, tout en propulsant votre mission avec une dynamique renouvelée. Notre gamme de services de
+        formation, de consultation et de coaching est là pour vous accompagner à chaque étape de ce voyage.</p>
+    {% endcall %}
+
+    <!-- modalFaqFrais -->
+    {% call modal.modal('modalFaqFrais','Avez-vous des frais récurrents ?') %}
+    <p>Pour maintenir cette transformation efficace et continue, nous demandons un contrat de service annuel ou mensuel,
+        commençant un an après le déploiement initial.</p>
+    <p>Ceci nous permet de mettre en valeur le potentiel de vos employés, membres ou partisans en continu, en leur
+        offrant une voix active et continue dans l'élaboration des politiques et des pratiques de votre organisation.
+        Nous comprenons que l'engagement et la participation ne sont pas des processus instantanés, mais nécessitent du
+        temps et des ressources pour se développer pleinement.</p>
+    <p>Enflammez la passion de l'engagement en incitant chaque partie prenante à contribuer à la direction que prendra
+        votre entreprise, OSBL ou parti politique. Notre contrat de service garantit un soutien continu pour ce
+        processus, permettant à notre système de continuer à encourager et à faciliter l'innovation de manière durable.
+    </p>
+    <p>Notre système propose un processus transparent et ouvert qui renforce non seulement la confiance et la
+        crédibilité de votre organisation, mais encourage aussi l'innovation. Avec notre contrat de service, nous nous
+        engageons à maintenir et à améliorer cette transparence et cette ouverture, en nous adaptant et en évoluant avec
+        les besoins de votre organisation.</p>
+    <p>Notre système offre une adaptabilité sans précédent, permettant à votre organisation de répondre rapidement aux
+        changements et défis. Avec un contrat de service annuel ou mensuel, nous pouvons continuer à fournir ce niveau
+        d'adaptabilité, en veillant à ce que notre système reste pertinent et efficace quelles que soient les
+        circonstances.</p>
+    <p>Enfin, en écoutant et en valorisant les voix de vos parties prenantes, vous augmenterez leur satisfaction et leur
+        engagement à long terme. Notre contrat de service est un engagement à long terme envers l'écoute et la
+        valorisation de ces voix, en veillant à ce que chaque partie prenante se sente satisfaite et engagée à long
+        terme.</p>
+    <p>Un contrat de service avec nous est un investissement dans cette dynamique, assurant une transformation continue
+        et durable au sein de votre organisation.</p>
+    {% endcall %}
+
+    <!-- Modal U-Man Crypto -->
+    {% call modal.modal('modalUmanCrypto','U-Man Crypto') %}
+    <p>Notre crypto-monnaie basée sur Constellation offre vitesse, sécurité, interopérabilité et coûts réduits. Elle
+        finance des projets humains, des campagnes, de la formation et l’innovation sociale, tout en étant accessible à
+        un large public mondial.</p>
+    <ul>
+        <li>Transactions rapides, sûres et anonymes</li>
+        <li>Programme d’aide à la population</li>
+        <li>Partenariats et alliances pour l’innovation</li>
+        <li>Accessible même sans compte bancaire</li>
+    </ul>
+    {% endcall %}
+
+    <!-- Modal Contact Vente -->
+    {% call modal.modal('modalContactVente','Contactez notre équipe de vente') %}
+    <!-- Informations de contact -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="contact-card glass--lite p-3 h-100">
+                <h5 style="color: var(--uman-primary); margin-bottom: 1rem;">
+                    <i class="fas fa-user-tie mr-2"></i>Paul Lynes
+                </h5>
+                <p style="color: var(--uman-light); margin-bottom: 0.5rem;">
+                    <i class="fas fa-crown mr-2 text-warning"></i>Directeur des ventes
+                </p>
+                <p style="color: var(--uman-light); margin-bottom: 1rem;">
+                    <i class="fas fa-shield-alt mr-2 text-success"></i>Expert en cyberdémocratie
+                </p>
+                <div class="contact-methods">
+                    <a href="tel:+15148925297" class="btn btn-sm hero-btn hero-btn--primary mb-2 d-block">
+                        <i class="fas fa-phone mr-2"></i>514 892.5297
+                    </a>
+                    <a href="mailto:paul@uman-api.com" class="btn btn-sm hero-btn hero-btn--info d-block">
+                        <i class="fas fa-envelope mr-2"></i>paul@uman-api.com
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <form action="/contact/vente" method="post" class="contact-form">
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="contactPrenom" class="small">Prénom</label>
+                        <input type="text" class="form-control" id="contactPrenom" name="prenom" required>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="contactNom" class="small">Nom</label>
+                        <input type="text" class="form-control" id="contactNom" name="nom" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="contactEmail" class="small">Courriel</label>
+                    <input type="email" class="form-control" id="contactEmail" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="contactTelephone" class="small">Téléphone</label>
+                    <input type="tel" class="form-control" id="contactTelephone" name="telephone">
+                </div>
+                <div class="form-group">
+                    <label for="contactType" class="small">Type de demande</label>
+                    <select id="contactType" name="type" class="form-control">
+                        <option value="formations">Formations / Coaching</option>
+                        <option value="consultation">Consultation</option>
+                        <option value="partenariat">Partenariat</option>
+                        <option value="autre">Autre</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="contactMessage" class="small">Message</label>
+                    <textarea id="contactMessage" name="message" class="form-control" rows="4"></textarea>
+                </div>
+                <!-- reCAPTCHA placeholder (server must inject keys) -->
+                <div class="form-group">
+                    <div class="g-recaptcha" data-sitekey="{{ RECAPTCHA_SITEKEY|default('') }}"></div>
+                </div>
+                <div class="text-right">
+                    <button type="submit" class="btn hero-btn hero-btn--primary">Envoyer la demande</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endcall %}
+
+
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+    {% if request.path.startswith('/democratie') %}
+    <script src="/static/democratie.js"></script>
+    {% endif %}
+</body>
+
+</html>

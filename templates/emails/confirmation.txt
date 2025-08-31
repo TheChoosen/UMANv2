@@ -1,0 +1,9 @@
+Bonjour,
+
+Voici votre code de confirmation pour activer votre profil UMan : {{ code }}
+
+Ce code est valable pendant {{ minutes }} minutes.
+
+Si vous n'avez pas demandé ce code, ignorez simplement ce message.
+
+Envoyé par {{ from_email }} — UMan API

@@ -1,0 +1,149 @@
+{% extends "BIQ/base.html" %}
+{% block biq_title %}Mon profil — BIQ{% endblock %}
+{% block biq_page %}
+<section class="container container-wide mt-5">
+  <!-- Profile Header -->
+  <div class="glass glass--pro p-4 mb-4">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <h1 class="h2 text-gradient mb-2">Mon tableau de bord</h1>
+        <p class="card-text mb-0">Bienvenue dans votre espace membre BIQ</p>
+      </div>
+      <div class="col-md-4 text-md-end">
+        <div class="d-flex flex-wrap gap-2 justify-content-md-end">
+          <span class="badge badge-primary">Membre actif</span>
+          <span class="badge badge-success">Alliance citoyenne</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Quick Actions -->
+    <div class="col-lg-4">
+      <div class="card glass--pro h-100">
+        <div class="card-header">
+          <h2 class="h5 mb-0">Actions rapides</h2>
+        </div>
+        <div class="card-body">
+          <div class="d-grid gap-2">
+            <a href="/biq/signalement" class="btn btn-primary">Nouveau signalement</a>
+            <a href="/biq/mediatheque" class="btn btn-glass">Médiathèque</a>
+            <a href="/biq/prd" class="btn btn-glass">Consulter le PRD</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="col-lg-8">
+      <div class="card glass--pro h-100">
+        <div class="card-header">
+          <h2 class="h5 mb-0">Activité récente</h2>
+        </div>
+        <div class="card-body">
+          <div class="text-center py-4">
+            <p class="text-muted mb-3">Aucune activité récente</p>
+            <a href="/biq/signalement" class="btn btn-outline-primary btn-sm">Déposer votre premier signalement</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile Stats -->
+    <div class="col-lg-6">
+      <div class="card glass--lite h-100">
+        <div class="card-header">
+          <h2 class="h5 mb-0">Mes statistiques</h2>
+        </div>
+        <div class="card-body">
+          <div class="row text-center">
+            <div class="col-4">
+              <div class="mb-2">
+                <span class="h4 text-gradient">0</span>
+              </div>
+              <small class="text-muted">Signalements</small>
+            </div>
+            <div class="col-4">
+              <div class="mb-2">
+                <span class="h4 text-gradient">0</span>
+              </div>
+              <small class="text-muted">Contributions</small>
+            </div>
+            <div class="col-4">
+              <div class="mb-2">
+                <span class="h4 text-gradient">1</span>
+              </div>
+              <small class="text-muted">Alliance</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Account Settings -->
+    <div class="col-lg-6">
+      <div class="card glass--lite h-100">
+        <div class="card-header">
+          <h2 class="h5 mb-0">Mon compte</h2>
+        </div>
+        <div class="card-body">
+          <form>
+            <div class="mb-3">
+              <label for="profile-email" class="form-label">Email</label>
+              <input 
+                id="profile-email" 
+                type="email" 
+                class="form-control" 
+                value="membre@biq.quebec" 
+                readonly
+              />
+            </div>
+            <div class="mb-3">
+              <label for="profile-username" class="form-label">Nom d'utilisateur</label>
+              <input 
+                id="profile-username" 
+                type="text" 
+                class="form-control" 
+                value="membre_biq" 
+                readonly
+              />
+            </div>
+            <div class="text-center">
+              <button type="button" class="btn btn-glass btn-sm" disabled>
+                Modifier le profil
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mission BIQ -->
+    <div class="col-12">
+      <div class="card glass--pro">
+        <div class="card-header">
+          <h2 class="h5 mb-0">Mission BIQ</h2>
+        </div>
+        <div class="card-body">
+          <p class="card-text">
+            En tant que membre de l'Alliance BIQ, vous contribuez à la protection des droits et la préservation 
+            des valeurs territoriales, au service des citoyens et du bien commun du Québec.
+          </p>
+          <div class="d-flex flex-wrap gap-2">
+            <a href="/biq#projets" class="btn btn-glass btn-sm">Voir nos projets</a>
+            <a href="/biq#whitehats-missions" class="btn btn-glass btn-sm">Missions WhiteHats</a>
+            <a href="/biq#alliance-canadienne" class="btn btn-glass btn-sm">Alliance canadienne</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="text-center mt-4">
+    <small class="text-muted">
+      <a href="/biq" class="text-muted">← Retour à l'accueil</a>
+    </small>
+  </div>
+</section>
+{% endblock %}

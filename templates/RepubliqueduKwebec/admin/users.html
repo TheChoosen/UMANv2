@@ -1,0 +1,80 @@
+{% extends "RepubliqueduKwebec/base.html" %}
+{% block title %}Admin — Utilisateurs{% endblock %}
+{% block content %}
+<div class="container py-4" style="margin-top:80px;">
+  <h1 class="mb-3">Gestion des utilisateurs</h1>
+  <div class="card card-body">
+    {% if users %}
+    <div class="table-responsive">
+      <table class="table table-striped table-hover">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nom</th>
+            <th>Email</th>
+            <th>Rôles</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in users %}
+          <tr>
+            <td>{{ u.id }}</td>
+            <td>{{ u.prenom or u.nom or u.username }}</td>
+            <td>{{ u.email }}</td>
+            <td>{{ u.roles if u.roles else '-' }}</td>
+            <td>
+              <a href="/admin/users/{{ u.id }}/edit" class="btn btn-sm btn-outline-primary">Éditer</a>
+              <a href="/admin/users/{{ u.id }}/delete" class="btn btn-sm btn-outline-danger">Supprimer</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="text-muted">Aucun utilisateur trouvé.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+{% extends "RepubliqueduKwebec/base.html" %}
+{% block title %}Admin — Utilisateurs{% endblock %}
+{% block content %}
+<div class="container py-4" style="margin-top:80px;">
+  <h1 class="mb-4">Gestion des utilisateurs</h1>
+  <div class="card card-body">
+    {% if users and users|length > 0 %}
+    <div class="table-responsive">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nom</th>
+            <th>Email</th>
+            <th>Admin</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in users %}
+          <tr>
+            <td>{{ u.id }}</td>
+            <td>{{ u.nom or u.name or '' }}</td>
+            <td>{{ u.email }}</td>
+            <td>{{ 'Oui' if u.is_admin else 'Non' }}</td>
+            <td>
+              <a href="/admin/users/{{ u.id }}/edit" class="btn btn-sm btn-primary">Éditer</a>
+              <a href="/admin/users/{{ u.id }}/delete" class="btn btn-sm btn-danger">Supprimer</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p>Aucun utilisateur trouvé.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

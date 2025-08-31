@@ -1,0 +1,80 @@
+{% extends "BIQ/base.html" %}
+{% block biq_title %}Inscription — BIQ{% endblock %}
+{% block biq_page %}
+<section class="container container-narrow mt-5">
+  <div class="glass glass--pro p-4">
+    <header class="text-center mb-4">
+      <h1 class="h2 text-gradient">Rejoindre l'Alliance BIQ</h1>
+      <p class="card-text">Inscrivez-vous pour participer au mouvement d'indépendance du Québec</p>
+    </header>
+    
+    <form method="post" action="/biq/register" novalidate>
+      <div class="mb-3">
+        <label for="username" class="form-label">Nom d'utilisateur</label>
+        <input 
+          id="username" 
+          name="username" 
+          type="text" 
+          class="form-control" 
+          required 
+          autocomplete="username"
+          placeholder="Votre nom d'utilisateur"
+          minlength="3"
+          maxlength="50"
+        />
+        <small class="text-muted">3 à 50 caractères, lettres et chiffres uniquement</small>
+      </div>
+      
+      <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <input 
+          id="email" 
+          name="email" 
+          type="email" 
+          class="form-control" 
+          required 
+          autocomplete="email"
+          placeholder="votre.email@exemple.com"
+        />
+      </div>
+      
+      <div class="mb-4">
+        <label for="password" class="form-label">Mot de passe</label>
+        <input 
+          id="password" 
+          name="password" 
+          type="password" 
+          class="form-control" 
+          required 
+          autocomplete="new-password"
+          placeholder="Choisissez un mot de passe sécurisé"
+          minlength="8"
+        />
+        <small class="text-muted">Minimum 8 caractères recommandés</small>
+      </div>
+      
+      <div class="d-flex flex-column gap-3">
+        <button type="submit" class="btn btn-primary">Créer mon compte</button>
+        <div class="text-center">
+          <a href="/biq/login" class="btn btn-glass btn-sm">J'ai déjà un compte</a>
+        </div>
+      </div>
+    </form>
+    
+    <div class="mt-4 p-3 glass--lite">
+      <h3 class="h6 mb-2">En vous inscrivant, vous rejoignez :</h3>
+      <ul class="small mb-0">
+        <li>L'Alliance citoyenne pour l'indépendance du Québec</li>
+        <li>Un réseau de protection des familles et des droits</li>
+        <li>Une plateforme de transparence et de signalement</li>
+      </ul>
+    </div>
+  </div>
+  
+  <div class="text-center mt-4">
+    <small class="text-muted">
+      <a href="/biq" class="text-muted">← Retour à l'accueil</a>
+    </small>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,947 @@
+<!doctype html>
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Démocratie Directe Québec — Accueil</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/democratie.css">
+    <style>
+        body {
+            padding-top: 70px
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dd-bg" aria-hidden="true"></div>
+    <main class="container my-5" role="region" aria-label="Contenu principal Démocratie Directe">
+        <div class="dd-glass">
+            <header class="mb-4 text-center">
+                <h1 class="display-5">Démocratie Directe Québec</h1>
+                <p class="lead">Pas de promesses, que des obligations — découvrez les 6 mandats et comment vous
+                    impliquer.</p>
+                <div class="d-flex justify-content-center gap-2 mt-3">
+                    <button class="btn btn-primary" data-toggle="modal" data-target="#modalDevenirMembre">Devenir
+                        membre</button>
+                    <button class="btn btn-outline-primary" data-toggle="modal" data-target="#modalBenevole">Devenir
+                        bénévole</button>
+                    <button class="btn btn-outline-secondary" data-toggle="modal"
+                        data-target="#modalCandidature">Devenir candidat</button>
+                </div>
+            </header>
+
+            <section aria-labelledby="mandats">
+                <h2 id="mandats" class="h3">Les 6 mandats impératifs</h2>
+                <p class="text-muted">Une synthèse claire des mandats — cliquez pour en savoir plus.</p>
+                <div class="row">
+                    <div class="col-md-8">
+                        <div id="mandatsList">
+                            <!-- Static list of mandats -->
+                            <div class="list-group">
+                                <a href="#" id="openMandats" class="list-group-item list-group-item-action"
+                                    data-toggle="modal" data-target="#modalMandats" aria-controls="mandat-1-panel">Voir
+                                    les mandats</a>
+                            </div>
+                        </div>
+                    </div>
+                    <aside class="col-md-4">
+                        <div class="card p-3">
+                            <h4>Appel aux comités</h4>
+                            <p>Rejoignez un comité local pour organiser des ateliers constituants.</p>
+                            <button class="btn btn-sm btn-primary" data-toggle="modal"
+                                data-target="#modalComite">Trouver un comité</button>
+                        </div>
+                    </aside>
+                </div>
+            </section>
+
+            <section class="mt-5">
+                <h2 class="h3">Actualités</h2>
+                <p class="text-muted">Dernières publications et événements.</p>
+                <div class="list-group">
+                    <a class="list-group-item list-group-item-action" href="#">Atelier constituant — Montréal —
+                        2025-09-01</a>
+                    <a class="list-group-item list-group-item-action" href="#">Assemblée locale — Sherbrooke —
+                        2025-08-20</a>
+                </div>
+            </section>
+
+            <!-- Questionnaire (opens in modal) -->
+            <section id="questionnaire" class="mt-5" aria-labelledby="questionnaire-label">
+                <div class="card p-3 mb-3">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h2 id="questionnaire-label" class="h5 mb-1">Questionnaire inductif — Sommes‑nous en démocratie ?</h2>
+                            <p class="text-muted mb-1">Format: 30–45 min • réponses individuelles. Avancez section par section.</p>
+                            <p class="small text-muted mb-0">Le questionnaire s'ouvre dans une boîte modale pour une expérience focalisée.</p>
+                        </div>
+                        <div class="text-right">
+                            <button class="btn btn-primary" data-toggle="modal" data-target="#modalQuestionnaire">Ouvrir le questionnaire</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Plan de match -->
+            <section class="plan-section" aria-labelledby="plan-de-match">
+                <h2 id="plan-de-match" class="h3">Plan de match</h2>
+                <div class="plan-grid">
+                    <div class="plan-left" id="phases-container">
+                        <!-- phases are rendered here by JS component -->
+                    </div>
+
+                    <aside class="plan-right">
+                        <div class="glossary" aria-labelledby="glossaire">
+                            <h4 id="glossaire">Mini glossaire</h4>
+                            <dl>
+                                <dt>Assemblée constituante</dt>
+                                <dd>Institution chargée d’élaborer ou de modifier la constitution d’un état.</dd>
+                                <dt>Constitution</dt>
+                                <dd>Loi fondamentale décrivant les principes du contrat social.</dd>
+                                <dt>Constitution provisoire</dt>
+                                <dd>Cadre juridique transitionnel appuyé sur le régime précédent.</dd>
+                                <dt>Démocratie</dt>
+                                <dd>Principe politique fondé sur la souveraineté du peuple.</dd>
+                            </dl>
+                        </div>
+
+                        <!-- Glossary area expanded; mandats-mini removed to prioritize glossary content -->
+                    </aside>
+                </div>
+            </section>
+
+          
+        </div>
+    </main>
+
+    <!-- Mandats Modal (accessible accordion) -->
+    <div class="modal fade" id="modalMandats" tabindex="-1" role="dialog" aria-labelledby="modalMandatsLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalMandatsLabel">Mandats impératifs</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Fermer">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted">Présentation synthétique des mandats. Cliquez sur chaque mandat pour lire les détails.</p>
+
+                    <div id="mandatsAccordion" role="tablist" aria-multiselectable="true">
+
+                        <!-- Mandat 1 -->
+                        <div class="card">
+                            <div class="card-header" role="tab" id="mandat-1-header">
+                                <h5 class="mb-0">
+                                    <a data-toggle="collapse" href="#mandat-1-panel" aria-expanded="false" aria-controls="mandat-1-panel">
+                                        Mandat 1 — Constitution provisoire & Assemblée Constituante
+                                    </a>
+                                </h5>
+                            </div>
+                            <div id="mandat-1-panel" class="collapse" role="tabpanel" aria-labelledby="mandat-1-header" data-parent="#mandatsAccordion">
+                                <div class="card-body">
+                                    Instaurer une constitution provisoire et lancer une assemblée constituante citoyenne pour rédiger une constitution démocratique, transparente et participative.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Mandat 2 -->
+                        <div class="card">
+                            <div class="card-header" role="tab" id="mandat-2-header">
+                                <h5 class="mb-0">
+                                    <a data-toggle="collapse" href="#mandat-2-panel" aria-expanded="false" aria-controls="mandat-2-panel">
+                                        Mandat 2 — Serment des élus au Peuple
+                                    </a>
+                                </h5>
+                            </div>
+                            <div id="mandat-2-panel" class="collapse" role="tabpanel" aria-labelledby="mandat-2-header" data-parent="#mandatsAccordion">
+                                <div class="card-body">
+                                    Exiger des élus qu'ils prêtent serment d'allégeance au peuple souverain, garantissant loyauté et responsabilité devant la collectivité.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Mandat 3 -->
+                        <div class="card">
+                            <div class="card-header" role="tab" id="mandat-3-header">
+                                <h5 class="mb-0">
+                                    <a data-toggle="collapse" href="#mandat-3-panel" aria-expanded="false" aria-controls="mandat-3-panel">
+                                        Mandat 3 — Comités citoyens et délibération locale
+                                    </a>
+                                </h5>
+                            </div>
+                            <div id="mandat-3-panel" class="collapse" role="tabpanel" aria-labelledby="mandat-3-header" data-parent="#mandatsAccordion">
+                                <div class="card-body">
+                                    Créer et soutenir des comités citoyens pour organiser ateliers locaux, synthèses et propositions, favorisant la subsidiarité.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Mandat 4 -->
+                        <div class="card">
+                            <div class="card-header" role="tab" id="mandat-4-header">
+                                <h5 class="mb-0">
+                                    <a data-toggle="collapse" href="#mandat-4-panel" aria-expanded="false" aria-controls="mandat-4-panel">
+                                        Mandat 4 — Transparence & Imputabilité
+                                    </a>
+                                </h5>
+                            </div>
+                            <div id="mandat-4-panel" class="collapse" role="tabpanel" aria-labelledby="mandat-4-header" data-parent="#mandatsAccordion">
+                                <div class="card-body">
+                                    Renforcer la transparence des institutions (décisions, financements, rencontres) et établir des procédures citoyennes d'imputabilité et de révocation.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Mandat 5 -->
+                        <div class="card">
+                            <div class="card-header" role="tab" id="mandat-5-header">
+                                <h5 class="mb-0">
+                                    <a data-toggle="collapse" href="#mandat-5-panel" aria-expanded="false" aria-controls="mandat-5-panel">
+                                        Mandat 5 — Plateforme de cyberdémocratie
+                                    </a>
+                                </h5>
+                            </div>
+                            <div id="mandat-5-panel" class="collapse" role="tabpanel" aria-labelledby="mandat-5-header" data-parent="#mandatsAccordion">
+                                <div class="card-body">
+                                    Développer une plateforme sécurisée, auditable et inclusive pour propositions, débats et scrutins numériques, avec journaux d'audit publics.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Mandat 6 -->
+                        <div class="card">
+                            <div class="card-header" role="tab" id="mandat-6-header">
+                                <h5 class="mb-0">
+                                    <a data-toggle="collapse" href="#mandat-6-panel" aria-expanded="false" aria-controls="mandat-6-panel">
+                                        Mandat 6 — Mise en œuvre & suivi
+                                    </a>
+                                </h5>
+                            </div>
+                            <div id="mandat-6-panel" class="collapse" role="tabpanel" aria-labelledby="mandat-6-header" data-parent="#mandatsAccordion">
+                                <div class="card-body">
+                                    Assurer un suivi, audits et révisions régulières des dispositifs pour garantir l'effectivité des droits et la conformité à la volonté populaire.
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Devenir Membre Modal -->
+    <div class="modal fade" id="modalDevenirMembre" tabindex="-1" role="dialog"
+        aria-labelledby="modalDevenirMembreLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Devenir membre</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Fermer"><span
+                            aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <form id="membreForm" action="/register" method="post" class="needs-validation" novalidate>
+                        <div class="form-group"><label>Nom</label><input class="form-control" name="nom" required>
+                        </div>
+                        <div class="form-group"><label>Prénom</label><input class="form-control" name="prenom" required>
+                        </div>
+                        <div class="form-group"><label>Courriel</label><input class="form-control" type="email"
+                                name="email" required></div>
+                        <div class="form-group"><label>Municipalité</label><input class="form-control"
+                                name="municipalite"></div>
+                        <div class="form-check mb-3"><input class="form-check-input" type="checkbox" name="consent"
+                                required id="consentModal"><label class="form-check-label" for="consentModal">Je
+                                consens
+                                au traitement de mes données (Loi 25)</label></div>
+                        <div class="text-right"><button class="btn btn-primary" type="submit">Recevoir le
+                                code</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Benevole Modal -->
+    <div class="modal fade" id="modalBenevole" tabindex="-1" role="dialog" aria-labelledby="modalBenevoleLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Devenir bénévole</h5><button type="button" class="close"
+                        data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <form id="benevoleForm">
+                        <div class="form-group"><label>Nom</label><input class="form-control" name="nom"></div>
+                        <div class="form-group"><label>Courriel</label><input class="form-control" type="email"
+                                name="email"></div>
+                        <div class="form-group"><label>Compétences</label><input class="form-control"
+                                name="competences"></div>
+                        <div class="form-group"><label>Disponibilités</label><input class="form-control"
+                                name="disponibilites"></div>
+                    </form>
+                </div>
+                <div class="modal-footer"><button class="btn btn-primary"
+                        onclick="document.getElementById('benevoleForm').submit();">Soumettre</button></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Candidature Modal -->
+    <div class="modal fade" id="modalCandidature" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Devenir candidat</h5><button class="close"
+                        data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <form id="candidatureForm" enctype="multipart/form-data">
+                        <div class="form-group"><label>Nom</label><input class="form-control" name="nom"></div>
+                        <div class="form-group"><label>Courriel</label><input class="form-control" type="email"
+                                name="email"></div>
+                        <div class="form-group"><label>Circonscription</label><input class="form-control"
+                                name="circonscription"></div>
+                        <div class="form-group"><label>CV (PDF)</label><input class="form-control" type="file"
+                                name="cv"></div>
+                    </form>
+                </div>
+                <div class="modal-footer"><button class="btn btn-primary"
+                        onclick="document.getElementById('candidatureForm').submit();">Soumettre la
+                        candidature</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Constitution Modal -->
+    <div class="modal fade" id="modalConstitution" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Constitution provisoire</h5><button class="close"
+                        data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <p>Téléchargez la Constitution provisoire (PDF) ou lisez le sommaire ci-dessous.</p>
+                    <a class="btn btn-outline-primary" href="#">Télécharger le PDF</a>
+                    <h2 class="mt-3">Sommaire</h2>
+                    <p>Résumé et ancres vers les sections principales.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statuts Modal -->
+    <div class="modal fade" id="modalStatuts" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Statuts & Règlements</h5><button class="close"
+                        data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body"><a class="btn btn-outline-primary" href="#">Télécharger les statuts
+                        (PDF)</a>
+                    <p class="mt-3">Résumé des éléments clés des statuts.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comite Modal -->
+    <div class="modal fade" id="modalComite" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Comités & Ateliers</h5><button class="close"
+                        data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <ul class="list-group">
+                        <li class="list-group-item">Comité Montréal — contact@exemple.org</li>
+                        <li class="list-group-item">Comité Sherbrooke — sherbrooke@example.org</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Modal -->
+    <div class="modal fade" id="modalContact" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Contact</h5><button class="close"
+                        data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <form id="contactForm">
+                        <div class="form-group"><label>Nom</label><input class="form-control" name="nom"></div>
+                        <div class="form-group"><label>Courriel</label><input class="form-control" name="email"
+                                type="email"></div>
+                        <div class="form-group"><label>Message</label><textarea class="form-control"
+                                rows="4"></textarea></div>
+                    </form>
+                </div>
+                <div class="modal-footer"><button class="btn btn-primary"
+                        onclick="document.getElementById('contactForm').submit();">Envoyer</button></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="/static/democratie.js"></script>
+        <script>
+        // Ensure modal questionnaire focuses and starts the wizard when opened
+        (function(){
+            try{
+                function startWizard(){
+                    try{
+                        if(window.__qInit) try{ window.__qInit(); }catch(e){}
+                        var start = document.getElementById('qStartBtn');
+                        if(start) start.addEventListener('click', function(){ try{ const firstFs = document.querySelector('#qSteps fieldset[data-section]'); if(firstFs){ const input = firstFs.querySelector('input'); if(input) input.focus(); } }catch(e){} });
+                    }catch(e){ console.warn('startWizard failed', e); }
+                }
+                if(window.jQuery && typeof jQuery === 'function'){
+                    jQuery('#modalQuestionnaire').on('shown.bs.modal', function(){ startWizard(); });
+                } else {
+                    var mq = document.getElementById('modalQuestionnaire'); if(mq) mq.addEventListener('shown.bs.modal', startWizard);
+                }
+            }catch(e){ console.warn('modal start hook failed', e); }
+        })();
+        </script>
+    <!-- Modal: Questionnaire inductif -->
+    <div class="modal fade" id="modalQuestionnaire" tabindex="-1" role="dialog" aria-labelledby="modalQuestionnaireLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalQuestionnaireLabel">Questionnaire inductif — Sommes‑nous en démocratie ?</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Fermer"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <section id="qModalContent">
+                        <p class="text-muted">Format: 30–45 min • réponses individuelles. Avancez section par section.</p>
+
+                        <div class="card p-3 mb-3 q-card">
+                            <div class="q-top mb-3 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>Objectif :</strong> comparer votre vécu à la souveraineté du peuple.
+                                    <div class="small text-muted">Utilisez Tab / Entrée pour naviguer.</div>
+                                </div>
+                                <div style="min-width:220px;">
+                                    <div class="progress" aria-hidden="true">
+                                        <div id="qProgressBar" class="progress-bar" role="progressbar" style="width:0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <form id="qWizard" autocomplete="off" novalidate>
+                                <div id="qSteps">
+                                    <!-- Instructions / Mini glossary -->
+                                    <fieldset class="mb-3" data-section="0" data-max="0">
+                                        <legend class="h5">0) Rappels & consignes</legend>
+                                        <p><strong>Objectif :</strong> amener les participants, par leurs propres réponses, à
+                                            comparer la réalité vécue avec la définition : <em>La démocratie a pour condition
+                                                fondamentale la souveraineté du peuple.</em></p>
+                                        <p><strong>Format :</strong> 30–45 min • en binômes puis en plénière • réponses
+                                            individuelles puis mise en commun.</p>
+                                        <h6>Mini‑glossaire</h6>
+                                        <ul>
+                                            <li><strong>Souveraineté :</strong> capacité d’agir sans restriction.</li>
+                                            <li><strong>Mandat impératif :</strong> engagement contraignant.</li>
+                                            <li><strong>Plébiscite :</strong> consultation OUI/NON exécutoire.</li>
+                                            <li><strong>Constitution provisoire :</strong> cadre transitoire s’appuyant sur le
+                                                droit existant.</li>
+                                            <li><strong>Subsidiarité :</strong> décision au niveau le plus proche.</li>
+                                        </ul>
+                                        <p><strong>Consigne :</strong> répondez d’abord sans débattre. On discutera après
+                                            l’addition des scores.</p>
+                                        <p><strong>Grille de réponses :</strong> Oui (2 pts) • Partiel (1 pt) • Non/NSP (0 pt).
+                                        </p>
+                                    </fieldset>
+
+                                    <!-- Section A -->
+                                    <fieldset class="mb-3" data-section="A" data-max="14">
+                                        <legend class="h5">A) Souveraineté populaire <small class="text-muted">(max 14
+                                                pts)</small></legend>
+                                        <ol>
+                                            <li>
+                                                <div class="q-question">Les citoyens peuvent-ils donner un <em>mandat
+                                                        impératif</em>
+                                                    aux élus au moment du vote?</div>
+                                                <div class="q-choices btn-group btn-group-toggle mt-2" data-toggle="buttons">
+                                                    <label class="btn-chip"><input type="radio" name="a1" value="2">
+                                                        <span>Oui</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="a1" value="1">
+                                                        <span>Partiel</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="a1" value="0">
+                                                        <span>Non/NSP</span></label>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="q-question">Ce mandat peut‑il être contrôlé en cours de mandat
+                                                    (rapports,
+                                                    votes d’orientation liants)?</div>
+                                                <div class="q-choices btn-group btn-group-toggle mt-2" data-toggle="buttons">
+                                                    <label class="btn-chip"><input type="radio" name="a2" value="2">
+                                                        <span>Oui</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="a2" value="1">
+                                                        <span>Partiel</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="a2" value="0">
+                                                        <span>Non/NSP</span></label>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="q-question">Les citoyens peuvent‑ils révoquer un élu qui ne respecte
+                                                    pas ce mandat?</div>
+                                                <div class="q-choices btn-group btn-group-toggle mt-2" data-toggle="buttons">
+                                                    <label class="btn-chip"><input type="radio" name="a3" value="2">
+                                                        <span>Oui</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="a3" value="1">
+                                                        <span>Partiel</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="a3" value="0">
+                                                        <span>Non/NSP</span></label>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="q-question">Le serment des élus est‑il prêté au peuple souverain?
+                                                </div>
+                                                <div class="q-choices btn-group btn-group-toggle mt-2" data-toggle="buttons">
+                                                    <label class="btn-chip"><input type="radio" name="a4" value="2">
+                                                        <span>Oui</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="a4" value="1">
+                                                        <span>Partiel</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="a4" value="0">
+                                                        <span>Non/NSP</span></label>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="q-question">Les règles du jeu (constitution/lois organiques)
+                                                    sont‑elles écrites par le
+                                                    peuple ou ses délégués sous contrôle populaire?</div>
+                                                <div class="q-choices btn-group btn-group-toggle mt-2" data-toggle="buttons">
+                                                    <label class="btn-chip"><input type="radio" name="a5" value="2">
+                                                        <span>Oui</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="a5" value="1">
+                                                        <span>Partiel</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="a5" value="0">
+                                                        <span>Non/NSP</span></label>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="q-question">Un plébiscite peut‑il lier juridiquement l’exécutif?
+                                                </div>
+                                                <div class="q-choices btn-group btn-group-toggle mt-2" data-toggle="buttons">
+                                                    <label class="btn-chip"><input type="radio" name="a6" value="2">
+                                                        <span>Oui</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="a6" value="1">
+                                                        <span>Partiel</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="a6" value="0">
+                                                        <span>Non/NSP</span></label>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="q-question">Les citoyens peuvent‑ils abroger une règle contraire à
+                                                    la volonté générale?</div>
+                                                <div class="q-choices btn-group btn-group-toggle mt-2" data-toggle="buttons">
+                                                    <label class="btn-chip"><input type="radio" name="a7" value="2">
+                                                        <span>Oui</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="a7" value="1">
+                                                        <span>Partiel</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="a7" value="0">
+                                                        <span>Non/NSP</span></label>
+                                                </div>
+                                            </li>
+                                        </ol>
+                                    </fieldset>
+
+                                    <!-- Section B -->
+                                    <fieldset class="mb-3" data-section="B" data-max="10">
+                                        <legend class="h5">B) Initiative citoyenne <small class="text-muted">(max 10
+                                                pts)</small></legend>
+                                        <ol>
+                                            <li>
+                                                <div class="q-question">Existe‑t‑il un référendum d’initiative citoyenne (RIC)
+                                                    législatif?</div>
+                                                <div class="q-choices btn-group btn-group-toggle mt-2" data-toggle="buttons">
+                                                    <label class="btn-chip"><input type="radio" name="b1" value="2">
+                                                        <span>Oui</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="b1" value="1">
+                                                        <span>Partiel</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="b1" value="0">
+                                                        <span>Non/NSP</span></label>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="q-question">…un RIC abrogatif ?</div>
+                                                <div class="q-choices btn-group btn-group-toggle mt-2" data-toggle="buttons">
+                                                    <label class="btn-chip"><input type="radio" name="b2" value="2">
+                                                        <span>Oui</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="b2" value="1">
+                                                        <span>Partiel</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="b2" value="0">
+                                                        <span>Non/NSP</span></label>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="q-question">…un RIC révocatoire ?</div>
+                                                <div class="q-choices btn-group btn-group-toggle mt-2" data-toggle="buttons">
+                                                    <label class="btn-chip"><input type="radio" name="b3" value="2">
+                                                        <span>Oui</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="b3" value="1">
+                                                        <span>Partiel</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="b3" value="0">
+                                                        <span>Non/NSP</span></label>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="q-question">…un RIC constitutionnel ?</div>
+                                                <div class="q-choices btn-group btn-group-toggle mt-2" data-toggle="buttons">
+                                                    <label class="btn-chip"><input type="radio" name="b4" value="2">
+                                                        <span>Oui</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="b4" value="1">
+                                                        <span>Partiel</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="b4" value="0">
+                                                        <span>Non/NSP</span></label>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="q-question">Des budgets participatifs décisionnels existent‑ils à
+                                                    plusieurs échelles ?</div>
+                                                <div class="q-choices btn-group btn-group-toggle mt-2" data-toggle="buttons">
+                                                    <label class="btn-chip"><input type="radio" name="b5" value="2">
+                                                        <span>Oui</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="b5" value="1">
+                                                        <span>Partiel</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="b5" value="0">
+                                                        <span>Non/NSP</span></label>
+                                                </div>
+                                            </li>
+                                        </ol>
+                                    </fieldset>
+
+                                    <!-- Section C -->
+                                    <fieldset class="mb-3" data-section="C" data-max="8">
+                                        <legend class="h5">C) Imputabilité & fonctions clés <small class="text-muted">(max 8
+                                                pts)</small></legend>
+                                        <ol>
+                                            <li>
+                                                <div class="q-question">Les postes clés des instances publiques/parapubliques
+                                                    sont‑ils élus au suffrage avec obligation de résultats?</div>
+                                                <div class="q-choices btn-group btn-group-toggle mt-2" data-toggle="buttons">
+                                                    <label class="btn-chip"><input type="radio" name="c1" value="2">
+                                                        <span>Oui</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="c1" value="1">
+                                                        <span>Partiel</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="c1" value="0">
+                                                        <span>Non/NSP</span></label>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="q-question">Les hauts fonctionnaires sont‑ils révocables par
+                                                    procédure citoyenne claire ?</div>
+                                                <div class="q-choices btn-group btn-group-toggle mt-2" data-toggle="buttons">
+                                                    <label class="btn-chip"><input type="radio" name="c2" value="2">
+                                                        <span>Oui</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="c2" value="1">
+                                                        <span>Partiel</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="c2" value="0">
+                                                        <span>Non/NSP</span></label>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="q-question">Les dépenses/contrats sont‑ils publiés en temps utile et
+                                                    auditables par tous?</div>
+                                                <div class="q-choices btn-group btn-group-toggle mt-2" data-toggle="buttons">
+                                                    <label class="btn-chip"><input type="radio" name="c3" value="2">
+                                                        <span>Oui</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="c3" value="1">
+                                                        <span>Partiel</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="c3" value="0">
+                                                        <span>Non/NSP</span></label>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="q-question">Les sanctions (malversations, parjure) sont‑elles
+                                                    effectives et rapides?</div>
+                                                <div class="q-choices btn-group btn-group-toggle mt-2" data-toggle="buttons">
+                                                    <label class="btn-chip"><input type="radio" name="c4" value="2">
+                                                        <span>Oui</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="c4" value="1">
+                                                        <span>Partiel</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="c4" value="0">
+                                                        <span>Non/NSP</span></label>
+                                                </div>
+                                            </li>
+                                        </ol>
+                                    </fieldset>
+
+                                    <!-- Section D -->
+                                    <fieldset class="mb-3" data-section="D" data-max="8">
+                                        <legend class="h5">D) Transparence & influence <small class="text-muted">(max 8
+                                                pts)</small></legend>
+                                        <ol>
+                                            <li>
+                                                <div class="q-question">Les ordres du jour, votes et arguments des élus sont‑ils
+                                                    publics avant décision?</div>
+                                                <div class="q-choices btn-group btn-group-toggle mt-2" data-toggle="buttons">
+                                                    <label class="btn-chip"><input type="radio" name="d1" value="2">
+                                                        <span>Oui</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="d1" value="1">
+                                                        <span>Partiel</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="d1" value="0">
+                                                        <span>Non/NSP</span></label>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="q-question">Les rencontres avec lobbyistes sont‑elles déclarées et
+                                                    vérifiables?</div>
+                                                <div class="q-choices btn-group btn-group-toggle mt-2" data-toggle="buttons">
+                                                    <label class="btn-chip"><input type="radio" name="d2" value="2">
+                                                        <span>Oui</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="d2" value="1">
+                                                        <span>Partiel</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="d2" value="0">
+                                                        <span>Non/NSP</span></label>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="q-question">Le financement politique est‑il transparent, plafonné,
+                                                    traçable, avec contrôle citoyen?</div>
+                                                <div class="q-choices btn-group btn-group-toggle mt-2" data-toggle="buttons">
+                                                    <label class="btn-chip"><input type="radio" name="d3" value="2">
+                                                        <span>Oui</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="d3" value="1">
+                                                        <span>Partiel</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="d3" value="0">
+                                                        <span>Non/NSP</span></label>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="q-question">L’accès à l’information est‑il rapide, peu coûteux, sans
+                                                    caviardage abusif?</div>
+                                                <div class="q-choices btn-group btn-group-toggle mt-2" data-toggle="buttons">
+                                                    <label class="btn-chip"><input type="radio" name="d4" value="2">
+                                                        <span>Oui</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="d4" value="1">
+                                                        <span>Partiel</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="d4" value="0">
+                                                        <span>Non/NSP</span></label>
+                                                </div>
+                                            </li>
+                                        </ol>
+                                    </fieldset>
+
+                                    <!-- Section E -->
+                                    <fieldset class="mb-3" data-section="E" data-max="6">
+                                        <legend class="h5">E) Processus constituant <small class="text-muted">(max 6
+                                                pts)</small></legend>
+                                        <ol>
+                                            <li>
+                                                <div class="q-question">Le peuple peut‑il initier la révision de la
+                                                    constitution?</div>
+                                                <div class="q-choices btn-group btn-group-toggle mt-2" data-toggle="buttons">
+                                                    <label class="btn-chip"><input type="radio" name="e1" value="2">
+                                                        <span>Oui</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="e1" value="1">
+                                                        <span>Partiel</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="e1" value="0">
+                                                        <span>Non/NSP</span></label>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="q-question">Une Assemblée Constituante Citoyenne est‑elle prévue?
+                                                </div>
+                                                <div class="q-choices btn-group btn-group-toggle mt-2" data-toggle="buttons">
+                                                    <label class="btn-chip"><input type="radio" name="e2" value="2">
+                                                        <span>Oui</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="e2" value="1">
+                                                        <span>Partiel</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="e2" value="0">
+                                                        <span>Non/NSP</span></label>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="q-question">Les étapes Consultation → Délibération → Rédaction →
+                                                    Plébiscite sont‑elles garanties?</div>
+                                                <div class="q-choices btn-group btn-group-toggle mt-2" data-toggle="buttons">
+                                                    <label class="btn-chip"><input type="radio" name="e3" value="2">
+                                                        <span>Oui</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="e3" value="1">
+                                                        <span>Partiel</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="e3" value="0">
+                                                        <span>Non/NSP</span></label>
+                                                </div>
+                                            </li>
+                                        </ol>
+                                    </fieldset>
+
+                                    <!-- Section F -->
+                                    <fieldset class="mb-3" data-section="F" data-max="6">
+                                        <legend class="h5">F) Cyberdémocratie <small class="text-muted">(max 6 pts)</small>
+                                        </legend>
+                                        <ol>
+                                            <li>
+                                                <div class="q-question">Existe‑t‑il une plateforme sécurisée pour proposer,
+                                                    débattre et voter en continu?</div>
+                                                <div class="q-choices btn-group btn-group-toggle mt-2" data-toggle="buttons">
+                                                    <label class="btn-chip"><input type="radio" name="f1" value="2">
+                                                        <span>Oui</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="f1" value="1">
+                                                        <span>Partiel</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="f1" value="0">
+                                                        <span>Non/NSP</span></label>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="q-question">Les scrutins numériques disposent‑ils d’un journal
+                                                    d’audit public?</div>
+                                                <div class="q-choices btn-group btn-group-toggle mt-2" data-toggle="buttons">
+                                                    <label class="btn-chip"><input type="radio" name="f2" value="2">
+                                                        <span>Oui</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="f2" value="1">
+                                                        <span>Partiel</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="f2" value="0">
+                                                        <span>Non/NSP</span></label>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="q-question">L’inclusion numérique (accès, accompagnement,
+                                                    alternatives papier) est‑elle assurée?</div>
+                                                <div class="q-choices btn-group btn-group-toggle mt-2" data-toggle="buttons">
+                                                    <label class="btn-chip"><input type="radio" name="f3" value="2">
+                                                        <span>Oui</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="f3" value="1">
+                                                        <span>Partiel</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="f3" value="0">
+                                                        <span>Non/NSP</span></label>
+                                                </div>
+                                            </li>
+                                        </ol>
+                                    </fieldset>
+
+                                    <!-- Section G -->
+                                    <fieldset class="mb-3" data-section="G" data-max="6">
+                                        <legend class="h5">G) Subsidiarité & proximité <small class="text-muted">(max 6
+                                                pts)</small></legend>
+                                        <ol>
+                                            <li>
+                                                <div class="q-question">Les décisions sont‑elles prises au niveau le plus proche
+                                                    des citoyens concernés?</div>
+                                                <div class="q-choices btn-group btn-group-toggle mt-2" data-toggle="buttons">
+                                                    <label class="btn-chip"><input type="radio" name="g1" value="2">
+                                                        <span>Oui</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="g1" value="1">
+                                                        <span>Partiel</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="g1" value="0">
+                                                        <span>Non/NSP</span></label>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="q-question">Les collectivités peuvent‑elles adapter/déroger
+                                                    localement dans l’intérêt général?</div>
+                                                <div class="q-choices btn-group btn-group-toggle mt-2" data-toggle="buttons">
+                                                    <label class="btn-chip"><input type="radio" name="g2" value="2">
+                                                        <span>Oui</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="g2" value="1">
+                                                        <span>Partiel</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="g2" value="0">
+                                                        <span>Non/NSP</span></label>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="q-question">Les comités citoyens sont‑ils reconnus et outillés dans
+                                                    les processus officiels?</div>
+                                                <div class="q-choices btn-group btn-group-toggle mt-2" data-toggle="buttons">
+                                                    <label class="btn-chip"><input type="radio" name="g3" value="2">
+                                                        <span>Oui</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="g3" value="1">
+                                                        <span>Partiel</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="g3" value="0">
+                                                        <span>Non/NSP</span></label>
+                                                </div>
+                                            </li>
+                                        </ol>
+                                    </fieldset>
+
+                                    <!-- Section H -->
+                                    <fieldset class="mb-3" data-section="H" data-max="6">
+                                        <legend class="h5">H) Expérience vécue <small class="text-muted">(max 6 pts)</small>
+                                        </legend>
+                                        <ol>
+                                            <li>
+                                                <div class="q-question">Avez‑vous, personnellement, déjà influencé une
+                                                    loi/règlement avant son adoption?</div>
+                                                <div class="q-choices btn-group btn-group-toggle mt-2" data-toggle="buttons">
+                                                    <label class="btn-chip"><input type="radio" name="h1" value="2">
+                                                        <span>Oui</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="h1" value="1">
+                                                        <span>Partiel</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="h1" value="0">
+                                                        <span>Non/NSP</span></label>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="q-question">Votre élu vous a‑t‑il consulté avant un vote important
+                                                    et suivi l’orientation majoritaire?</div>
+                                                <div class="q-choices btn-group btn-group-toggle mt-2" data-toggle="buttons">
+                                                    <label class="btn-chip"><input type="radio" name="h2" value="2">
+                                                        <span>Oui</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="h2" value="1">
+                                                        <span>Partiel</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="h2" value="0">
+                                                        <span>Non/NSP</span></label>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="q-question">Avez‑vous déjà abrogé (avec d’autres citoyens) une règle
+                                                    nuisible par un mécanisme officiel?</div>
+                                                <div class="q-choices btn-group btn-group-toggle mt-2" data-toggle="buttons">
+                                                    <label class="btn-chip"><input type="radio" name="h3" value="2">
+                                                        <span>Oui</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="h3" value="1">
+                                                        <span>Partiel</span></label>
+                                                    <label class="btn-chip"><input type="radio" name="h3" value="0">
+                                                        <span>Non/NSP</span></label>
+                                                </div>
+                                            </li>
+                                        </ol>
+                                    </fieldset>
+
+                                </div>
+                                <p class="mandat-excerpt">Déployer une plateforme de cyberdémocratie pour votes et
+                                    propositions sécurisées et transparentes.</p>
+                                <div id="mandat-5-panel" class="collapse-body" role="region" aria-labelledby="mandat-5-header"
+                                    aria-hidden="true">
+                                    <p>Mettre en place un système hybride, transparent et sécuritaire de contrôle de votes
+                                        et de propositions, comprenant une plateforme de cyberdémocratie.</p>
+                                    <h5>Pourquoi ?</h5>
+                                    <p>Pour fournir au peuple des outils numériques fiables facilitant la participation et
+                                        la compréhension des enjeux.</p>
+                                    <h5>Comment ?</h5>
+                                    <p>Constituer une équipe en charge du développement et de la gouvernance de la
+                                        plateforme, avec des obligations de transparence.</p>
+                                </div>
+                            </form>
+                        </div>
+                    </section>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                    <button type="button" class="btn btn-primary" id="qStartBtn">Commencer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

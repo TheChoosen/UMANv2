@@ -1,0 +1,272 @@
+{% extends "BIQ/base.html" %}
+{% block biq_title %}Gestion Signalements — BIQ Admin{% endblock %}
+{% block biq_page %}
+<section class="container container-wide mt-5">
+  <!-- Header -->
+  <div class="glass glass--pro p-4 mb-4">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <h1 class="h2 text-gradient mb-2">
+          <i class="me-2">🚨</i>Gestion des signalements
+        </h1>
+        <p class="card-text mb-0">Audit et traitement des signalements citoyens</p>
+      </div>
+      <div class="col-md-4 text-md-end">
+        <div class="d-flex flex-wrap gap-2 justify-content-md-end">
+          <a href="/biq/admin" class="btn btn-glass btn-sm">← Retour admin</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="row g-4 mb-4">
+    <div class="col-lg-3 col-md-6">
+      <div class="card glass--lite text-center h-100">
+        <div class="card-body">
+          <i class="fs-1 text-primary">📋</i>
+          <h3 class="h4 mt-2 mb-1">{{ signalements|length }}</h3>
+          <p class="card-text text-muted mb-0">Total signalements</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+      <div class="card glass--lite text-center h-100">
+        <div class="card-body">
+          <i class="fs-1 text-warning">🆕</i>
+          <h3 class="h4 mt-2 mb-1">{{ stats_status.get('nouveau', 0) }}</h3>
+          <p class="card-text text-muted mb-0">Nouveaux</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+      <div class="card glass--lite text-center h-100">
+        <div class="card-body">
+          <i class="fs-1 text-info">⏳</i>
+          <h3 class="h4 mt-2 mb-1">{{ stats_status.get('en_cours', 0) }}</h3>
+          <p class="card-text text-muted mb-0">En cours</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+      <div class="card glass--lite text-center h-100">
+        <div class="card-body">
+          <i class="fs-1 text-success">✅</i>
+          <h3 class="h4 mt-2 mb-1">{{ stats_status.get('resolu', 0) }}</h3>
+          <p class="card-text text-muted mb-0">Résolus</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Signalements List -->
+  <div class="card glass--pro">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h2 class="h5 mb-0">Liste des signalements</h2>
+      <small class="text-muted">{{ signalements|length }} signalement(s) trouvé(s)</small>
+    </div>
+    <div class="card-body p-0">
+      {% if signalements %}
+      <!-- Signalements Table -->
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Titre</th>
+              <th>Type</th>
+              <th>Auteur</th>
+              <th>Statut</th>
+              <th>Priorité</th>
+              <th>Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for signalement in signalements %}
+            <tr>
+              <td>{{ signalement.id }}</td>
+              <td>
+                <strong>{{ signalement.title }}</strong>
+                <br>
+                <small class="text-muted">
+                  {{ signalement.description[:100] }}{% if signalement.description|length > 100 %}...{% endif %}
+                </small>
+              </td>
+              <td>
+                {% if signalement.type == 'abus_dpj' %}
+                  <span class="badge badge-danger">Abus DPJ</span>
+                {% elif signalement.type == 'falsification' %}
+                  <span class="badge badge-warning">Falsification</span>
+                {% elif signalement.type == 'violation_droits' %}
+                  <span class="badge badge-primary">Violation droits</span>
+                {% elif signalement.type == 'negligence' %}
+                  <span class="badge badge-info">Négligence</span>
+                {% else %}
+                  <span class="badge badge-secondary">{{ signalement.type }}</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if signalement.username %}
+                  <strong>{{ signalement.username }}</strong>
+                  <br>
+                  <small class="text-muted">{{ signalement.email }}</small>
+                {% else %}
+                  <span class="text-muted">Anonyme</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if signalement.status == 'nouveau' %}
+                  <span class="badge badge-warning">Nouveau</span>
+                {% elif signalement.status == 'en_cours' %}
+                  <span class="badge badge-info">En cours</span>
+                {% elif signalement.status == 'resolu' %}
+                  <span class="badge badge-success">Résolu</span>
+                {% else %}
+                  <span class="badge badge-secondary">{{ signalement.status }}</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if signalement.priority == 'critique' %}
+                  <span class="badge badge-danger">Critique</span>
+                {% elif signalement.priority == 'haute' %}
+                  <span class="badge badge-warning">Haute</span>
+                {% else %}
+                  <span class="badge badge-primary">Normale</span>
+                {% endif %}
+              </td>
+              <td>{{ signalement.created_at.strftime('%d/%m/%Y %H:%M') if signalement.created_at else 'N/A' }}</td>
+              <td>
+                <div class="btn-group btn-group-sm">
+                  <button class="btn btn-glass" title="Voir détails" data-bs-toggle="modal" data-bs-target="#viewSignalementModal{{ signalement.id }}">👁️</button>
+                  <button class="btn btn-warning" title="Modifier statut">📝</button>
+                  <button class="btn btn-success" title="Marquer résolu">✅</button>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <!-- Empty State -->
+      <div class="text-center py-5">
+        <i class="fs-1 text-muted">📋</i>
+        <h3 class="h5 mt-3 mb-2">Aucun signalement trouvé</h3>
+        <p class="text-muted mb-3">
+          Aucun signalement n'a encore été déposé par les membres.
+        </p>
+        <a href="/biq/signalement" class="btn btn-primary">
+          Déposer le premier signalement
+        </a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Statistics by Type -->
+  {% if stats_type %}
+  <div class="row g-4 mt-4">
+    <div class="col-lg-6">
+      <div class="card glass--lite">
+        <div class="card-header">
+          <h3 class="h6 mb-0">Répartition par type</h3>
+        </div>
+        <div class="card-body">
+          {% for type, count in stats_type.items() %}
+          <div class="d-flex justify-content-between mb-2">
+            <span>{{ type|title }}</span>
+            <span class="badge badge-primary">{{ count }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="card glass--lite">
+        <div class="card-header">
+          <h3 class="h6 mb-0">Répartition par statut</h3>
+        </div>
+        <div class="card-body">
+          {% for status, count in stats_status.items() %}
+          <div class="d-flex justify-content-between mb-2">
+            <span>{{ status|title }}</span>
+            <span class="badge badge-secondary">{{ count }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  
+  <div class="text-center mt-4">
+    <small class="text-muted">
+      <a href="/biq/admin" class="text-muted">← Retour à l'administration</a>
+    </small>
+  </div>
+</section>
+
+<!-- View Signalement Modals -->
+{% for signalement in signalements %}
+<div class="modal fade" id="viewSignalementModal{{ signalement.id }}" tabindex="-1" aria-labelledby="viewSignalementModalLabel{{ signalement.id }}" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="glass glass--pro">
+        <div class="modal-header">
+          <h5 class="modal-title" id="viewSignalementModalLabel{{ signalement.id }}">
+            Signalement #{{ signalement.id }}
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <strong>Titre :</strong>
+              <p>{{ signalement.title }}</p>
+            </div>
+            <div class="col-md-6">
+              <strong>Type :</strong>
+              <p>{{ signalement.type }}</p>
+            </div>
+            <div class="col-md-6">
+              <strong>Statut :</strong>
+              <p>{{ signalement.status }}</p>
+            </div>
+            <div class="col-md-6">
+              <strong>Priorité :</strong>
+              <p>{{ signalement.priority }}</p>
+            </div>
+            {% if signalement.contact %}
+            <div class="col-md-12">
+              <strong>Contact :</strong>
+              <p>{{ signalement.contact }}</p>
+            </div>
+            {% endif %}
+            <div class="col-md-12">
+              <strong>Description :</strong>
+              <p>{{ signalement.description }}</p>
+            </div>
+            {% if signalement.resolution %}
+            <div class="col-md-12">
+              <strong>Résolution :</strong>
+              <p>{{ signalement.resolution }}</p>
+            </div>
+            {% endif %}
+            <div class="col-md-12">
+              <strong>Créé le :</strong>
+              <p>{{ signalement.created_at.strftime('%d/%m/%Y à %H:%M') if signalement.created_at else 'N/A' }}</p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-glass" data-bs-dismiss="modal">Fermer</button>
+          <button type="button" class="btn btn-warning">Modifier le statut</button>
+          <button type="button" class="btn btn-success">Marquer comme résolu</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endfor %}
+{% endblock %}

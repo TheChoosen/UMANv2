@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block biq_title %}BIQ — Bureau de l’Indépendance du Québec{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/BIQ/glass.css">
+    <style>
+        /* BIQ-specific overrides on top of glass.css theme */
+        body {
+            background:
+                linear-gradient(135deg,
+                    rgba(0, 230, 195, 0.08) 0%,
+                    rgba(16, 20, 26, 0.95) 40%,
+                    rgba(0, 230, 195, 0.06) 100%),
+                url('/static/image/LANDING/UManager_landing-page4-b.jpg') no-repeat center center fixed;
+            background-size: cover;
+            background-attachment: fixed;
+            color: var(--uman-light);
+        }
+
+        /* Skip link for accessibility */
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 6px;
+            background: var(--uman-primary);
+            color: white;
+            padding: 8px;
+            text-decoration: none;
+            z-index: 100;
+            border-radius: var(--radius-sm);
+        }
+
+        .skip-link:focus {
+            top: 6px;
+        }
+
+        /* Enhanced navbar */
+        .navbar-brand img {
+            height: 42px;
+        }
+
+        .nav-buttons-wrapper {
+            gap: 8px;
+        }
+
+        .nav-buttons-wrapper .btn {
+            min-width: 100px;
+        }
+
+        /* Sub-navigation */
+        .biq-subnav {
+            background: var(--glass-bg-standard);
+            backdrop-filter: var(--glass-blur-medium);
+            -webkit-backdrop-filter: var(--glass-blur-medium);
+            border: 1px solid var(--glass-border-lite);
+            border-radius: var(--radius-md);
+        }
+
+        .biq-subnav a {
+            color: var(--uman-light);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border-radius: var(--radius-sm);
+            transition: all var(--duration-fast) var(--easing-smooth);
+        }
+
+        .biq-subnav a.active,
+        .biq-subnav a:hover {
+            background: var(--glass-bg-pro);
+            color: var(--uman-primary);
+            transform: translateY(-1px);
+        }
+
+        /* Content wrapper */
+        .content-wrapper {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Alert enhancements */
+        .alert {
+            background: var(--glass-bg-pro);
+            border: 2px solid var(--glass-border-standard);
+            backdrop-filter: var(--glass-blur-medium);
+            -webkit-backdrop-filter: var(--glass-blur-medium);
+            border-radius: var(--radius-md);
+            color: var(--uman-light);
+        }
+
+        .alert-success {
+            border-color: var(--uman-success);
+        }
+
+        .alert-danger {
+            border-color: var(--uman-danger);
+        }
+
+        .alert-warning {
+            border-color: var(--uman-warning);
+        }
+
+        .alert-info {
+            border-color: var(--uman-info);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 992px) {
+            .nav-buttons-wrapper {
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+
+            .nav-buttons-wrapper .btn {
+                min-width: 90px;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .biq-subnav {
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+
+            .content-wrapper {
+                padding-top: 70px;
+            }
+        }
+    </style>
+    {% block head %}{% endblock %}
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg fixed-top glass--pro">
+        <div class="container-fluid d-flex justify-content-between align-items-center px-4">
+            <a class="navbar-brand d-flex align-items-center" href="/biq">
+                <img src="/static/BIQ/Photo/biq.png" alt="BIQ">
+                <span class="ms-2 text-gradient fw-bold" style="font-size:1.35rem; letter-spacing:1px;">BIQ</span>
+            </a>
+            <div class="nav-buttons-wrapper d-flex align-items-center gap-2">
+                <a href="/biq" class="btn btn-glass">Accueil</a>
+                {% if session.get('user_id') %}
+                <a href="/biq/signalement" class="btn btn-glass">Signalement</a>
+                <a href="/biq/mediatheque" class="btn btn-glass">Médiathèque</a>
+                {% endif %}
+                {% if session.get('user_id') and session.get('is_admin') %}
+                <a href="/biq/admin" class="btn btn-glass">Admin</a>
+                {% endif %}
+                {% if session.get('user_id') %}
+                <a href="/biq/logout" class="btn btn-glass">Déconnexion</a>
+                {% else %}
+                <a href="/biq/login" class="btn btn-glass">Connexion</a>
+                <a href="/biq/register" class="btn btn-primary">Inscription</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <div class="content-wrapper">
+
+        
+
+        <main id="main-content" class="container-fluid mt-3 mb-5">
+            {% with msgs = get_flashed_messages(with_categories=true) %}
+            {% if msgs %}
+            <div class="container container-narrow">
+                {% for cat,msg in msgs %}
+                <div class="alert alert-{{cat}} alert-dismissible fade show glass" role="alert">{{ msg }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endwith %}
+            {% block biq_page %}{% endblock %}
+        </main>
+    </div>
+
+    <!-- Enhanced Modal using glass design system -->
+    <div class="modal fade" id="biqModalInfo" tabindex="-1" aria-labelledby="biqModalInfoLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="glass glass--pro">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="biqModalInfoLabel">Information</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Contenu informatif BIQ...</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                        <button type="button" class="btn btn-primary">Valider</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>
