@@ -436,7 +436,7 @@ def logout():
     """Route de déconnexion"""
     session.clear()
     flash('Déconnexion réussie.', 'success')
-    return redirect(url_for('rdkq_index'))
+    return redirect(url_for('index'))
 
 
 @app.route('/admin/users', methods=['GET', 'POST'])
@@ -1243,7 +1243,14 @@ def handle_domain():
 
 @app.route('/')
 def index():
-    # si le domaine est peupleun.live, servir la page RDKQ (RepubliqueduKwebec)
+    """Route principale qui redirige selon le domaine"""
+    host = request.headers.get('Host', '').lower()
+    
+    # Gestion du domaine peupleun.live
+    if 'peupleun.live' in host:
+        return render_template('peupleun/index.html')
+    
+    # si le domaine est uman-api.com ou par défaut, servir la page principale
     domain = getattr(g, 'current_domain', 'uman-api.com')
     if domain == 'peupleun.live':
         return render_template('RepubliqueduKwebec/index.html')
@@ -1465,5 +1472,5 @@ if __name__ == '__main__':
     app.config['SESSION_TYPE'] = 'filesystem'
     
     debug_flag = os.environ.get('FLASK_DEBUG', '1') == '1'
-    # Changer le port pour correspondre à la configuration Cloudflare
+    # Port configuré pour correspondre au tunnel Cloudflare
     app.run(host='127.0.0.1', port=8002, debug=debug_flag)

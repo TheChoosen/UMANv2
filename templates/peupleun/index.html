@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Peuple Un - Accueil</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='democratie.css') }}">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <h1>Peuple Un</h1>
+            </div>
+            <div class="nav-links">
+                <a href="/">Accueil</a>
+                <a href="/mission">Mission</a>
+                <a href="/democratie">Démocratie</a>
+                <a href="/login">Connexion</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Bienvenue sur Peuple Un</h1>
+                <p>La plateforme de démocratie participative pour tous</p>
+                <div class="cta-buttons">
+                    <a href="/register" class="btn btn-primary">Rejoindre</a>
+                    <a href="/mission" class="btn btn-secondary">En savoir plus</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="features">
+            <div class="container">
+                <h2>Nos Services</h2>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h3>Démocratie Directe</h3>
+                        <p>Participez directement aux décisions qui vous concernent</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Transparence</h3>
+                        <p>Accès complet aux informations et processus décisionnels</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Participation</h3>
+                        <p>Votre voix compte dans chaque décision importante</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Peuple Un. Tous droits réservés.</p>
+        </div>
+    </footer>
+</body>
+</html>

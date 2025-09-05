@@ -1,0 +1,50 @@
+{# Composant modal pour la page de connexion #}
+<!-- Modal Connexion -->
+<div class="modal fade" id="modalConnexion" tabindex="-1" role="dialog" aria-labelledby="modalConnexionLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content glass-modal">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalConnexionLabel">
+                    <i class="fas fa-sign-in-alt mr-2"></i>Connexion
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fermer">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="row justify-content-center">
+                        <div class="col-md-10">
+                            <div class="card glass-modal-card">
+                                <div class="card-body">
+                                    <!-- Messages flash -->
+                                    <div id="loginFlashMessages"></div>
+                                    
+                                    <form id="modalLoginForm" method="POST" action="/login">
+                                        <div class="form-group">
+                                            <label for="modalLoginEmail" class="form-label">
+                                                <i class="fas fa-envelope mr-2"></i>Email
+                                            </label>
+                                            <input type="email" class="form-control" id="modalLoginEmail" name="email" required>
+                                            <div class="form-text">
+                                                Utilisez votre email enregistré. Pour être admin, votre email doit être dans la liste des administrateurs.
+                                            </div>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <button type="submit" class="btn hero-btn hero-btn--primary">
+                                                <i class="fas fa-sign-in-alt mr-2"></i>Se connecter
+                                            </button>
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                                <i class="fas fa-times mr-2"></i>Annuler
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,585 +1,1293 @@
 {% extends "base.html" %}
 
-{% block title %}Accueil - U-MAN API{% endblock %}
+{% block title %}UMan API — Cyberdémocratie souveraine pour décider mieux, ensemble{% endblock %}
+
+{% block meta %}
+<meta name="description" content="Plateforme participative et traçable. Propositions, débats, votes et résultats vérifiables — secret du vote garanti. Démo gratuite 20 min.">
+<meta name="keywords" content="cyberdémocratie, budget participatif municipal, consultation publique numérique, vote électronique vérifiable, traçabilité décisions, Loi 25 RGPD, gouvernance participative">
+<meta property="og:title" content="UMan API — Cyberdémocratie souveraine pour décider mieux, ensemble">
+<meta property="og:description" content="Plateforme participative et traçable. Propositions, débats, votes et résultats vérifiables — secret du vote garanti.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+{% endblock %}
 
 {% block content %}
-<div class="glass glass--ultra p-4 mb-5">
-    <h1 class="display-3 font-weight-bold text-center hero-title mb-3"
-        style="font-size:2.7rem;background:linear-gradient(90deg,#00e6c3 20%,#fff 60%,#00e6c3 100%);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 4px 32px #00e6c355,0 2px 8px #10141a99;letter-spacing:1.5px;">
-        UMan
-        API Inc.</h1>
-    <p class="lead text-center hero-lead mb-4"
-        style="color:#eafaf7;font-size:1.25rem;text-shadow:0 2px 12px #10141a99;max-width:700px;margin:auto;">
-        La
-        plateforme qui place l’humain au cœur de chaque décision.<br>Rejoignez une communauté mondiale pour
-        transformer votre organisation, votre entreprise ou votre milieu de vie grâce à la cyberdémocratie
-        et à
-        l’IA.</p>
-    <div class="d-flex justify-content-center align-items-center flex-wrap mb-4 gap-2 hero-badges">
-        <button type="button" class="badge badge-primary phase-badge mx-2" data-toggle="modal"
-            data-target="#modalPhase1">
-            <i class="fas fa-briefcase mr-2"></i>Phase 1 : B2B
-        </button>
-        <button type="button" class="badge badge-warning phase-badge mx-2" data-toggle="modal"
-            data-target="#modalPhase2">
-            <i class="fas fa-users mr-2"></i>Phase 2 : B2C
-        </button>
-        <button type="button" class="badge badge-success phase-badge mx-2" data-toggle="modal"
-            data-target="#modalPhase3">
-            <i class="fas fa-globe mr-2"></i>Phase 3 : International
-        </button>
-    </div>
-    <div class="text-center mt-3">
-        <div class="d-flex flex-column flex-sm-row justify-content-center align-items-center gap-3">
-            <!-- Bouton mission qui ouvre une modal -->
-            <a class="btn btn-lg hero-btn hero-btn--primary" href="#" data-toggle="modal" data-target="#modalMission">
-                <i class="fas fa-rocket mr-2"></i>Découvrir notre mission
-            </a>
-            <!-- Bouton cryptomonnaie qui ouvre une modal -->
-            <a class="btn btn-lg hero-btn hero-btn--gold" href="#" data-toggle="modal" data-target="#modalUmanCrypto">
-                <i class="fab fa-bitcoin mr-2"></i>Cryptomonnaie
-            </a>
-            <!-- Lien vers la documentation DemocratieDirecte -->
-            <a class="btn btn-lg hero-btn hero-btn--secondary" href="/democratie/documentation"
-                title="Documentation DemocratieDirecte">
-                <i class="fas fa-book mr-2"></i>Documentation
-            </a>
-        </div>
-    </div>
-    <div class="row py-4 py-md-5 text-center justify-content-center align-items-stretch">
-        <div class="col-lg-4 col-md-6 mb-4">
-            <div class="paul-glass-inner stat-card"
-                style="min-height:235px;padding:1.3rem 0.7rem;transition:transform .18s,box-shadow .18s;">
-                <h5 class="card-title paul-name" style="font-size:1.25rem;"><i class="fas fa-users mr-2"></i>+1000
-                    utilisateurs</h5>
-                <p class="card-text paul-desc">Déjà convaincus par la gestion participative et l’innovation
-                    U-MAN.
-                </p>
-                <button type="button" class="btn btn-lg hero-btn hero-btn--info" data-toggle="modal"
-                    data-target="#modalCyberdemocratie">
-                    <i class="fas fa-vote-yea mr-2"></i>En savoir plus
-                </button>
+
+<!-- HERO SECTION -->
+<section class="hero text-center">
+    <div class="container">
+        <h1 class="hero-title text-gradient reveal">Décider mieux, ensemble.</h1>
+        <p class="hero-subtitle reveal">La plateforme de <strong>cyberdémocratie souveraine</strong> qui transforme vos idées en décisions concrètes et mesurables — avec traçabilité et confiance.</p>
+
+        <!-- Bullets valeur -->
+        <div class="value-bullets reveal">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <div class="value-item">
+                        <i class="fas fa-route text-primary"></i>
+                        <span class="text-white">Traçabilité complète : propositions → débats → votes → résultats</span>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="value-item">
+                        <i class="fas fa-shield-check text-success"></i>
+                        <span class="text-white">Secret du vote garanti : protocoles cryptographiques vérifiés</span>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="value-item">
+                        <i class="fas fa-database text-info"></i>
+                        <span class="text-white">Données souveraines : hébergées localement, réversibles, conformité Loi 25 / RGPD</span>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="value-item">
+                        <i class="fas fa-rocket text-warning"></i>
+                        <span class="text-white">Déploiement rapide : municipalités, OBNL/coop, entreprises</span>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="col-md-4 mb-4">
-            <div class="paul-glass-inner stat-card h-100 d-flex flex-column justify-content-between"
-                style="padding:1.3rem 0.7rem;transition:transform .18s,box-shadow .18s;">
-                <div>
-                    <h5 class="card-title paul-name mb-3" style="font-size:1.25rem;"><i
-                            class="fas fa-puzzle-piece mr-2"></i>Modules sur-mesure</h5>
-                    <p class="card-text paul-desc mb-4">Événements, campagnes, comités, crypto, IA, et bien plus pour
-                        tous
-                        vos besoins.</p>
+
+        <div class="hero-actions reveal">
+            <a href="#" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#modalContactVente">
+                <i class="fas fa-video mr-2"></i>Réserver une démo gratuite (20 min)
+            </a>
+            <a href="#pricing" class="btn btn-secondary btn-lg">
+                <i class="fas fa-play-circle mr-2"></i>Lancer un pilote clé en main (90 jours)
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- SOLUTIONS SECTION -->
+<section class="solutions">
+    <div class="container">
+        <div class="section-header text-center reveal">
+            <h2>Solutions adaptées à votre secteur</h2>
+            <p>Cyberdémocratie souveraine pour municipalités, OBNL/coopératives et entreprises</p>
+        </div>
+        <div class="solutions-grid grid grid-cols-3">
+            <!-- Municipalités -->
+            <div class="card glass reveal solution-card">
+                <div class="solution-icon">
+                    <i class="fas fa-city"></i>
                 </div>
-                <div class="mt-auto">
-                    <button type="button" class="btn btn-lg hero-btn hero-btn--warning" data-toggle="modal"
-                        data-target="#modalModulesSurMesure">
-                        <i class="fas fa-puzzle-piece mr-2"></i>En savoir plus
+                <h3>Municipalités</h3>
+                <h4>Gouvernance municipale claire et vérifiable</h4>
+                <p class="solution-intro">Redonnez confiance aux citoyens avec des décisions locales traçables, auditées et légitimes.</p>
+                
+                <div class="solution-cases">
+                    <h5>Cas d'usage</h5>
+                    <ul>
+                        <li><strong>Budget participatif</strong> : vote citoyen priorisé, résultats publics, preuves d'exécution</li>
+                        <li><strong>Comités</strong> : ordres du jour, quorum, décisions signées</li>
+                        <li><strong>Consultations publiques</strong> : contributions, synthèses officielles, archivage sécurisé</li>
+                    </ul>
+                </div>
+                
+                <div class="solution-benefits">
+                    <h5>Bénéfices</h5>
+                    <div class="benefit-item">
+                        <i class="fas fa-gavel text-primary"></i>
+                        <span><strong>Légitimité</strong> : quorum, règles claires, respect du secret du vote</span>
+                    </div>
+                    <div class="benefit-item">
+                        <i class="fas fa-shield-check text-success"></i>
+                        <span><strong>Confiance</strong> : journaux immuables, décisions justifiées</span>
+                    </div>
+                    <div class="benefit-item">
+                        <i class="fas fa-tachometer-alt text-info"></i>
+                        <span><strong>Efficacité</strong> : modèles prêts à l'emploi, rappels automatiques, suivi des actions</span>
+                    </div>
+                </div>
+                
+                <div class="compliance-box">
+                    <i class="fas fa-certificate text-warning"></i>
+                    <span>Conforme Loi 25 (Québec) & RGPD (UE) — minimisation, pseudonymisation, registre complet</span>
+                </div>
+                
+                <div class="solution-cta">
+                    <a href="#" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#modalContactVente">Réserver une démo</a>
+                    <a href="#" class="btn btn-outline-primary btn-sm">Guide municipal</a>
+                </div>
+            </div>
+            
+            <!-- OBNL & Coopératives -->
+            <div class="card glass reveal solution-card">
+                <div class="solution-icon">
+                    <i class="fas fa-handshake"></i>
+                </div>
+                <h3>OBNL & Coopératives</h3>
+                <h4>Une gouvernance associative simple et engageante</h4>
+                <p class="solution-intro">Simplifiez vos assemblées générales et décisions de CA. Respectez le secret du vote et publiez des décisions transparentes.</p>
+                
+                <div class="solution-benefits">
+                    <h5>Bénéfices</h5>
+                    <div class="benefit-item">
+                        <i class="fas fa-users text-primary"></i>
+                        <span><strong>Assemblées et votes statutaires</strong> 100% en ligne</span>
+                    </div>
+                    <div class="benefit-item">
+                        <i class="fas fa-heart text-success"></i>
+                        <span><strong>Implication accrue</strong> des membres</span>
+                    </div>
+                    <div class="benefit-item">
+                        <i class="fas fa-file-signature text-info"></i>
+                        <span><strong>Exports scellés</strong> pour la reddition de comptes</span>
+                    </div>
+                </div>
+                
+                <div class="solution-cta">
+                    <a href="#" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#modalContactVente">Parler à un conseiller</a>
+                </div>
+            </div>
+            
+            <!-- Entreprises -->
+            <div class="card glass reveal solution-card">
+                <div class="solution-icon">
+                    <i class="fas fa-building"></i>
+                </div>
+                <h3>Entreprises</h3>
+                <h4>Décider vite, décider bien</h4>
+                <p class="solution-intro">Donnez à vos comités (RH, RSE, produit) un processus clair et des décisions suivies d'effets.</p>
+                
+                <div class="solution-cases">
+                    <h5>Cas d'usage</h5>
+                    <ul>
+                        <li><strong>Roadmap produit</strong> : arbitrages documentés et scorecards</li>
+                        <li><strong>Climat social</strong> : sondages et médiation transparente</li>
+                        <li><strong>Projets RSE</strong> : objectifs mesurables et budgets suivis</li>
+                    </ul>
+                </div>
+                
+                <div class="solution-cta">
+                    <a href="#" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#modalContactVente">Organiser une démo</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- POURQUOI UMAN API SECTION -->
+<section class="why-uman">
+    <div class="container">
+        <div class="section-header text-center reveal">
+            <h2>Transparence, légitimité, efficacité.</h2>
+            <p class="lead">UMan API réunit participation, délibération et décision dans un flux clair et auditable.
+                Chaque étape est documentée et vérifiable selon les droits, afin d'accélérer les décisions sans
+                sacrifier la confiance.</p>
+                 <h3>Prêt à tester ?</h3>
+        </div>
+        <div class="section-header text-center reveal">
+                <p class="lead">Essayez un <strong>budget participatif en 90 jours</strong> avec nos gabarits prêts à
+                    l'emploi.</p>
+                <a href="#" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#modalContactVente">
+                    <i class="fas fa-rocket mr-2"></i>Démarrer un pilote
+                </a>
+        </div>
+    </div>
+</section>
+
+<!-- CE QUE VOUS OBTENEZ SECTION -->
+<section class="what-you-get">
+    <div class="container">
+        <div class="section-header text-center reveal">
+            <h2>De la décision à l'exécution.</h2>
+        </div>
+        <div class="benefits-grid grid grid-cols-2">
+            <div class="card glass reveal">
+                <div class="card-icon"><i class="fas fa-file-alt"></i></div>
+                <h4 class="text-white">Propositions et amendements versionnés</h4>
+                <p class="text-white">Suivi complet des évolutions avec horodatage et traçabilité</p>
+            </div>
+            <div class="card glass reveal">
+                <div class="card-icon"><i class="fas fa-comments"></i></div>
+                <h4 class="text-white">Débats cadrés, modération motivée</h4>
+                <p class="text-white">Espaces de délibération structurés avec règles claires</p>
+            </div>
+            <div class="card glass reveal">
+                <div class="card-icon"><i class="fas fa-vote-yea"></i></div>
+                <h4 class="text-white">Scrutins (oui/non, préférentiel, quorum)</h4>
+                <p class="text-white">Processus de vote sécurisé et vérifiable</p>
+            </div>
+            <div class="card glass reveal">
+                <div class="card-icon"><i class="fas fa-clipboard-check"></i></div>
+                <h4 class="text-white">Résultats signés + plan d'action + preuves d'exécution</h4>
+                <p class="text-white">Suivi complet de la mise en œuvre des décisions</p>
+            </div>
+            <div class="card glass reveal">
+                <div class="card-icon"><i class="fas fa-download"></i></div>
+                <h4 class="text-white">Exports scellés (PDF/ZIP), KPI de transparence</h4>
+                <p class="text-white">Documentation complète et vérifiable pour audit</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+<!-- NOTRE APPROCHE CTA SECTION -->
+<section class="approach-cta">
+    <div class="container">
+        <div class="text-center reveal">
+            <div class="approach-content glass p-5">
+                <h3>Notre approche cyberdémocratique</h3>
+                <p class="lead">Découvrez les <strong>quatre piliers fondamentaux</strong> qui rendent notre plateforme unique et efficace.</p>
+                <a href="#" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#modalApproche">
+                    <i class="fas fa-lightbulb mr-2"></i>Découvrir notre approche
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- PRODUIT SECTION -->
+<section id="produit">
+    <div class="container">
+        <!-- UMan Manager -->
+        <div class="section-header text-center reveal">
+            <h2>UMan Manager : La console qui pilote vos décisions collectives</h2>
+            <p>Configurez vos espaces, vos rôles et vos règles. Suivez l'engagement et publiez des décisions traçables.</p>
+        </div>
+        
+        <div class="manager-features reveal">
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="manager-card glass p-4">
+                        <h4>Fonctions clés</h4>
+                        <ul class="feature-list">
+                            <li><i class="fas fa-sitemap text-primary mr-2"></i>Organisations, unités, rôles et mandats</li>
+                            <li><i class="fas fa-project-diagram text-success mr-2"></i>Processus complet : consultation → délibération → vote → exécution</li>
+                            <li><i class="fas fa-chart-pie text-info mr-2"></i>Tableaux de bord et KPI d'engagement</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="manager-card glass p-4">
+                        <h4>Hébergement & intégrations</h4>
+                        <div class="hosting-options mb-3">
+                            <span class="badge badge-primary mr-2">Base</span>
+                            <span class="badge badge-warning mr-2">Premium</span>
+                            <span class="badge badge-danger">Cyber</span>
+                        </div>
+                        <ul class="feature-list">
+                            <li><i class="fas fa-sign-in-alt text-primary mr-2"></i>Connexion sécurisée (Google, Microsoft, AD)</li>
+                            <li><i class="fas fa-code text-success mr-2"></i>API, webhooks, exports CSV/JSON/PDF</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Modules -->
+        <div class="modules-section reveal">
+            <div class="section-header text-center">
+                <h3>Des modules qui s'adaptent à vos besoins</h3>
+                <p>Modules interopérables pour proposer, débattre, voter et exécuter</p>
+            </div>
+            
+            <div class="modules-grid grid grid-cols-3">
+                <!-- Module Propositions -->
+                <div class="card glass reveal module-card">
+                    <div class="module-icon">
+                        <i class="fas fa-file-signature"></i>
+                    </div>
+                    <h4>Propositions</h4>
+                    <p>Rédaction guidée, versions horodatées, gestion des conflits d'intérêts</p>
+                    <button class="btn btn-outline-primary btn-sm mt-3" data-toggle="modal" data-target="#modalPropositions">
+                        <i class="fas fa-info-circle"></i> En savoir plus
+                    </button>
+                </div>
+                
+                <!-- Module Comités -->
+                <div class="card glass reveal module-card">
+                    <div class="module-icon">
+                        <i class="fas fa-users-cog"></i>
+                    </div>
+                    <h4>Comités</h4>
+                    <p>Ordres du jour, quorum, décisions signées</p>
+                    <button class="btn btn-outline-primary btn-sm mt-3" data-toggle="modal" data-target="#modalComite">
+                        <i class="fas fa-info-circle"></i> En savoir plus
+                    </button>
+                </div>
+                
+                <!-- Module Études -->
+                <div class="card glass reveal module-card">
+                    <div class="module-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h4>Études</h4>
+                    <p>Sondages, rapports et boucles d'amélioration continue</p>
+                    <button class="btn btn-outline-primary btn-sm mt-3" data-toggle="modal" data-target="#modalEtude">
+                        <i class="fas fa-info-circle"></i> En savoir plus
+                    </button>
+                </div>
+                
+                <!-- Module Humain -->
+                <div class="card glass reveal module-card">
+                    <div class="module-icon">
+                        <i class="fas fa-user-friends"></i>
+                    </div>
+                    <h4>Humain</h4>
+                    <p>Profils, délégations, reconnaissance des contributions</p>
+                    <button class="btn btn-outline-primary btn-sm mt-3" data-toggle="modal" data-target="#modalHumain">
+                        <i class="fas fa-info-circle"></i> En savoir plus
+                    </button>
+                </div>
+                
+                <!-- Module Médiathèque -->
+                <div class="card glass reveal module-card">
+                    <div class="module-icon">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                    <h4>Médiathèque</h4>
+                    <p>Documents, PV, recherche et exports scellés</p>
+                    <button class="btn btn-outline-primary btn-sm mt-3" data-toggle="modal" data-target="#modalMediatheque">
+                        <i class="fas fa-info-circle"></i> En savoir plus
+                    </button>
+                </div>
+                
+                <!-- Module Sur-mesure -->
+                <div class="card glass reveal module-card">
+                    <div class="module-icon">
+                        <i class="fas fa-puzzle-piece"></i>
+                    </div>
+                    <h4>Sur-mesure</h4>
+                    <p>Modules personnalisés selon vos besoins spécifiques</p>
+                    <button class="btn btn-outline-primary btn-sm mt-3" data-toggle="modal" data-target="#modalModulesSurMesure">
+                        <i class="fas fa-info-circle"></i> En savoir plus
                     </button>
                 </div>
             </div>
-        </div>
-        <div class="col-lg-4 col-md-6 mb-4">
-            <div class="paul-glass-inner stat-card"
-                style="min-height:235px;padding:1.3rem 0.7rem;min-height:110px;transition:transform .18s,box-shadow .18s;">
-                <h5 class="card-title paul-name" style="font-size:1.25rem;"><i class="fas fa-lightbulb mr-2"></i>Impact
-                    social & innovation</h5>
-                <p class="card-text paul-desc">Favorisez la transparence, l’inclusion et la motivation dans
-                    votre
-                    organisation.</p>
-                <button type="button" class="btn btn-lg hero-btn hero-btn--success" data-toggle="modal"
-                    data-target="#modalImpactSocial">
-                    <i class="fas fa-lightbulb mr-2"></i>En savoir plus
-                </button>
+            
+            <div class="text-center mt-4">
+                <a href="#" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#modalContactVente">
+                    <i class="fas fa-play mr-2"></i>Tester les modules en démo
+                </a>
             </div>
         </div>
     </div>
-</div>
+</section>
 
-<div class="glass glass--ultra p-4 mb-5">
-    <h1 class="display-3 font-weight-bold text-center hero-title mb-3"
-        style="font-size:2.7rem;background:linear-gradient(90deg,#00e6c3 20%,#fff 60%,#00e6c3 100%);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 4px 32px #00e6c355,0 2px 8px #10141a99;letter-spacing:1.5px;">
-        UMan API – Kit de base professionnel</h1>
-    <h2 class="mb-4"></h2>
-    <div class="row">
-        <!-- Module Cards -->
-        <div class="col-md-4 col-sm-6 mb-4">
-            <div class="glass card h-100 text-center p-3 d-flex flex-column justify-content-between">
-                <div>
-                    <div class="mb-2" style="font-size:2.2rem;">
-                        <i class="fas fa-balance-scale"></i>
-                    </div>
-                    <span class="badge badge-primary mb-2">Propositions</span>
-                    <h5 class="card-title">Propositions, Lois, Référendum</h5>
-                    <p class="card-text">Démocratie participative, vote électronique, impact réel sur la
-                        gouvernance.
-                    </p>
+<!-- PRICING SECTION -->
+<section id="pricing" class="pricing">
+    <div class="container">
+        <div class="section-header text-center reveal">
+            <h2>Des packages simples, adaptés à votre taille</h2>
+            <p>Choisissez la solution qui correspond aux besoins de votre organisation</p>
+        </div>
+        <div class="pricing-grid grid grid-cols-3">
+            <!-- Plan 1: Démarrage -->
+            <div class="card pricing-card glass reveal">
+                <div class="pricing-header">
+                    <h3>Démarrage</h3>
+                    <p class="price"><span>$2,999</span>/unique</p>
                 </div>
-                <button class="btn btn-lg hero-btn hero-btn--primary mt-3" data-toggle="modal"
-                    data-target="#modalPropositions">
-                    <i class="fas fa-balance-scale mr-2"></i>En savoir plus
-                </button>
+                <ul class="pricing-features">
+                    <li>3 modules de base</li>
+                    <li>100 utilisateurs maximum</li>
+                    <li>Formation en ligne</li>
+                    <li>Hébergement Base</li>
+                    <li>Support par email</li>
+                </ul>
+                <a href="#" class="btn btn-secondary" data-toggle="modal" data-target="#modalContactVente">Choisir ce
+                    plan</a>
+            </div>
+
+            <!-- Plan 2: Professionnel (Featured) -->
+            <div class="card pricing-card featured glass--pro reveal">
+                <div class="featured-badge">Populaire</div>
+                <div class="pricing-header">
+                    <h3>Professionnel</h3>
+                    <p class="price"><span>$7,999</span>/unique</p>
+                </div>
+                <ul class="pricing-features">
+                    <li>5 modules complets</li>
+                    <li>Utilisateurs illimités</li>
+                    <li>Intégrations API</li>
+                    <li>Formation sur site</li>
+                    <li>Hébergement Premium</li>
+                    <li>Support prioritaire</li>
+                </ul>
+                <a href="#" class="btn btn-primary" data-toggle="modal" data-target="#modalContactVente">Choisir ce
+                    plan</a>
+            </div>
+
+            <!-- Plan 3: Entreprise -->
+            <div class="card pricing-card glass reveal">
+                <div class="pricing-header">
+                    <h3>Entreprise</h3>
+                    <p class="price"><span>Sur-mesure</span></p>
+                </div>
+                <ul class="pricing-features">
+                    <li>Multi-organisations</li>
+                    <li>Support 24/7</li>
+                    <li>Hébergement Cyber</li>
+                    <li>SLA garantie</li>
+                    <li>Modules personnalisés</li>
+                </ul>
+                <a href="#" class="btn btn-secondary" data-toggle="modal" data-target="#modalContactVente">Nous
+                    contacter</a>
             </div>
         </div>
-        <div class="col-md-4 col-sm-6 mb-4">
-            <div class="glass card h-100 text-center p-3 d-flex flex-column justify-content-between">
-                <div>
-                    <div class="mb-2" style="font-size:2.2rem;">
-                        <i class="fas fa-users-cog"></i>
-                    </div>
-                    <span class="badge badge-success mb-2">Comité</span>
-                    <h5 class="card-title">Comité, Département, Engagement</h5>
-                    <p class="card-text">Collaboration, feedback rapide, implication active de chaque membre.
-                    </p>
-                </div>
-                <button class="btn btn-lg hero-btn hero-btn--success mt-3" data-toggle="modal"
-                    data-target="#modalComite">
-                    <i class="fas fa-users-cog mr-2"></i>En savoir plus
-                </button>
-            </div>
-        </div>
-        <div class="col-md-4 col-sm-6 mb-4">
-            <div class="glass card h-100 text-center p-3 d-flex flex-column justify-content-between">
-                <div>
-                    <div class="mb-2" style="font-size:2.2rem;">
-                        <i class="fas fa-chart-line"></i>
-                    </div>
-                    <span class="badge badge-info mb-2">Étude</span>
-                    <h5 class="card-title">Étude & Analyse</h5>
-                    <p class="card-text">Analyse quantitative, insights, amélioration continue et innovation.
-                    </p>
-                </div>
-                <button class="btn btn-lg hero-btn hero-btn--info mt-3" data-toggle="modal" data-target="#modalEtude">
-                    <i class="fas fa-chart-line mr-2"></i>En savoir plus
-                </button>
-            </div>
-        </div>
-        <div class="col-md-4 col-sm-6 mb-4">
-            <div class="glass card h-100 text-center p-3 d-flex flex-column justify-content-between">
-                <div>
-                    <div class="mb-2" style="font-size:2.2rem;">
-                        <i class="fas fa-user-astronaut"></i>
-                    </div>
-                    <span class="badge badge-warning mb-2">Humain</span>
-                    <h5 class="card-title">Humain & Communauté</h5>
-                    <p class="card-text">Liberté créative, monétisation, communauté engagée et inclusive.</p>
-                </div>
-                <button class="btn btn-lg hero-btn hero-btn--warning mt-3" data-toggle="modal"
-                    data-target="#modalHumain">
-                    <i class="fas fa-user-astronaut mr-2"></i>En savoir plus
-                </button>
-            </div>
-        </div>
-        <div class="col-md-4 col-sm-6 mb-4">
-            <div class="glass card h-100 text-center p-3 d-flex flex-column justify-content-between">
-                <div>
-                    <div class="mb-2" style="font-size:2.2rem;">
-                        <i class="fas fa-book-open"></i>
-                    </div>
-                    <span class="badge badge-secondary mb-2">Médiathèque</span>
-                    <h5 class="card-title">Médiathèque</h5>
-                    <p class="card-text">Transparence, accès à l'information, mémoire collective UMan.</p>
-                </div>
-                <button class="btn btn-lg hero-btn hero-btn--danger mt-3" data-toggle="modal"
-                    data-target="#modalMediatheque">
-                    <i class="fas fa-book-open mr-2"></i>En savoir plus
-                </button>
+
+        <!-- Note récurrence -->
+        <div class="pricing-note text-center mt-4 reveal">
+            <div class="alert alert-info glass text-white">
+                <i class="fas fa-info-circle mr-2"></i>
+                <strong>Note :</strong> Contrat de service à partir du 13ᵉ mois (MAJ, sécurité, support, amélioration
+                continue).
             </div>
         </div>
     </div>
-</div>
+</section>
 
-<!-- Section équipe / contact principal - Présentation moderne du co-fondateur -->
-<div class="glass glass--ultra p-5 mb-5">
-    <div class="row align-items-center">
-        <!-- Colonne photo -->
-        <div class="col-lg-4 text-center mb-4 mb-lg-0">
-            <div class="founder-photo-container position-relative">
-                <img src="/static/image/Paul Lynes-Crop-460px_4.jpg" alt="Paul Lynes"
-                    class="founder-photo rounded-circle shadow-lg mb-3"
-                    style="width: 200px; height: 200px; object-fit: cover; border: 4px solid var(--uman-primary); box-shadow: 0 8px 32px rgba(0, 230, 195, 0.4);">
-                <div class="founder-badge position-absolute"
-                    style="bottom: 10px; right: 10px; background: var(--uman-primary); color: white; padding: 8px 12px; border-radius: var(--radius-full); font-size: 0.75rem; font-weight: 700; box-shadow: 0 4px 16px rgba(0, 230, 195, 0.5);">
-                    <i class="fas fa-crown mr-1"></i>Co-Fondateur
-                </div>
-            </div>
+<!-- COMMENT ÇA MARCHE SECTION CTA -->
+<section class="comment-ca-marche-cta">
+    <div class="container">
+        <div class="section-header text-center reveal">
+            <h2>De l'idée à la preuve d'exécution — en 4 étapes</h2>
+            <p>Un flux traçable et vérifiable, secret du vote respecté</p>
         </div>
-
-        <!-- Colonne informations -->
-        <div class="col-lg-8">
-            <div class="founder-info">
-                <!-- Nom et titre principal -->
-                <h1 class="founder-name mb-2"
-                    style="font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 900; color: var(--uman-primary); text-shadow: 0 2px 8px rgba(0, 230, 195, 0.3); letter-spacing: 1px;">
-                    PAUL LYNES
-                </h1>
-
-                <!-- Logo entreprise -->
-                <div class="company-logo mb-3">
-                    <img src="/static/image/UMan-API_logotype_01-eng_w.png" alt="UMan API"
-                        style="height: 40px; filter: drop-shadow(0 2px 8px rgba(0, 230, 195, 0.4));">
-                </div>
-
-                <!-- Rôles et responsabilités -->
-                <div class="founder-roles mb-4">
-                    <div class="role-badge-container d-flex flex-wrap gap-2 mb-3">
-                        <h3 class="founder-name mb-2"
-                            style="font-weight: 900; color: var(--uman-primary); text-shadow: 0 2px 8px rgba(0, 230, 195, 0.3); letter-spacing: 1px;">
-                            <i class="fas fa-handshake mr-2"></i>Directeur des ventes
-                        </h3>
-                        <h3 class="founder-name mb-2"
-                            style="font-weight: 900; color: var(--uman-warning); text-shadow: 0 2px 8px rgba(255, 193, 7, 0.3); letter-spacing: 1px;">
-                            <i class="fas fa-chalkboard-teacher mr-2"></i>Formateur expert
-                        </h3>
-                        <h3 class="founder-name mb-2"
-                            style="font-weight: 900; color: var(--uman-success); text-shadow: 0 2px 8px rgba(16, 185, 129, 0.3); letter-spacing: 1px;">
-                            <i class="fas fa-vote-yea mr-2"></i>Éthique cyberdémocratie
-                        </h3>
+        
+        <div class="comment-ca-marche-content text-center reveal">
+            <div class="comment-ca-marche-preview glass p-5">
+                <div class="steps-preview mb-4">
+                    <div class="step-mini">
+                        <div class="step-mini-icon"><i class="fas fa-lightbulb"></i></div>
+                        <span>Proposer</span>
                     </div>
-
-
-                </div>
-
-                <!-- Contact actions -->
-                <div class="contact-actions">
-                    <div class="contact-buttons d-flex flex-wrap gap-3 mb-3">
-                        <a href="tel:+15148925297" class="btn btn-lg hero-btn hero-btn--primary">
-                            <i class="fas fa-phone mr-2"></i>514 892.5297
-                        </a>
-                        <a href="mailto:info@uman-api.com" class="btn btn-lg hero-btn hero-btn--info">
-                            <i class="fas fa-envelope mr-2"></i>Nous contacter
-                        </a>
+                    <div class="step-connector">→</div>
+                    <div class="step-mini">
+                        <div class="step-mini-icon"><i class="fas fa-comments"></i></div>
+                        <span>Débattre</span>
                     </div>
-
-                    <div class="contact-note text-center"
-                        style="color: var(--uman-light); font-style: italic; font-size: 0.95rem;">
-                        <i class="fas fa-clock mr-1"></i>
-                        Disponible pour consultations et formations sur la cyberdémocratie
+                    <div class="step-connector">→</div>
+                    <div class="step-mini">
+                        <div class="step-mini-icon"><i class="fas fa-vote-yea"></i></div>
+                        <span>Voter</span>
+                    </div>
+                    <div class="step-connector">→</div>
+                    <div class="step-mini">
+                        <div class="step-mini-icon"><i class="fas fa-chart-line"></i></div>
+                        <span>Exécuter</span>
                     </div>
                 </div>
+                
+                <h4 class="text-white mb-3">Découvrez notre processus détaillé</h4>
+                <p class="text-white-50 mb-4">Gabarits, débats modérés, votes sécurisés, preuves d'exécution</p>
+                
+                <a href="#" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#modalCommentCaMarche">
+                    <i class="fas fa-cogs mr-2"></i>Comment ça marche
+                </a>
             </div>
         </div>
     </div>
+</section>
 
-    <!-- Citation ou mission personnelle -->
-    <div class="founder-quote mt-5 pt-4" style="border-top: 1px solid rgba(0, 230, 195, 0.2);">
-        <blockquote class="text-center">
-            <p class="quote-text mb-3"
-                style="font-size: 1.2rem; font-style: italic; color: var(--uman-light); line-height: 1.6;">
-                "Notre mission est de placer l'humain au cœur de chaque décision organisationnelle,
-                en utilisant la technologie comme un pont vers une démocratie plus participative et inclusive."
-            </p>
-            <footer class="quote-author" style="color: var(--uman-primary); font-weight: 600;">
-                — Paul Lynes, Co-Fondateur UMan-API Inc.
-            </footer>
-        </blockquote>
-    </div>
-</div>
-
-<!-- Section Tarification -->
-<div class="glass glass--ultra p-4 mb-5">
-    <h1 class="display-3 font-weight-bold text-center hero-title mb-3"
-        style="font-size:2.7rem;background:linear-gradient(90deg,#00e6c3 20%,#fff 60%,#00e6c3 100%);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 4px 32px #00e6c355,0 2px 8px #10141a99;letter-spacing:1.5px;">
-        Tarification & Packages</h1>
-
-    <div class="row">
-        <!-- Package Starter -->
-        <div class="col-lg-4 col-md-6 mb-4">
-            <div class="glass card h-100 text-center p-4 d-flex flex-column justify-content-between">
-                <div>
-                    <div class="mb-3" style="font-size:2.5rem; color: var(--uman-info);">
-                        <i class="fas fa-seedling"></i>
+<!-- SÉCURITÉ & CONFORMITÉ SECTION -->
+<section id="securite" class="security-section d-none">
+    <div class="container">
+        <div class="section-header text-center reveal">
+            <h2>Sécurité & Conformité de bout en bout</h2>
+            <p>Nous prenons la protection de vos données et le respect de vos droits au sérieux</p>
+        </div>
+        
+        <div class="security-grid row">
+            <!-- Colonne gauche : Sécurité technique -->
+            <div class="col-lg-6">
+                <div class="security-card glass p-4 reveal">
+                    <div class="security-icon mb-3">
+                        <i class="fas fa-shield-check"></i>
                     </div>
-                    <span class="badge badge-info mb-3 phase-badge">Starter</span>
-                    <h4 class="card-title mb-3" style="color: var(--uman-primary);">Package Démarrage</h4>
-                    <div class="price-section mb-4">
-                        <div style="font-size: 2.5rem; font-weight: 900; color: var(--uman-primary);">$2,999</div>
-                        <div style="color: var(--uman-light); font-size: 0.9rem;">Installation unique</div>
-                    </div>
-                    <ul class="text-left mb-4" style="color: var(--uman-light);">
-                        <li><i class="fas fa-check text-success mr-2"></i>3 modules de base</li>
-                        <li><i class="fas fa-check text-success mr-2"></i>Jusqu'à 100 utilisateurs</li>
-                        <li><i class="fas fa-check text-success mr-2"></i>Support par email</li>
-                        <li><i class="fas fa-check text-success mr-2"></i>Formation en ligne</li>
-                        <li><i class="fas fa-check text-success mr-2"></i>Hébergement de base</li>
+                    <h4>Sécurité technique</h4>
+                    <ul class="security-list">
+                        <li><i class="fas fa-lock text-success mr-2"></i>Chiffrement AES-256 et TLS 1.3</li>
+                        <li><i class="fas fa-key text-success mr-2"></i>Authentification multifacteur (2FA/SSO)</li>
+                        <li><i class="fas fa-server text-success mr-2"></i>Hébergement souverain et réversible</li>
+                        <li><i class="fas fa-user-secret text-success mr-2"></i>Anonymisation des votes et données</li>
+                        <li><i class="fas fa-history text-success mr-2"></i>Audit trails et logs immutables</li>
                     </ul>
                 </div>
-                <button class="btn btn-lg hero-btn hero-btn--info mt-auto" data-toggle="modal"
-                    data-target="#modalContactVente">
-                    <i class="fas fa-shopping-cart mr-2"></i>Choisir ce package
-                </button>
             </div>
-        </div>
-
-        <!-- Package Professional -->
-        <div class="col-lg-4 col-md-6 mb-4">
-            <div class="glass card h-100 text-center p-4 d-flex flex-column justify-content-between position-relative">
-                <!-- Badge Populaire -->
-                <div class="position-absolute py-3"
-                    style=" left: 50%; transform: translateX(-50%); background: var(--uman-warning); color: white; padding: 8px 20px; border-radius: var(--radius-full); font-size: 0.8rem; font-weight: 700; box-shadow: 0 4px 16px rgba(255, 193, 7, 0.5);">
-                    <i class="fas fa-star mr-1"></i>POPULAIRE
-                </div>
-                <div>
-                    <div class="mb-3" style="font-size:2.5rem; color: var(--uman-primary);">
-                        <i class="fas fa-rocket"></i>
+            
+            <!-- Colonne droite : Conformité légale -->
+            <div class="col-lg-6">
+                <div class="security-card glass p-4 reveal">
+                    <div class="security-icon mb-3">
+                        <i class="fas fa-gavel"></i>
                     </div>
-                    <span class="badge badge-primary mb-3 phase-badge">Professional</span>
-                    <h4 class="card-title mb-3" style="color: var(--uman-primary);">Package Professionnel</h4>
-                    <div class="price-section mb-4">
-                        <div style="font-size: 2.5rem; font-weight: 900; color: var(--uman-primary);">$7,999</div>
-                        <div style="color: var(--uman-light); font-size: 0.9rem;">Installation unique</div>
-                    </div>
-                    <ul class="text-left mb-4" style="color: var(--uman-light);">
-                        <li><i class="fas fa-check text-success mr-2"></i>5 modules complets</li>
-                        <li><i class="fas fa-check text-success mr-2"></i>Utilisateurs illimités</li>
-                        <li><i class="fas fa-check text-success mr-2"></i>Support prioritaire</li>
-                        <li><i class="fas fa-check text-success mr-2"></i>Formation sur site</li>
-                        <li><i class="fas fa-check text-success mr-2"></i>Hébergement premium</li>
-                        <li><i class="fas fa-check text-success mr-2"></i>Intégrations API</li>
+                    <h4>Conformité légale</h4>
+                    <ul class="security-list">
+                        <li><i class="fas fa-maple-leaf text-warning mr-2"></i>Loi 25 (Québec) - Protection des renseignements personnels</li>
+                        <li><i class="fas fa-flag text-info mr-2"></i>RGPD (UE) - Droit à l'oubli et portabilité</li>
+                        <li><i class="fas fa-balance-scale text-primary mr-2"></i>Transparence algorithmique et auditabilité</li>
+                        <li><i class="fas fa-clipboard-check text-success mr-2"></i>DPIA et registres de traitement</li>
+                        <li><i class="fas fa-file-contract text-secondary mr-2"></i>Conditions d'utilisation claires</li>
                     </ul>
                 </div>
-                <button class="btn btn-lg hero-btn hero-btn--primary mt-auto" data-toggle="modal"
-                    data-target="#modalContactVente">
-                    <i class="fas fa-crown mr-2"></i>Choisir ce package
-                </button>
             </div>
         </div>
+        
+        <!-- Certifications et badges -->
+        <div class="certifications-row text-center mt-5 reveal">
+            <h5 class="mb-4">Certifications et partenaires de confiance</h5>
+            <div class="cert-badges">
+                <div class="cert-badge">
+                    <i class="fas fa-certificate text-primary"></i>
+                    <span>ISO 27001</span>
+                </div>
+                <div class="cert-badge">
+                    <i class="fas fa-shield-alt text-success"></i>
+                    <span>SOC 2 Type II</span>
+                </div>
+                <div class="cert-badge">
+                    <i class="fas fa-lock text-warning"></i>
+                    <span>Chiffrement E2E</span>
+                </div>
+                <div class="cert-badge">
+                    <i class="fas fa-maple-leaf text-danger"></i>
+                    <span>Hébergement CA</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- CTA sécurité -->
+        <div class="text-center mt-5">
+            <a href="#" class="btn btn-outline-light btn-lg" data-toggle="modal" data-target="#modalSecurite">
+                <i class="fas fa-file-alt mr-2"></i>Consulter notre politique de sécurité
+            </a>
+        </div>
+    </div>
+</section>
 
-        <!-- Package Enterprise -->
-        <div class="col-lg-4 col-md-6 mb-4">
-            <div class="glass card h-100 text-center p-4 d-flex flex-column justify-content-between">
-                <div>
-                    <div class="mb-3" style="font-size:2.5rem; color: var(--uman-gold);">
+<!-- ÉTUDES DE CAS SECTION -->
+<section id="etudes-cas" class="case-studies d-none">
+    <div class="container">
+        <div class="section-header text-center reveal">
+            <h2>Ils nous font confiance</h2>
+            <p>Découvrez comment nos clients transforment leur gouvernance avec UMan API</p>
+        </div>
+        
+        <div class="case-studies-grid">
+            <!-- Cas 1: Municipalité -->
+            <div class="case-card glass reveal">
+                <div class="case-header">
+                    <div class="case-icon municipalite">
+                        <i class="fas fa-city"></i>
+                    </div>
+                    <div class="case-info">
+                        <h4>Ville de Saint-Exemple</h4>
+                        <span class="case-type">Municipalité • 25,000 habitants</span>
+                    </div>
+                </div>
+                <div class="case-content">
+                    <h5>Budget participatif citoyen</h5>
+                    <p>Mise en place d'un processus de budget participatif impliquant 2,500 citoyens dans la priorisation de 50 projets municipaux.</p>
+                    <div class="case-results">
+                        <div class="result-item">
+                            <strong>2,500</strong>
+                            <span>participants</span>
+                        </div>
+                        <div class="result-item">
+                            <strong>78%</strong>
+                            <span>taux de satisfaction</span>
+                        </div>
+                        <div class="result-item">
+                            <strong>50</strong>
+                            <span>projets évalués</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="case-cta">
+                    <a href="#" class="btn btn-outline-primary btn-sm" data-toggle="modal" data-target="#modalCaseMunicipalite">
+                        <i class="fas fa-external-link-alt mr-1"></i>Voir l'étude complète
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Cas 2: OBNL -->
+            <div class="case-card glass reveal">
+                <div class="case-header">
+                    <div class="case-icon obnl">
+                        <i class="fas fa-hands-helping"></i>
+                    </div>
+                    <div class="case-info">
+                        <h4>Coopérative Alimentaire du Quartier</h4>
+                        <span class="case-type">OBNL • 800 membres</span>
+                    </div>
+                </div>
+                <div class="case-content">
+                    <h5>Gouvernance participative simplifiée</h5>
+                    <p>Digitalisation complète de l'AGA, votes électroniques sécurisés et gestion transparente des comités.</p>
+                    <div class="case-results">
+                        <div class="result-item">
+                            <strong>800</strong>
+                            <span>membres actifs</span>
+                        </div>
+                        <div class="result-item">
+                            <strong>92%</strong>
+                            <span>participation AGA</span>
+                        </div>
+                        <div class="result-item">
+                            <strong>100%</strong>
+                            <span>transparence</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="case-cta">
+                    <a href="#" class="btn btn-outline-primary btn-sm" data-toggle="modal" data-target="#modalCaseOBNL">
+                        <i class="fas fa-external-link-alt mr-1"></i>Voir l'étude complète
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Cas 3: Entreprise -->
+            <div class="case-card glass reveal">
+                <div class="case-header">
+                    <div class="case-icon entreprise">
                         <i class="fas fa-building"></i>
                     </div>
-                    <span class="badge badge-warning mb-3 phase-badge">Enterprise</span>
-                    <h4 class="card-title mb-3" style="color: var(--uman-primary);">Package Entreprise</h4>
-                    <div class="price-section mb-4">
-                        <div style="font-size: 2.5rem; font-weight: 900; color: var(--uman-primary);">Sur mesure</div>
-                        <div style="color: var(--uman-light); font-size: 0.9rem;">Contactez-nous</div>
+                    <div class="case-info">
+                        <h4>TechCorp Solutions</h4>
+                        <span class="case-type">Entreprise • 1,200 employés</span>
                     </div>
-                    <ul class="text-left mb-4" style="color: var(--uman-light);">
-                        <li><i class="fas fa-check text-success mr-2"></i>Modules sur-mesure</li>
-                        <li><i class="fas fa-check text-success mr-2"></i>Multi-organisations</li>
-                        <li><i class="fas fa-check text-success mr-2"></i>Support dédié 24/7</li>
-                        <li><i class="fas fa-check text-success mr-2"></i>Coaching personnalisé</li>
-                        <li><i class="fas fa-check text-success mr-2"></i>Hébergement cyber sécurisé</li>
-                        <li><i class="fas fa-check text-success mr-2"></i>SLA garantie</li>
-                    </ul>
                 </div>
-                <button class="btn btn-lg hero-btn hero-btn--gold mt-auto" data-toggle="modal"
-                    data-target="#modalContactVente">
-                    <i class="fas fa-phone mr-2"></i>Nous contacter
+                <div class="case-content">
+                    <h5>Comités internes et roadmap produit</h5>
+                    <p>Gestion des comités de direction, validation de roadmap produit et initiatives RSE avec traçabilité complète.</p>
+                    <div class="case-results">
+                        <div class="result-item">
+                            <strong>15</strong>
+                            <span>comités actifs</span>
+                        </div>
+                        <div class="result-item">
+                            <strong>85%</strong>
+                            <span>efficacité accrue</span>
+                        </div>
+                        <div class="result-item">
+                            <strong>100%</strong>
+                            <span>traçabilité</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="case-cta">
+                    <a href="#" class="btn btn-outline-primary btn-sm" data-toggle="modal" data-target="#modalCaseEntreprise">
+                        <i class="fas fa-external-link-alt mr-1"></i>Voir l'étude complète
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- CTA pour plus d'études de cas -->
+        <div class="text-center mt-5">
+            <a href="#" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#modalTousLesCas">
+                <i class="fas fa-chart-bar mr-2"></i>Voir toutes nos études de cas
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ SECTION -->
+<section id="faq" class="faq">
+    <div class="container">
+        <div class="section-header text-center reveal">
+            <h2>Questions Fréquentes</h2>
+            <p>Trouvez rapidement les réponses à vos questions les plus courantes</p>
+        </div>
+        <div class="faq-container">
+            <details class="faq-item glass reveal">
+                <summary>La plateforme garantit-elle le secret du vote ?</summary>
+                <p>Oui. Séparation identité/bulletins, chiffrement, mixnet/threshold, audits et reçus non-dévoilants
+                    pour assurer une transparence totale tout en préservant l'anonymat.</p>
+                <button class="btn btn-primary btn-sm mt-3 shadow-sm" data-toggle="modal"
+                    data-target="#modalCyberdemocratie">
+                    <i class="fas fa-shield-check mr-2"></i>En savoir plus sur la sécurité
                 </button>
-            </div>
+            </details>
+
+            <details class="faq-item glass reveal">
+                <summary>Sommes-nous conformes à la Loi 25 / RGPD ?</summary>
+                <p>Oui, via minimisation, registres, DPIA, droits d'accès et d'effacement, sécurité renforcée. UMan API
+                    respecte toutes les exigences de protection des données personnelles.</p>
+                <button class="btn btn-success btn-sm mt-3 shadow-sm" data-toggle="modal"
+                    data-target="#modalContactVente">
+                    <i class="fas fa-balance-scale mr-2"></i>Demander la documentation RGPD
+                </button>
+            </details>
+
+            <details class="faq-item glass reveal">
+                <summary>Peut-on démarrer petit ?</summary>
+                <p>Oui, avec un pilote 90 jours (comité ou budget participatif). Nos gabarits prêts à l'emploi
+                    permettent un déploiement rapide et efficace.</p>
+                <button class="btn btn-info btn-sm mt-3 shadow-sm" data-toggle="modal" data-target="#modalContactVente">
+                    <i class="fas fa-play-circle mr-2"></i>Lancer un pilote
+                </button>
+            </details>
+
+            <details class="faq-item glass reveal">
+                <summary>Peut-on intégrer nos outils existants ?</summary>
+                <p>Oui, SSO/AD, API REST, webhooks et exports standards. UMan API s'intègre facilement dans votre
+                    écosystème technologique existant.</p>
+                <button class="btn btn-warning btn-sm mt-3 shadow-sm" data-toggle="modal"
+                    data-target="#modalModulesSurMesure">
+                    <i class="fas fa-plug mr-2"></i>Voir les intégrations
+                </button>
+            </details>
+
+            <details class="faq-item glass reveal">
+                <summary>Où sont hébergées les données ?</summary>
+                <p>Environnement au choix (Base/Premium/Cyber), réversibilité SQL. Vos données restent sous votre
+                    contrôle avec une souveraineté numérique complète.</p>
+                <button class="btn btn-danger btn-sm mt-3 shadow-sm" data-toggle="modal"
+                    data-target="#modalFaqHebergement">
+                    <i class="fas fa-server mr-2"></i>Options d'hébergement
+                </button>
+            </details>
         </div>
     </div>
+</section>
 
-    <!-- Section services annuels -->
-    <div class="text-center mt-5 pt-4" style="border-top: 1px solid rgba(0, 230, 195, 0.2);">
-        <h3 class="mb-4" style="color: var(--uman-primary);">Services de Maintenance & Support</h3>
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <div class="glass--lite p-3 h-100">
-                    <h5 style="color: var(--uman-primary);"><i class="fas fa-tools mr-2"></i>Maintenance Annuelle</h5>
-                    <p style="color: var(--uman-light);">À partir de la 2e année : 15% du coût d'installation</p>
-                    <small style="color: var(--uman-secondary);">Mises à jour, support technique, sauvegardes</small>
-                </div>
-            </div>
-            <div class="col-md-6 mb-3">
-                <div class="glass--lite p-3 h-100">
-                    <h5 style="color: var(--uman-primary);"><i class="fas fa-graduation-cap mr-2"></i>Formation Continue
-                    </h5>
-                    <p style="color: var(--uman-light);">Sessions mensuelles incluses dans la maintenance</p>
-                    <small style="color: var(--uman-secondary);">Optimisation, nouvelles fonctionnalités,
-                        coaching</small>
-                </div>
-            </div>
+<!-- RESSOURCES SECTION -->
+<section id="ressources" class="resources">
+    <div class="container">
+        <div class="section-header text-center reveal">
+            <h2>Ressources et apprentissage</h2>
+            <p>Tout ce dont vous avez besoin pour réussir votre transformation numérique</p>
         </div>
-    </div>
-
-</div>
-
-<!-- Section Témoignages et Cas d'Usage -->
-<div class="glass glass--ultra p-4 mb-5">
-    <h1 class="display-3 font-weight-bold text-center hero-title mb-4"
-        style="font-size:2.7rem;background:linear-gradient(90deg,#00e6c3 20%,#fff 60%,#00e6c3 100%);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 4px 32px #00e6c355,0 2px 8px #10141a99;letter-spacing:1.5px;">
-        Témoignages & Cas d'Usage</h1>
-
-    <div class="row">
-        <!-- Témoignage 1 -->
-        <div class="col-lg-4 col-md-6 mb-4">
-            <div class="glass--lite p-4 h-100 text-center">
-                <div class="testimonial-avatar mb-3">
-                    <div
-                        style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(45deg, var(--uman-primary), var(--uman-info)); margin: 0 auto; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: white;">
-                        <i class="fas fa-building"></i>
+        
+        <div class="resources-grid">
+            <!-- Documentation -->
+            <div class="resource-category reveal">
+                <div class="category-header">
+                    <div class="category-icon">
+                        <i class="fas fa-book"></i>
                     </div>
+                    <h4>Documentation</h4>
                 </div>
-                <h5 style="color: var(--uman-primary); margin-bottom: 1rem;">Coopérative Habitat Montréal</h5>
-                <blockquote
-                    style="color: var(--uman-light); font-style: italic; margin-bottom: 1rem; line-height: 1.6;">
-                    "UMan API a révolutionné notre prise de décision. Nos 200 membres participent maintenant activement
-                    aux votes et propositions. La transparence est totale."
-                </blockquote>
-                <div class="testimonial-stats">
-                    <div class="row text-center">
-                        <div class="col-4">
-                            <div style="color: var(--uman-primary); font-weight: 700; font-size: 1.2rem;">+85%</div>
-                            <small style="color: var(--uman-secondary);">Participation</small>
-                        </div>
-                        <div class="col-4">
-                            <div style="color: var(--uman-success); font-weight: 700; font-size: 1.2rem;">200</div>
-                            <small style="color: var(--uman-secondary);">Membres</small>
-                        </div>
-                        <div class="col-4">
-                            <div style="color: var(--uman-warning); font-weight: 700; font-size: 1.2rem;">15</div>
-                            <small style="color: var(--uman-secondary);">Projets</small>
-                        </div>
-                    </div>
+                <div class="resource-links">
+                    <a href="#" class="resource-link" data-toggle="modal" data-target="#modalGuideImplementation">
+                        <i class="fas fa-file-alt mr-2"></i>Guide d'implémentation
+                    </a>
+                    <a href="#" class="resource-link" data-toggle="modal" data-target="#modalAPIDoc">
+                        <i class="fas fa-code mr-2"></i>Documentation API
+                    </a>
+                    <a href="#" class="resource-link" data-toggle="modal" data-target="#modalFAQComplete">
+                        <i class="fas fa-question-circle mr-2"></i>FAQ complète
+                    </a>
+                    <a href="#" class="resource-link" data-toggle="modal" data-target="#modalMeilleuresPratiques">
+                        <i class="fas fa-star mr-2"></i>Meilleures pratiques
+                    </a>
                 </div>
             </div>
-        </div>
-
-        <!-- Témoignage 2 -->
-        <div class="col-lg-4 col-md-6 mb-4">
-            <div class="glass--lite p-4 h-100 text-center">
-                <div class="testimonial-avatar mb-3">
-                    <div
-                        style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(45deg, var(--uman-warning), var(--uman-gold)); margin: 0 auto; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: white;">
+            
+            <!-- Formation -->
+            <div class="resource-category reveal">
+                <div class="category-header">
+                    <div class="category-icon">
                         <i class="fas fa-graduation-cap"></i>
                     </div>
+                    <h4>Formation</h4>
                 </div>
-                <h5 style="color: var(--uman-primary); margin-bottom: 1rem;">CÉGEP Innovation Québec</h5>
-                <blockquote
-                    style="color: var(--uman-light); font-style: italic; margin-bottom: 1rem; line-height: 1.6;">
-                    "Les étudiants co-créent maintenant les politiques étudiantes. L'engagement et la satisfaction ont
-                    explosé depuis l'implémentation."
-                </blockquote>
-                <div class="testimonial-stats">
-                    <div class="row text-center">
-                        <div class="col-4">
-                            <div style="color: var(--uman-primary); font-weight: 700; font-size: 1.2rem;">+120%</div>
-                            <small style="color: var(--uman-secondary);">Engagement</small>
-                        </div>
-                        <div class="col-4">
-                            <div style="color: var(--uman-success); font-weight: 700; font-size: 1.2rem;">1,500</div>
-                            <small style="color: var(--uman-secondary);">Étudiants</small>
-                        </div>
-                        <div class="col-4">
-                            <div style="color: var(--uman-warning); font-weight: 700; font-size: 1.2rem;">8</div>
-                            <small style="color: var(--uman-secondary);">Départements</small>
-                        </div>
+                <div class="resource-links">
+                    <a href="#" class="resource-link" data-toggle="modal" data-target="#modalFormationEnLigne">
+                        <i class="fas fa-play-circle mr-2"></i>Formation en ligne
+                    </a>
+                    <a href="#" class="resource-link" data-toggle="modal" data-target="#modalWebinaires">
+                        <i class="fas fa-video mr-2"></i>Webinaires mensuels
+                    </a>
+                    <a href="#" class="resource-link" data-toggle="modal" data-target="#modalCertification">
+                        <i class="fas fa-certificate mr-2"></i>Certification UMan
+                    </a>
+                    <a href="#" class="resource-link" data-toggle="modal" data-target="#modalFormationSurSite">
+                        <i class="fas fa-users mr-2"></i>Formation sur site
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Support -->
+            <div class="resource-category reveal">
+                <div class="category-header">
+                    <div class="category-icon">
+                        <i class="fas fa-life-ring"></i>
                     </div>
+                    <h4>Support</h4>
+                </div>
+                <div class="resource-links">
+                    <a href="#" class="resource-link" data-toggle="modal" data-target="#modalTicketSupport">
+                        <i class="fas fa-ticket-alt mr-2"></i>Créer un ticket
+                    </a>
+                    <a href="#" class="resource-link" data-toggle="modal" data-target="#modalCommunaute">
+                        <i class="fas fa-comments mr-2"></i>Communauté
+                    </a>
+                    <a href="#" class="resource-link" data-toggle="modal" data-target="#modalStatutService">
+                        <i class="fas fa-chart-line mr-2"></i>Statut du service
+                    </a>
+                    <a href="#" class="resource-link" data-toggle="modal" data-target="#modalContactSupport">
+                        <i class="fas fa-phone mr-2"></i>Contact direct
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Outils -->
+            <div class="resource-category reveal">
+                <div class="category-header">
+                    <div class="category-icon">
+                        <i class="fas fa-tools"></i>
+                    </div>
+                    <h4>Outils</h4>
+                </div>
+                <div class="resource-links">
+                    <a href="#" class="resource-link" data-toggle="modal" data-target="#modalCalculateurROI">
+                        <i class="fas fa-calculator mr-2"></i>Calculateur ROI
+                    </a>
+                    <a href="#" class="resource-link" data-toggle="modal" data-target="#modalChecklistImplementation">
+                        <i class="fas fa-tasks mr-2"></i>Checklist d'implémentation
+                    </a>
+                    <a href="#" class="resource-link" data-toggle="modal" data-target="#modalModelesDocuments">
+                        <i class="fas fa-file-download mr-2"></i>Modèles de documents
+                    </a>
+                    <a href="#" class="resource-link" data-toggle="modal" data-target="#modalIntegrationKit">
+                        <i class="fas fa-plug mr-2"></i>Kit d'intégration
+                    </a>
                 </div>
             </div>
         </div>
-
-        <!-- Témoignage 3 -->
-        <div class="col-lg-4 col-md-6 mb-4">
-            <div class="glass--lite p-4 h-100 text-center">
-                <div class="testimonial-avatar mb-3">
-                    <div
-                        style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(45deg, var(--uman-success), var(--uman-primary)); margin: 0 auto; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: white;">
-                        <i class="fas fa-users"></i>
-                    </div>
-                </div>
-                <h5 style="color: var(--uman-primary); margin-bottom: 1rem;">OBNL Environnement Action</h5>
-                <blockquote
-                    style="color: var(--uman-light); font-style: italic; margin-bottom: 1rem; line-height: 1.6;">
-                    "Nous mobilisons maintenant 10x plus de bénévoles grâce à la participation démocratique. Chaque voix
-                    compte vraiment."
-                </blockquote>
-                <div class="testimonial-stats">
-                    <div class="row text-center">
-                        <div class="col-4">
-                            <div style="color: var(--uman-primary); font-weight: 700; font-size: 1.2rem;">+900%</div>
-                            <small style="color: var(--uman-secondary);">Bénévoles</small>
-                        </div>
-                        <div class="col-4">
-                            <div style="color: var(--uman-success); font-weight: 700; font-size: 1.2rem;">500</div>
-                            <small style="color: var(--uman-secondary);">Membres</small>
-                        </div>
-                        <div class="col-4">
-                            <div style="color: var(--uman-warning); font-weight: 700; font-size: 1.2rem;">25</div>
-                            <small style="color: var(--uman-secondary);">Campagnes</small>
+        
+        <!-- Newsletter et CTA -->
+        <div class="newsletter-section text-center mt-5 reveal">
+            <div class="newsletter-content glass p-5">
+                <h5>Restez informé des nouveautés</h5>
+                <p>Recevez nos actualités, guides et bonnes pratiques directement dans votre boîte mail</p>
+                <div class="newsletter-form">
+                    <div class="input-group">
+                        <input type="email" class="form-control" placeholder="Votre adresse email">
+                        <div class="input-group-append">
+                            <button class="btn btn-primary" type="button">
+                                <i class="fas fa-paper-plane mr-1"></i>S'abonner
+                            </button>
                         </div>
                     </div>
                 </div>
+                <small class="text-muted mt-2 d-block">Aucun spam. Désinscription en un clic.</small>
             </div>
         </div>
     </div>
-
-    <!-- Call to Action -->
-    <div class="text-center mt-5 pt-4" style="border-top: 1px solid rgba(0, 230, 195, 0.2);">
-        <h3 class="mb-3" style="color: var(--uman-primary);">Rejoignez plus de 1000+ organisations qui transforment leur
-            gouvernance</h3>
-        <p style="color: var(--uman-light); font-size: 1.1rem; margin-bottom: 2rem;">
-            Coopératives, OBNL, PME, institutions d'enseignement... Ils ont tous choisi UMan API pour révolutionner leur
-            démocratie interne.
-        </p>
-        <div class="d-flex flex-column flex-sm-row justify-content-center align-items-center gap-3">
-            <button class="btn btn-lg hero-btn hero-btn--primary" data-toggle="modal" data-target="#modalContactVente">
-                <i class="fas fa-rocket mr-2"></i>Démarrer votre transformation
-            </button>
-            <button class="btn btn-lg hero-btn hero-btn--info" data-toggle="modal" data-target="#modalCyberdemocratie">
-                <i class="fas fa-play-circle mr-2"></i>Voir une démo
-            </button>
-        </div>
-    </div>
-
-</div>
+</section>
 
 
-<div class="glass glass--ultra p-4 mb-5">
-    <h1 class="display-3 font-weight-bold text-center hero-title mb-3"
-        style="font-size:2.7rem;background:linear-gradient(90deg,#00e6c3 20%,#fff 60%,#00e6c3 100%);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 4px 32px #00e6c355,0 2px 8px #10141a99;letter-spacing:1.5px;">
-        Questions / Réponses</h1>
-    <div class="d-flex flex-wrap justify-content-center align-items-center">
-        <button type="button" class="btn btn-lg hero-btn hero-btn--info m-2" data-toggle="modal"
-            data-target="#modalFaqLicenceManager">
-            <i class="fas fa-crown mr-2"></i>Que veux dire une licence Manager ?
-        </button>
-        <button type="button" class="btn btn-lg hero-btn hero-btn--success m-2" data-toggle="modal"
-            data-target="#modalFaqUtilisateurIllimite">
-            <i class="fas fa-infinity mr-2"></i>Que veux dire utilisateur illimité ?
-        </button>
-        <button type="button" class="btn btn-lg hero-btn hero-btn--primary m-2" data-toggle="modal"
-            data-target="#modalFaqHebergement">
-            <i class="fas fa-cloud mr-2"></i>Que veux dire un hébergement de base, premium et cyber ?
-        </button>
-        <button type="button" class="btn btn-lg hero-btn hero-btn--warning m-2" data-toggle="modal"
-            data-target="#modalFaqServices">
-            <i class="fas fa-graduation-cap mr-2"></i>Offrez-vous les services de formations, consultations et de
-            coaching ?
-        </button>
-        <button type="button" class="btn btn-lg hero-btn hero-btn--gold m-2" data-toggle="modal"
-            data-target="#modalFaqFrais">
-            <i class="fas fa-dollar-sign mr-2"></i>Avez-vous des frais récurrents ?
-        </button>
-    </div>
 
-    <h1 class="display-3 font-weight-bold text-center hero-title mb-3 pt-5"
-        style="font-size:2.7rem;background:linear-gradient(90deg,#00e6c3 20%,#fff 60%,#00e6c3 100%);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 4px 32px #00e6c355,0 2px 8px #10141a99;letter-spacing:1.5px;">
-        Compatibilité &
-        intégration</h1>
+<!-- Enhanced JavaScript for animations and interactivity -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Navbar scroll effect
+        const navbar = document.getElementById('navbar');
+        let lastScrollTop = 0;
 
+        window.addEventListener('scroll', function () {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
 
-    <p class="text-center mb-4 paul-desc" style="color:#fff;font-size:1.08rem;">UMan API s’intègre avec les
-        outils
-        numériques de référence pour accompagner la transformation collaborative et l’innovation dans votre
-        organisation.</p>
-    <div class="d-flex flex-wrap justify-content-center align-items-center">
-        <img src="/static/compatibilite/Adobe.svg" alt="Adobe" height="36" class="mx-3 my-2 compat-logo">
-        <img src="/static/compatibilite/CloudFlare.svg" alt="Cloudflare" height="36" class="mx-3 my-2 compat-logo">
-        <img src="/static/compatibilite/DropBox.svg" alt="Dropbox" height="36" class="mx-3 my-2 compat-logo">
-        <img src="/static/compatibilite/Google.svg" alt="Google" height="36" class="mx-3 my-2 compat-logo">
-        <img src="/static/compatibilite/Metronic.png" alt="Metronic" height="36" class="mx-3 my-2 compat-logo">
-        <img src="/static/compatibilite/mySQL.svg" alt="MySQL" height="36" class="mx-3 my-2 compat-logo">
-        <img src="/static/compatibilite/Visual studio.svg" alt="Visual Studio" height="36"
-            class="mx-3 my-2 compat-logo">
-    </div>
+            if (scrollTop > 100) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
 
-</div>
+            lastScrollTop = scrollTop;
+        });
+
+        // Reveal animations on scroll
+        const revealElements = document.querySelectorAll('.reveal');
+
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        });
+
+        revealElements.forEach(element => {
+            revealObserver.observe(element);
+        });
+
+        // Mobile navigation toggle
+        const navToggle = document.getElementById('nav-toggle');
+        const navMenu = document.getElementById('nav-menu');
+
+        if (navToggle && navMenu) {
+            navToggle.addEventListener('click', function () {
+                navMenu.classList.toggle('active');
+                const icon = navToggle.querySelector('i');
+                icon.classList.toggle('fa-bars');
+                icon.classList.toggle('fa-times');
+            });
+
+            // Close mobile menu when clicking on links
+            navMenu.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', function () {
+                    navMenu.classList.remove('active');
+                    const icon = navToggle.querySelector('i');
+                    icon.classList.add('fa-bars');
+                    icon.classList.remove('fa-times');
+                });
+            });
+        }
+
+        // Smooth scroll for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                const href = this.getAttribute('href');
+
+                // Skip empty hashes, modal triggers, and invalid selectors
+                if (href === '#' ||
+                    href.includes('modal') ||
+                    this.hasAttribute('data-toggle') ||
+                    href.length <= 1) {
+                    return; // Let the default behavior handle modals and empty links
+                }
+
+                e.preventDefault();
+
+                // Validate selector before using querySelector
+                try {
+                    const target = document.querySelector(href);
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                } catch (error) {
+                    console.warn('Invalid selector for smooth scroll:', href);
+                    // Fallback: try to find element by ID if href starts with #
+                    if (href.startsWith('#')) {
+                        const elementId = href.substring(1);
+                        const element = document.getElementById(elementId);
+                        if (element) {
+                            element.scrollIntoView({
+                                behavior: 'smooth',
+                                block: 'start'
+                            });
+                        }
+                    }
+                }
+            });
+        });
+
+        // FAQ accordion enhancement
+        const faqItems = document.querySelectorAll('.faq-item');
+        faqItems.forEach(item => {
+            const summary = item.querySelector('summary');
+            summary.addEventListener('click', function (e) {
+                // Close other open FAQ items for accordion effect
+                faqItems.forEach(otherItem => {
+                    if (otherItem !== item && otherItem.hasAttribute('open')) {
+                        otherItem.removeAttribute('open');
+                    }
+                });
+            });
+        });
+
+        // Enhanced button hover effects
+        const buttons = document.querySelectorAll('.btn');
+        buttons.forEach(button => {
+            button.addEventListener('mouseenter', function () {
+                this.style.transform = 'translateY(-2px) scale(1.02)';
+            });
+
+            button.addEventListener('mouseleave', function () {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+
+        // Add loading animation complete class
+        setTimeout(() => {
+            document.body.classList.add('loaded');
+        }, 100);
+    });
+
+    // Add some CSS for enhanced animations and effects
+    const additionalStyles = `
+    <style>
+        /* Enhanced reveal animations */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Enhanced grid layouts */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        /* Company info and evolution sections */
+        .company-info, .evolution-impact {
+            padding: 4rem 0;
+            background: var(--glass-bg-lite);
+        }
+
+        .info-grid, .evolution-grid {
+            display: grid;
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .info-grid {
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        }
+
+        .evolution-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .evolution-cards, .impact-cards {
+            padding: 1rem;
+        }
+
+        /* Enhanced FAQ buttons */
+        .faq-item .btn {
+            transition: all 0.3s ease;
+            font-weight: 600;
+            border-radius: 25px;
+            padding: 10px 24px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.85rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .faq-item .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .faq-item .btn:hover::before {
+            left: 100%;
+        }
+
+        .faq-item .btn:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+        }
+
+        .faq-item .btn-primary {
+            background: linear-gradient(135deg, #0056b3, #004085) !important;
+            border: none !important;
+            color: white !important;
+            box-shadow: 0 4px 15px rgba(0, 86, 179, 0.4) !important;
+        }
+
+        .faq-item .btn-primary:hover {
+            box-shadow: 0 8px 25px rgba(0, 86, 179, 0.6) !important;
+            background: linear-gradient(135deg, #004085, #002752) !important;
+        }
+
+        .faq-item .btn-success {
+            background: linear-gradient(135deg, #28a745, #1e7e34) !important;
+            border: none !important;
+            color: white !important;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4) !important;
+        }
+
+        .faq-item .btn-success:hover {
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.6) !important;
+            background: linear-gradient(135deg, #1e7e34, #155724) !important;
+        }
+
+        .faq-item .btn-info {
+            background: linear-gradient(135deg, #17a2b8, #117a8b) !important;
+            border: none !important;
+            color: white !important;
+            box-shadow: 0 4px 15px rgba(23, 162, 184, 0.4) !important;
+        }
+
+        .faq-item .btn-info:hover {
+            box-shadow: 0 8px 25px rgba(23, 162, 184, 0.6) !important;
+            background: linear-gradient(135deg, #117a8b, #0c5460) !important;
+        }
+
+        .faq-item .btn-warning {
+            background: linear-gradient(135deg, #ffc107, #e0a800) !important;
+            border: none !important;
+            color: #212529 !important;
+            font-weight: 700 !important;
+            box-shadow: 0 4px 15px rgba(255, 193, 7, 0.4) !important;
+        }
+
+        .faq-item .btn-warning:hover {
+            box-shadow: 0 8px 25px rgba(255, 193, 7, 0.6) !important;
+            background: linear-gradient(135deg, #e0a800, #d39e00) !important;
+        }
+
+        .faq-item .btn-danger {
+            background: linear-gradient(135deg, #dc3545, #c82333) !important;
+            border: none !important;
+            color: white !important;
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4) !important;
+        }
+
+        .faq-item .btn-danger:hover {
+            box-shadow: 0 8px 25px rgba(220, 53, 69, 0.6) !important;
+            background: linear-gradient(135deg, #c82333, #a71e2a) !important;
+        }
+
+        /* FAQ item spacing */
+        .faq-item {
+            margin-bottom: 1.5rem !important;
+        }
+
+        .faq-item summary {
+            font-weight: 600;
+            color: var(--uman-primary);
+            cursor: pointer;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .faq-item p {
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        /* Enhanced pricing card */
+        .featured-badge {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, var(--uman-warning), var(--uman-gold));
+            color: white;
+            padding: 8px 24px;
+            border-radius: var(--radius-full);
+            font-size: 0.85rem;
+            font-weight: 700;
+            box-shadow: 0 4px 16px rgba(255, 193, 7, 0.3);
+        }
+
+        .pricing-card.featured {
+            transform: scale(1.05);
+            border-color: var(--uman-primary);
+        }
+
+        /* Enhanced card icons */
+        .card-icon {
+            font-size: 3rem;
+            color: var(--uman-primary);
+            margin-bottom: 1.5rem;
+            text-shadow: 0 4px 16px rgba(0, 230, 195, 0.4);
+        }
+
+        /* Footer improvements */
+        .footer {
+            background: var(--glass-bg-ultra);
+            backdrop-filter: var(--glass-blur-strong);
+            border-top: 2px solid var(--glass-border-standard);
+            padding: 4rem 0 2rem;
+            margin-top: 6rem;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid var(--glass-border-lite);
+            color: var(--uman-light);
+            opacity: 0.8;
+        }
+
+        .footer ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .footer ul li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer ul li a {
+            color: var(--uman-light);
+            text-decoration: none;
+            transition: color var(--duration-fast);
+        }
+
+        .footer ul li a:hover {
+            color: var(--uman-primary);
+        }
+
+        .footer-logo {
+            height: 40px;
+            margin-bottom: 1rem;
+            filter: drop-shadow(0 2px 8px rgba(0, 230, 195, 0.4));
+        }
+
+        /* Loading animation */
+        body:not(.loaded) .reveal {
+            opacity: 0;
+            transform: translateY(50px);
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .features-grid,
+            .pricing-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .pricing-card.featured {
+                transform: none;
+            }
+            
+            .featured-badge {
+                position: relative;
+                top: 0;
+                left: 0;
+                transform: none;
+                display: inline-block;
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+`;
+
+    document.head.insertAdjacentHTML('beforeend', additionalStyles);
+</script>
+
+<!-- MODALS -->
+
 
 {% endblock %}
