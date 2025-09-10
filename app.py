@@ -1312,6 +1312,43 @@ def democratie_assets(filename):
     return send_from_directory(img_dir, filename, as_attachment=False)
 
 
+# --- Routes Cyberdémocratie PRD ---
+@app.route('/cyberdemocratie')
+def cyberdemocratie_index():
+    """Page principale du PRD Cyberdémocratie"""
+    return render_template('Cyberdemocratie/index.html')
+
+
+@app.route('/cyberdemocratie/architecture')
+def cyberdemocratie_architecture():
+    """Architecture technique du système"""
+    return render_template('Cyberdemocratie/architecture.html')
+
+
+@app.route('/cyberdemocratie/user-stories')
+def cyberdemocratie_user_stories():
+    """User Stories et fonctionnalités"""
+    return render_template('Cyberdemocratie/user-stories.html')
+
+
+@app.route('/cyberdemocratie/roadmap')
+def cyberdemocratie_roadmap():
+    """Roadmap détaillé sur 6 mois"""
+    return render_template('Cyberdemocratie/roadmap.html')
+
+
+@app.route('/cyberdemocratie/metrics')
+def cyberdemocratie_metrics():
+    """Métriques et KPIs de performance"""
+    return render_template('Cyberdemocratie/metrics.html')
+
+
+@app.route('/cyberdemocratie/sprint1')
+def cyberdemocratie_sprint1():
+    """Sprint 1 - Authentification & Accès détaillé"""
+    return render_template('Cyberdemocratie/sprint1.html')
+
+
 # Serve the background image used by the DemocratieDirecte static page
 @app.route('/democratie/assets/dd-bg.jpg')
 def democratie_bg():

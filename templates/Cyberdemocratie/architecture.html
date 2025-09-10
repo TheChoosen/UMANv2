@@ -1,0 +1,576 @@
+{% extends "base.html" %}
+
+{% block title %}Architecture Technique - PRD Cyberdémocratie{% endblock %}
+
+{% block content %}
+<div class="architecture-prd">
+    <!-- Hero Section -->
+    <section class="hero-architecture glass text-center py-5">
+        <div class="container">
+            <h1 class="display-4 text-gradient mb-3">🏗️ Architecture Technique</h1>
+            <p class="lead">Infrastructure robuste et sécurisée pour la cyberdémocratie</p>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb justify-content-center bg-transparent">
+                    <li class="breadcrumb-item"><a href="/cyberdemocratie">PRD Cyberdémocratie</a></li>
+                    <li class="breadcrumb-item active">Architecture</li>
+                </ol>
+            </nav>
+        </div>
+    </section>
+
+    <!-- Vue d'ensemble Architecture -->
+    <section class="architecture-overview py-5">
+        <div class="container">
+            <h2 class="text-center mb-5">🌐 Vue d'ensemble du Système</h2>
+            
+            <!-- Diagramme d'architecture -->
+            <div class="architecture-diagram glass p-4 mb-5">
+                <div class="diagram-container">
+                    <div class="layer layer-frontend">
+                        <h4><i class="fas fa-desktop"></i> Frontend</h4>
+                        <div class="components">
+                            <div class="component">React/Vue.js</div>
+                            <div class="component">Bootstrap 5</div>
+                            <div class="component">PWA</div>
+                        </div>
+                    </div>
+                    
+                    <div class="layer layer-api">
+                        <h4><i class="fas fa-exchange-alt"></i> API Gateway</h4>
+                        <div class="components">
+                            <div class="component">Flask REST API</div>
+                            <div class="component">JWT Auth</div>
+                            <div class="component">Rate Limiting</div>
+                        </div>
+                    </div>
+                    
+                    <div class="layer layer-business">
+                        <h4><i class="fas fa-cogs"></i> Services Métier</h4>
+                        <div class="components">
+                            <div class="component">Gestion Votes</div>
+                            <div class="component">Propositions</div>
+                            <div class="component">Notification</div>
+                            <div class="component">Analytics</div>
+                        </div>
+                    </div>
+                    
+                    <div class="layer layer-data">
+                        <h4><i class="fas fa-database"></i> Données</h4>
+                        <div class="components">
+                            <div class="component">MySQL 8.0</div>
+                            <div class="component">Redis Cache</div>
+                            <div class="component">MinIO Files</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Composants clés -->
+            <div class="key-components">
+                <h3 class="text-center mb-4">🔧 Composants Clés</h3>
+                <div class="row">
+                    <div class="col-lg-4 mb-4">
+                        <div class="component-card glass h-100">
+                            <div class="component-header bg-primary text-white p-3">
+                                <h5><i class="fas fa-shield-alt"></i> Sécurité</h5>
+                            </div>
+                            <div class="component-content p-3">
+                                <ul class="feature-list">
+                                    <li>Chiffrement AES-256</li>
+                                    <li>Authentification 2FA</li>
+                                    <li>Audit logs complets</li>
+                                    <li>Anonymisation votes</li>
+                                    <li>WAF Cloudflare</li>
+                                </ul>
+                                <div class="tech-badges mt-3">
+                                    <span class="badge badge-primary">HTTPS</span>
+                                    <span class="badge badge-primary">JWT</span>
+                                    <span class="badge badge-primary">OAuth2</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4 mb-4">
+                        <div class="component-card glass h-100">
+                            <div class="component-header bg-success text-white p-3">
+                                <h5><i class="fas fa-vote-yea"></i> Moteur de Vote</h5>
+                            </div>
+                            <div class="component-content p-3">
+                                <ul class="feature-list">
+                                    <li>Vote électronique sécurisé</li>
+                                    <li>Bulletins chiffrés</li>
+                                    <li>Vérification cryptographique</li>
+                                    <li>Horodatage blockchain</li>
+                                    <li>Anonymat garanti</li>
+                                </ul>
+                                <div class="tech-badges mt-3">
+                                    <span class="badge badge-success">RSA</span>
+                                    <span class="badge badge-success">SHA-256</span>
+                                    <span class="badge badge-success">Merkle Tree</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4 mb-4">
+                        <div class="component-card glass h-100">
+                            <div class="component-header bg-info text-white p-3">
+                                <h5><i class="fas fa-chart-line"></i> Analytics</h5>
+                            </div>
+                            <div class="component-content p-3">
+                                <ul class="feature-list">
+                                    <li>Tableaux de bord temps réel</li>
+                                    <li>Métriques participation</li>
+                                    <li>Rapports automatisés</li>
+                                    <li>Alertes intelligentes</li>
+                                    <li>Export données RGPD</li>
+                                </ul>
+                                <div class="tech-badges mt-3">
+                                    <span class="badge badge-info">D3.js</span>
+                                    <span class="badge badge-info">WebSocket</span>
+                                    <span class="badge badge-info">CSV/JSON</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Infrastructure Cloud -->
+    <section class="cloud-infrastructure py-5 bg-light">
+        <div class="container">
+            <h2 class="text-center mb-5">☁️ Infrastructure Cloud</h2>
+            
+            <div class="row">
+                <!-- Production -->
+                <div class="col-lg-6 mb-4">
+                    <div class="infra-card glass h-100">
+                        <div class="infra-header bg-danger text-white p-3">
+                            <h4><i class="fas fa-server"></i> Environnement Production</h4>
+                        </div>
+                        <div class="infra-content p-4">
+                            <div class="infra-specs">
+                                <div class="spec-item mb-3">
+                                    <strong>Serveurs Web:</strong>
+                                    <div class="spec-details">
+                                        <span class="badge badge-secondary">AWS EC2 t3.medium</span>
+                                        <span class="badge badge-secondary">2 instances</span>
+                                        <span class="badge badge-secondary">Auto-scaling</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="spec-item mb-3">
+                                    <strong>Base de données:</strong>
+                                    <div class="spec-details">
+                                        <span class="badge badge-info">AWS RDS MySQL</span>
+                                        <span class="badge badge-info">Multi-AZ</span>
+                                        <span class="badge badge-info">Backup quotidien</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="spec-item mb-3">
+                                    <strong>Cache & Files:</strong>
+                                    <div class="spec-details">
+                                        <span class="badge badge-warning">ElastiCache Redis</span>
+                                        <span class="badge badge-warning">S3 + CloudFront</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="spec-item">
+                                    <strong>Monitoring:</strong>
+                                    <div class="spec-details">
+                                        <span class="badge badge-success">CloudWatch</span>
+                                        <span class="badge badge-success">Datadog</span>
+                                        <span class="badge badge-success">PagerDuty</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Développement -->
+                <div class="col-lg-6 mb-4">
+                    <div class="infra-card glass h-100">
+                        <div class="infra-header bg-primary text-white p-3">
+                            <h4><i class="fas fa-code"></i> Environnement Dev/Test</h4>
+                        </div>
+                        <div class="infra-content p-4">
+                            <div class="infra-specs">
+                                <div class="spec-item mb-3">
+                                    <strong>Développement:</strong>
+                                    <div class="spec-details">
+                                        <span class="badge badge-secondary">Docker Compose</span>
+                                        <span class="badge badge-secondary">Local MySQL</span>
+                                        <span class="badge badge-secondary">Hot Reload</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="spec-item mb-3">
+                                    <strong>Tests:</strong>
+                                    <div class="spec-details">
+                                        <span class="badge badge-info">pytest</span>
+                                        <span class="badge badge-info">Selenium</span>
+                                        <span class="badge badge-info">Coverage 80%</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="spec-item mb-3">
+                                    <strong>CI/CD:</strong>
+                                    <div class="spec-details">
+                                        <span class="badge badge-warning">GitHub Actions</span>
+                                        <span class="badge badge-warning">SonarQube</span>
+                                        <span class="badge badge-warning">Terraform</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="spec-item">
+                                    <strong>Qualité:</strong>
+                                    <div class="spec-details">
+                                        <span class="badge badge-success">ESLint</span>
+                                        <span class="badge badge-success">Black</span>
+                                        <span class="badge badge-success">Pre-commit</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sécurité & Conformité -->
+    <section class="security-compliance py-5">
+        <div class="container">
+            <h2 class="text-center mb-5">🔒 Sécurité & Conformité</h2>
+            
+            <div class="security-grid">
+                <div class="row">
+                    <!-- RGPD -->
+                    <div class="col-lg-4 mb-4">
+                        <div class="security-card glass h-100">
+                            <div class="security-icon text-center mb-3">
+                                <i class="fas fa-balance-scale fa-3x text-primary"></i>
+                            </div>
+                            <h4 class="text-center">RGPD/Loi 25</h4>
+                            <ul class="security-features">
+                                <li>Consentement explicite</li>
+                                <li>Droit à l'oubli</li>
+                                <li>Portabilité données</li>
+                                <li>Privacy by design</li>
+                                <li>DPO désigné</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Cryptographie -->
+                    <div class="col-lg-4 mb-4">
+                        <div class="security-card glass h-100">
+                            <div class="security-icon text-center mb-3">
+                                <i class="fas fa-lock fa-3x text-success"></i>
+                            </div>
+                            <h4 class="text-center">Cryptographie</h4>
+                            <ul class="security-features">
+                                <li>AES-256 chiffrement</li>
+                                <li>RSA 4096 signatures</li>
+                                <li>SHA-256 hachage</li>
+                                <li>ECDSA votes</li>
+                                <li>HSM key storage</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Audit -->
+                    <div class="col-lg-4 mb-4">
+                        <div class="security-card glass h-100">
+                            <div class="security-icon text-center mb-3">
+                                <i class="fas fa-search fa-3x text-info"></i>
+                            </div>
+                            <h4 class="text-center">Audit & Traçabilité</h4>
+                            <ul class="security-features">
+                                <li>Logs immuables</li>
+                                <li>Blockchain horodatage</li>
+                                <li>Audit trail complet</li>
+                                <li>Alertes sécurité</li>
+                                <li>Pentests réguliers</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Performance & Scalabilité -->
+    <section class="performance py-5 bg-light">
+        <div class="container">
+            <h2 class="text-center mb-5">⚡ Performance & Scalabilité</h2>
+            
+            <div class="performance-metrics row">
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="metric-card glass text-center p-4">
+                        <div class="metric-value">
+                            <span class="display-4 text-primary">< 2s</span>
+                        </div>
+                        <h5>Temps de réponse</h5>
+                        <p class="text-muted">Pages principales</p>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="metric-card glass text-center p-4">
+                        <div class="metric-value">
+                            <span class="display-4 text-success">10K+</span>
+                        </div>
+                        <h5>Utilisateurs simultanés</h5>
+                        <p class="text-muted">Peak capacity</p>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="metric-card glass text-center p-4">
+                        <div class="metric-value">
+                            <span class="display-4 text-info">99.9%</span>
+                        </div>
+                        <h5>Disponibilité</h5>
+                        <p class="text-muted">SLA garanti</p>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="metric-card glass text-center p-4">
+                        <div class="metric-value">
+                            <span class="display-4 text-warning">1M+</span>
+                        </div>
+                        <h5>Votes/jour</h5>
+                        <p class="text-muted">Capacité théorique</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Navigation -->
+    <section class="navigation-footer py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <a href="/cyberdemocratie" class="btn btn-outline-primary btn-block">
+                        <i class="fas fa-arrow-left"></i> Retour PRD Principal
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="/cyberdemocratie/user-stories" class="btn btn-outline-success btn-block">
+                        <i class="fas fa-user-friends"></i> User Stories
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="/cyberdemocratie/roadmap" class="btn btn-outline-info btn-block">
+                        <i class="fas fa-road"></i> Roadmap
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<style>
+.architecture-prd {
+    font-family: 'Inter', sans-serif;
+}
+
+.hero-architecture {
+    background: linear-gradient(135deg, 
+        rgba(25, 135, 84, 0.1) 0%, 
+        rgba(13, 202, 240, 0.1) 100%);
+    border-radius: 20px;
+    margin: 2rem 0;
+}
+
+.architecture-diagram {
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.diagram-container {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: 1fr;
+}
+
+.layer {
+    padding: 1.5rem;
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+}
+
+.layer-frontend {
+    border-color: #0d6efd;
+    background: linear-gradient(135deg, rgba(13, 110, 253, 0.1) 0%, #ffffff 100%);
+}
+
+.layer-api {
+    border-color: #198754;
+    background: linear-gradient(135deg, rgba(25, 135, 84, 0.1) 0%, #ffffff 100%);
+}
+
+.layer-business {
+    border-color: #fd7e14;
+    background: linear-gradient(135deg, rgba(253, 126, 20, 0.1) 0%, #ffffff 100%);
+}
+
+.layer-data {
+    border-color: #6f42c1;
+    background: linear-gradient(135deg, rgba(111, 66, 193, 0.1) 0%, #ffffff 100%);
+}
+
+.layer h4 {
+    margin-bottom: 1rem;
+    color: #495057;
+}
+
+.components {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.component {
+    background: rgba(0,0,0,0.05);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.component-card, .infra-card, .security-card {
+    border-radius: 15px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
+.component-card:hover, .infra-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.component-header, .infra-header {
+    border-radius: 0;
+}
+
+.feature-list {
+    list-style: none;
+    padding: 0;
+}
+
+.feature-list li {
+    padding: 0.25rem 0;
+    position: relative;
+    padding-left: 1.5rem;
+}
+
+.feature-list li:before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #198754;
+    font-weight: bold;
+}
+
+.tech-badges .badge {
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.spec-item {
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    padding-bottom: 0.75rem;
+}
+
+.spec-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.spec-details {
+    margin-top: 0.5rem;
+}
+
+.spec-details .badge {
+    margin-right: 0.5rem;
+    margin-bottom: 0.25rem;
+}
+
+.security-card {
+    padding: 2rem 1.5rem;
+    text-align: center;
+}
+
+.security-features {
+    list-style: none;
+    padding: 0;
+    text-align: left;
+}
+
+.security-features li {
+    padding: 0.5rem 0;
+    position: relative;
+    padding-left: 2rem;
+}
+
+.security-features li:before {
+    content: "🔐";
+    position: absolute;
+    left: 0;
+}
+
+.metric-card {
+    border-radius: 15px;
+    transition: all 0.3s ease;
+}
+
+.metric-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+.metric-value {
+    margin-bottom: 1rem;
+}
+
+@media (max-width: 768px) {
+    .diagram-container {
+        gap: 0.5rem;
+    }
+    
+    .layer {
+        padding: 1rem;
+    }
+    
+    .components {
+        justify-content: center;
+    }
+    
+    .metric-value .display-4 {
+        font-size: 2rem;
+    }
+}
+
+@media (min-width: 992px) {
+    .diagram-container {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto auto;
+    }
+    
+    .layer-frontend {
+        grid-column: 1 / -1;
+    }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,861 @@
+{% extends "base.html" %}
+
+{% block title %}Roadmap - PRD Cyberdémocratie{% endblock %}
+
+{% block content %}
+<div class="roadmap-prd">
+    <!-- Hero Section -->
+    <section class="hero-roadmap glass text-center py-5">
+        <div class="container">
+            <h1 class="display-4 text-gradient mb-3">🛣️ Roadmap Détaillé</h1>
+            <p class="lead">Planification sur 6 mois - De la conception au déploiement</p>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb justify-content-center bg-transparent">
+                    <li class="breadcrumb-item"><a href="/cyberdemocratie">PRD Cyberdémocratie</a></li>
+                    <li class="breadcrumb-item active">Roadmap</li>
+                </ol>
+            </nav>
+        </div>
+    </section>
+
+    <!-- Vue d'ensemble Timeline -->
+    <section class="timeline-overview py-5">
+        <div class="container">
+            <div class="timeline-header text-center mb-5">
+                <h2>📅 Vue d'ensemble - 6 mois</h2>
+                <p class="lead">De Mars à Août 2025</p>
+            </div>
+
+            <div class="timeline-container">
+                <div class="timeline-line"></div>
+                
+                <!-- Sprint 0 -->
+                <div class="timeline-item sprint-0" data-sprint="0">
+                    <div class="timeline-marker bg-primary"></div>
+                    <div class="timeline-content glass">
+                        <div class="timeline-date">Mars 2025</div>
+                        <h4>Sprint 0 - Préparation</h4>
+                        <p>Infrastructure, équipe, partenaire pilote</p>
+                        <div class="timeline-meta">
+                            <span class="badge badge-primary">2 semaines</span>
+                            <span class="badge badge-success">✓ En cours</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sprint 1 -->
+                <div class="timeline-item sprint-1" data-sprint="1">
+                    <div class="timeline-marker bg-success"></div>
+                    <div class="timeline-content glass">
+                        <div class="timeline-date">Mars-Avril 2025</div>
+                        <h4>Sprint 1 - Authentification & Accès</h4>
+                        <p>Connexion sécurisée, gestion des rôles, 2FA, dashboard personnalisé</p>
+                        <div class="timeline-meta mb-2">
+                            <span class="badge badge-success">2 semaines</span>
+                            <span class="badge badge-warning">En cours</span>
+                        </div>
+                        <div class="timeline-actions">
+                            <a href="/cyberdemocratie/sprint1" class="btn btn-sm btn-primary">
+                                <i class="fas fa-eye"></i> Voir détails
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sprint 2 -->
+                <div class="timeline-item sprint-2" data-sprint="2">
+                    <div class="timeline-marker bg-info"></div>
+                    <div class="timeline-content glass">
+                        <div class="timeline-date">Avril 2025</div>
+                        <h4>Sprint 2 - Propositions</h4>
+                        <p>Débats, commentaires, workflow validation</p>
+                        <div class="timeline-meta">
+                            <span class="badge badge-info">3 semaines</span>
+                            <span class="badge badge-secondary">Backlog</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sprint 3 -->
+                <div class="timeline-item sprint-3" data-sprint="3">
+                    <div class="timeline-marker bg-warning"></div>
+                    <div class="timeline-content glass">
+                        <div class="timeline-date">Mai 2025</div>
+                        <h4>Sprint 3 - Votes</h4>
+                        <p>Système de vote sécurisé et transparent</p>
+                        <div class="timeline-meta">
+                            <span class="badge badge-warning">4 semaines</span>
+                            <span class="badge badge-secondary">Backlog</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sprint 4 -->
+                <div class="timeline-item sprint-4" data-sprint="4">
+                    <div class="timeline-marker bg-danger"></div>
+                    <div class="timeline-content glass">
+                        <div class="timeline-date">Juin 2025</div>
+                        <h4>Sprint 4 - Analytics</h4>
+                        <p>Tableaux de bord, reporting, métriques</p>
+                        <div class="timeline-meta">
+                            <span class="badge badge-danger">3 semaines</span>
+                            <span class="badge badge-secondary">Backlog</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sprint 5 -->
+                <div class="timeline-item sprint-5" data-sprint="5">
+                    <div class="timeline-marker bg-dark"></div>
+                    <div class="timeline-content glass">
+                        <div class="timeline-date">Juillet 2025</div>
+                        <h4>Sprint 5 - Intégration</h4>
+                        <p>API publique, webhooks, intégrations tierces</p>
+                        <div class="timeline-meta">
+                            <span class="badge badge-dark">4 semaines</span>
+                            <span class="badge badge-secondary">Backlog</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sprint 6 -->
+                <div class="timeline-item sprint-6" data-sprint="6">
+                    <div class="timeline-marker bg-purple"></div>
+                    <div class="timeline-content glass">
+                        <div class="timeline-date">Août 2025</div>
+                        <h4>Sprint 6 - Mobile</h4>
+                        <p>Application mobile PWA, notifications push</p>
+                        <div class="timeline-meta">
+                            <span class="badge badge-purple">3 semaines</span>
+                            <span class="badge badge-secondary">Backlog</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sprint 1 Détaillé -->
+    <section class="sprint-detail py-5 bg-light" id="sprint-1-detail">
+        <div class="container">
+            <div class="sprint-header text-center mb-5">
+                <h2><i class="fas fa-rocket text-success"></i> Sprint 1 - MVP Authentification</h2>
+                <p class="lead">3 semaines | 8 User Stories | 25 Story Points</p>
+                <div class="sprint-dates">
+                    <span class="badge badge-primary">Début: 15 Mars 2025</span>
+                    <span class="badge badge-success">Fin: 5 Avril 2025</span>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Planning -->
+                <div class="col-lg-8">
+                    <div class="sprint-planning glass p-4">
+                        <h4><i class="fas fa-calendar-alt text-primary"></i> Planning Sprint</h4>
+                        <div class="planning-table">
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Semaine</th>
+                                            <th>Stories</th>
+                                            <th>Livrables</th>
+                                            <th>Tests</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>S1</strong><br><small>15-21 Mars</small></td>
+                                            <td>US-001, US-002<br><small>Inscription + 2FA</small></td>
+                                            <td>
+                                                <span class="badge badge-primary">Backend Auth</span>
+                                                <span class="badge badge-info">DB Schema</span>
+                                            </td>
+                                            <td>Unit Tests API</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>S2</strong><br><small>22-28 Mars</small></td>
+                                            <td>US-003, US-004<br><small>Profil + Propositions</small></td>
+                                            <td>
+                                                <span class="badge badge-success">Frontend UI</span>
+                                                <span class="badge badge-warning">File Upload</span>
+                                            </td>
+                                            <td>Integration Tests</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>S3</strong><br><small>29 Mars-5 Avril</small></td>
+                                            <td>Testing + Polish<br><small>Bug fixes</small></td>
+                                            <td>
+                                                <span class="badge badge-danger">Demo Ready</span>
+                                                <span class="badge badge-dark">Documentation</span>
+                                            </td>
+                                            <td>E2E Tests</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Métriques -->
+                <div class="col-lg-4">
+                    <div class="sprint-metrics glass p-4">
+                        <h4><i class="fas fa-chart-bar text-info"></i> Métriques Sprint</h4>
+                        <div class="metrics-list">
+                            <div class="metric-item mb-3">
+                                <div class="d-flex justify-content-between">
+                                    <span>Vélocité prévue:</span>
+                                    <strong>25 pts</strong>
+                                </div>
+                                <div class="progress mt-1">
+                                    <div class="progress-bar bg-success" style="width: 32%"></div>
+                                </div>
+                                <small class="text-muted">8/25 pts complétés</small>
+                            </div>
+
+                            <div class="metric-item mb-3">
+                                <div class="d-flex justify-content-between">
+                                    <span>Tests Coverage:</span>
+                                    <strong>85%</strong>
+                                </div>
+                                <div class="progress mt-1">
+                                    <div class="progress-bar bg-info" style="width: 85%"></div>
+                                </div>
+                            </div>
+
+                            <div class="metric-item mb-3">
+                                <div class="d-flex justify-content-between">
+                                    <span>Code Review:</span>
+                                    <strong>100%</strong>
+                                </div>
+                                <div class="progress mt-1">
+                                    <div class="progress-bar bg-warning" style="width: 100%"></div>
+                                </div>
+                            </div>
+
+                            <div class="metric-item">
+                                <div class="d-flex justify-content-between">
+                                    <span>Documentation:</span>
+                                    <strong>60%</strong>
+                                </div>
+                                <div class="progress mt-1">
+                                    <div class="progress-bar bg-danger" style="width: 60%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Risques & Mitigation -->
+            <div class="risks-section mt-5">
+                <h4><i class="fas fa-exclamation-triangle text-warning"></i> Risques & Mitigation</h4>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="risk-card glass p-3 mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="text-danger mb-0">Retard infrastructure</h6>
+                                <span class="badge badge-danger">Élevé</span>
+                            </div>
+                            <p class="text-muted mb-2">Délais configuration AWS/MySQL</p>
+                            <div class="mitigation">
+                                <strong>Mitigation:</strong> Environnement Docker local prêt
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="risk-card glass p-3 mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="text-warning mb-0">Complexité 2FA</h6>
+                                <span class="badge badge-warning">Moyen</span>
+                            </div>
+                            <p class="text-muted mb-2">Intégration service SMS/Email</p>
+                            <div class="mitigation">
+                                <strong>Mitigation:</strong> Fallback email simple
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="risk-card glass p-3 mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="text-info mb-0">Feedback pilote</h6>
+                                <span class="badge badge-info">Faible</span>
+                            </div>
+                            <p class="text-muted mb-2">Changements demandés par PME</p>
+                            <div class="mitigation">
+                                <strong>Mitigation:</strong> Buffer 20% du sprint
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="risk-card glass p-3 mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="text-success mb-0">Ressources équipe</h6>
+                                <span class="badge badge-success">Contrôlé</span>
+                            </div>
+                            <p class="text-muted mb-2">Disponibilité développeurs</p>
+                            <div class="mitigation">
+                                <strong>Status:</strong> Équipe confirmée et disponible
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Milestones Clés -->
+    <section class="milestones py-5">
+        <div class="container">
+            <h2 class="text-center mb-5"><i class="fas fa-flag-checkered text-primary"></i> Milestones Clés</h2>
+            
+            <div class="milestones-timeline">
+                <div class="row">
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="milestone-card glass">
+                            <div class="milestone-header bg-primary text-white p-3">
+                                <h5><i class="fas fa-rocket"></i> MVP Demo</h5>
+                                <div class="milestone-date">5 Avril 2025</div>
+                            </div>
+                            <div class="milestone-content p-3">
+                                <ul class="milestone-checklist">
+                                    <li>✓ Authentification fonctionnelle</li>
+                                    <li>✓ Profils utilisateurs</li>
+                                    <li>⏳ Première proposition</li>
+                                    <li>⏳ Interface responsive</li>
+                                </ul>
+                                <div class="milestone-progress">
+                                    <div class="progress">
+                                        <div class="progress-bar bg-primary" style="width: 65%"></div>
+                                    </div>
+                                    <small>65% complété</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="milestone-card glass">
+                            <div class="milestone-header bg-success text-white p-3">
+                                <h5><i class="fas fa-comments"></i> Beta Débats</h5>
+                                <div class="milestone-date">26 Avril 2025</div>
+                            </div>
+                            <div class="milestone-content p-3">
+                                <ul class="milestone-checklist">
+                                    <li>⏳ Système commentaires</li>
+                                    <li>⏳ Modération contenu</li>
+                                    <li>⏳ Notifications temps réel</li>
+                                    <li>⏳ Workflow validation</li>
+                                </ul>
+                                <div class="milestone-progress">
+                                    <div class="progress">
+                                        <div class="progress-bar bg-success" style="width: 0%"></div>
+                                    </div>
+                                    <small>Planifié</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="milestone-card glass">
+                            <div class="milestone-header bg-warning text-dark p-3">
+                                <h5><i class="fas fa-vote-yea"></i> Votes Sécurisés</h5>
+                                <div class="milestone-date">31 Mai 2025</div>
+                            </div>
+                            <div class="milestone-content p-3">
+                                <ul class="milestone-checklist">
+                                    <li>⏳ Moteur de vote</li>
+                                    <li>⏳ Chiffrement bulletins</li>
+                                    <li>⏳ Résultats temps réel</li>
+                                    <li>⏳ Audit trail complet</li>
+                                </ul>
+                                <div class="milestone-progress">
+                                    <div class="progress">
+                                        <div class="progress-bar bg-warning" style="width: 0%"></div>
+                                    </div>
+                                    <small>Planifié</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="milestone-card glass">
+                            <div class="milestone-header bg-info text-white p-3">
+                                <h5><i class="fas fa-mobile-alt"></i> Production</h5>
+                                <div class="milestone-date">30 Août 2025</div>
+                            </div>
+                            <div class="milestone-content p-3">
+                                <ul class="milestone-checklist">
+                                    <li>⏳ Application mobile</li>
+                                    <li>⏳ API publique</li>
+                                    <li>⏳ Déploiement production</li>
+                                    <li>⏳ Formation utilisateurs</li>
+                                </ul>
+                                <div class="milestone-progress">
+                                    <div class="progress">
+                                        <div class="progress-bar bg-info" style="width: 0%"></div>
+                                    </div>
+                                    <small>Planifié</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Rétrospectives -->
+    <section class="retrospectives py-5 bg-light">
+        <div class="container">
+            <h2 class="text-center mb-5"><i class="fas fa-history text-success"></i> Rétrospectives</h2>
+            
+            <div class="retro-accordion">
+                <div class="card glass mb-3">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <button class="btn btn-link text-decoration-none" data-toggle="collapse" data-target="#retro-sprint0">
+                                Sprint 0 - Préparation (Terminé)
+                            </button>
+                        </h5>
+                    </div>
+                    <div id="retro-sprint0" class="collapse show">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <h6 class="text-success"><i class="fas fa-thumbs-up"></i> Ce qui a bien marché</h6>
+                                    <ul class="retro-list">
+                                        <li>Configuration rapide de l'infrastructure AWS</li>
+                                        <li>Recrutement développeur senior</li>
+                                        <li>Partenariat PME signé</li>
+                                        <li>Stack technique validée</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-4">
+                                    <h6 class="text-warning"><i class="fas fa-exclamation-triangle"></i> À améliorer</h6>
+                                    <ul class="retro-list">
+                                        <li>Documentation technique incomplète</li>
+                                        <li>Setup CI/CD plus long que prévu</li>
+                                        <li>Délais validation sécurité</li>
+                                        <li>Communication avec pilote</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-4">
+                                    <h6 class="text-info"><i class="fas fa-lightbulb"></i> Actions Sprint 1</h6>
+                                    <ul class="retro-list">
+                                        <li>Daily stand-ups à 9h</li>
+                                        <li>Template documentation</li>
+                                        <li>Weekly review avec pilote</li>
+                                        <li>Pair programming backend</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card glass mb-3">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <button class="btn btn-link text-decoration-none collapsed" data-toggle="collapse" data-target="#retro-planning">
+                                Planification générale
+                            </button>
+                        </h5>
+                    </div>
+                    <div id="retro-planning" class="collapse">
+                        <div class="card-body">
+                            <h6><i class="fas fa-chart-line text-primary"></i> Métriques de planification</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="planning-metric">
+                                        <strong>Vélocité estimée:</strong> 20-25 pts/sprint
+                                    </div>
+                                    <div class="planning-metric">
+                                        <strong>Durée sprints:</strong> 3-4 semaines
+                                    </div>
+                                    <div class="planning-metric">
+                                        <strong>Buffer risques:</strong> 20% par sprint
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="planning-metric">
+                                        <strong>Tests coverage:</strong> Min 80%
+                                    </div>
+                                    <div class="planning-metric">
+                                        <strong>Code review:</strong> 100% obligatoire
+                                    </div>
+                                    <div class="planning-metric">
+                                        <strong>Definition of Done:</strong> Définie
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Navigation -->
+    <section class="navigation-footer py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <a href="/cyberdemocratie/user-stories" class="btn btn-outline-primary btn-block">
+                        <i class="fas fa-arrow-left"></i> User Stories
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="/cyberdemocratie" class="btn btn-outline-success btn-block">
+                        <i class="fas fa-home"></i> PRD Principal
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="/cyberdemocratie/metrics" class="btn btn-outline-info btn-block">
+                        <i class="fas fa-chart-line"></i> Métriques & KPIs
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<style>
+.roadmap-prd {
+    font-family: 'Inter', sans-serif;
+}
+
+.hero-roadmap {
+    background: linear-gradient(135deg, 
+        rgba(111, 66, 193, 0.1) 0%, 
+        rgba(13, 202, 240, 0.1) 100%);
+    border-radius: 20px;
+    margin: 2rem 0;
+}
+
+/* Timeline Styles */
+.timeline-container {
+    position: relative;
+    padding: 2rem 0;
+}
+
+.timeline-line {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(to bottom, #0d6efd, #6610f2);
+    transform: translateX(-50%);
+    z-index: 1;
+}
+
+.timeline-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-bottom: 4rem;
+    z-index: 2;
+}
+
+.timeline-item:nth-child(even) {
+    flex-direction: row-reverse;
+}
+
+.timeline-item:nth-child(even) .timeline-content {
+    text-align: right;
+}
+
+.timeline-marker {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 4px solid white;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 3;
+}
+
+.timeline-content {
+    flex: 1;
+    margin: 0 3rem;
+    padding: 2rem;
+    border-radius: 15px;
+    max-width: 450px;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.timeline-content:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+}
+
+.timeline-content::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 0;
+    height: 0;
+    border: 12px solid transparent;
+    transform: translateY(-50%);
+}
+
+.timeline-item:nth-child(odd) .timeline-content::before {
+    right: -24px;
+    border-left-color: rgba(255,255,255,0.9);
+}
+
+.timeline-item:nth-child(even) .timeline-content::before {
+    left: -24px;
+    border-right-color: rgba(255,255,255,0.9);
+}
+
+.timeline-date {
+    font-size: 0.9rem;
+    color: #6c757d;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.timeline-content h4 {
+    color: #0d6efd;
+    margin: 0.5rem 0 1rem 0;
+}
+
+.timeline-meta .badge {
+    margin-right: 0.5rem;
+}
+
+/* Sprint Detail Styles */
+.sprint-header {
+    background: linear-gradient(135deg, rgba(25, 135, 84, 0.1) 0%, rgba(13, 110, 253, 0.1) 100%);
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.sprint-dates .badge {
+    margin: 0 0.5rem;
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+}
+
+.sprint-planning, .sprint-metrics {
+    border-radius: 15px;
+    height: fit-content;
+}
+
+.planning-table .table {
+    margin-bottom: 0;
+}
+
+.planning-table .table td, .planning-table .table th {
+    vertical-align: middle;
+    border-color: rgba(0,0,0,0.1);
+}
+
+.metrics-list .metric-item {
+    padding: 1rem 0;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.metrics-list .metric-item:last-child {
+    border-bottom: none;
+}
+
+.progress {
+    height: 8px;
+    border-radius: 4px;
+}
+
+/* Risk Cards */
+.risk-card {
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    border-left: 4px solid #dc3545;
+}
+
+.risk-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+.mitigation {
+    font-size: 0.9rem;
+    color: #495057;
+}
+
+/* Milestone Cards */
+.milestone-card {
+    border-radius: 15px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.milestone-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+}
+
+.milestone-date {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.milestone-checklist {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 1rem;
+}
+
+.milestone-checklist li {
+    padding: 0.25rem 0;
+    font-size: 0.9rem;
+}
+
+.milestone-progress {
+    margin-top: 1rem;
+}
+
+.milestone-progress .progress {
+    height: 6px;
+}
+
+.milestone-progress small {
+    color: #6c757d;
+}
+
+/* Retrospective Styles */
+.retro-list {
+    list-style: none;
+    padding: 0;
+}
+
+.retro-list li {
+    padding: 0.5rem 0;
+    position: relative;
+    padding-left: 1.5rem;
+    font-size: 0.9rem;
+}
+
+.retro-list li:before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: #0d6efd;
+    font-weight: bold;
+}
+
+.planning-metric {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.planning-metric:last-child {
+    border-bottom: none;
+}
+
+/* Badge personnalisé */
+.badge-purple {
+    background-color: #6610f2;
+    color: white;
+}
+
+.bg-purple {
+    background-color: #6610f2;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .timeline-line {
+        left: 30px;
+    }
+    
+    .timeline-item {
+        flex-direction: row !important;
+        margin-left: 60px;
+    }
+    
+    .timeline-item .timeline-content {
+        text-align: left !important;
+        margin: 0 0 0 1rem;
+    }
+    
+    .timeline-marker {
+        left: 30px;
+    }
+    
+    .timeline-content::before {
+        display: none;
+    }
+    
+    .sprint-dates {
+        text-align: center;
+    }
+    
+    .sprint-dates .badge {
+        margin: 0.25rem;
+        display: inline-block;
+    }
+}
+
+/* Dark mode enhancements */
+@media (prefers-color-scheme: dark) {
+    .timeline-content {
+        background: rgba(0,0,0,0.8);
+        color: white;
+    }
+    
+    .timeline-content::before {
+        border-left-color: rgba(0,0,0,0.8);
+        border-right-color: rgba(0,0,0,0.8);
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animation pour les timeline items
+    const timelineItems = document.querySelectorAll('.timeline-item');
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, { threshold: 0.3 });
+    
+    timelineItems.forEach(item => {
+        item.style.opacity = '0';
+        item.style.transform = 'translateY(30px)';
+        item.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+        observer.observe(item);
+    });
+    
+    // Hover effects pour les milestone cards
+    const milestoneCards = document.querySelectorAll('.milestone-card');
+    milestoneCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-8px) scale(1.02)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(-5px) scale(1)';
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,419 @@
+{% extends "base.html" %}
+
+{% block title %}PRD Cyberdémocratie - UMan API{% endblock %}
+
+{% block content %}
+<div class="cyberdemocratie-prd">
+    <!-- Hero Section -->
+    <section class="hero-prd glass text-center py-5">
+        <div class="container">
+            <div class="cyber-logo mb-4">
+                <i class="fas fa-network-wired fa-3x text-primary mb-3"></i>
+            </div>
+            <h1 class="display-4 text-gradient mb-3">PRD Cyberdémocratie</h1>
+            <p class="lead mb-4">Product Requirements Document - Plateforme de démocratie numérique souveraine</p>
+            <div class="meta-info d-flex justify-content-center gap-4 flex-wrap">
+                <span class="badge badge-primary badge-lg"><i class="fas fa-calendar"></i> Version 2.0</span>
+                <span class="badge badge-success badge-lg"><i class="fas fa-clock"></i> Sprint 0 - Préparation</span>
+                <span class="badge badge-info badge-lg"><i class="fas fa-users"></i> Phase Pilote</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Navigation Rapide -->
+    <section class="quick-nav py-4">
+        <div class="container">
+            <div class="nav-cards row">
+                <div class="col-md-3">
+                    <a href="#sprint0" class="nav-card glass text-center p-3 d-block">
+                        <i class="fas fa-rocket fa-2x mb-2 text-primary"></i>
+                        <h6>Sprint 0</h6>
+                        <small>Préparation</small>
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="#architecture" class="nav-card glass text-center p-3 d-block">
+                        <i class="fas fa-sitemap fa-2x mb-2 text-success"></i>
+                        <h6>Architecture</h6>
+                        <small>Technique</small>
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="#user-stories" class="nav-card glass text-center p-3 d-block">
+                        <i class="fas fa-user-friends fa-2x mb-2 text-info"></i>
+                        <h6>User Stories</h6>
+                        <small>Fonctionnalités</small>
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="#roadmap" class="nav-card glass text-center p-3 d-block">
+                        <i class="fas fa-road fa-2x mb-2 text-warning"></i>
+                        <h6>Roadmap</h6>
+                        <small>Planning</small>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sprint 0 - Préparation -->
+    <section id="sprint0" class="sprint-section py-5">
+        <div class="container">
+            <div class="section-header text-center mb-5">
+                <h2 class="text-gradient">⚡ Sprint 0 – Préparation (2 semaines)</h2>
+                <p class="lead">Mise en place des fondations techniques et organisationnelles</p>
+            </div>
+
+            <div class="sprint-content">
+                <!-- Phases du Sprint 0 -->
+                <div class="row">
+                    <!-- Phase 1: Infrastructure -->
+                    <div class="col-lg-6 mb-4">
+                        <div class="phase-card glass h-100">
+                            <div class="phase-header bg-primary text-white p-3">
+                                <h4><i class="fas fa-server"></i> 1. Infrastructure Technique</h4>
+                                <span class="badge badge-light">Jours 1-5</span>
+                            </div>
+                            <div class="phase-content p-3">
+                                <ul class="checklist">
+                                    <li><i class="fas fa-check-circle text-success"></i> Mise en place serveurs cloud (AWS/Azure)</li>
+                                    <li><i class="fas fa-check-circle text-success"></i> Configuration sécurité (HTTPS, WAF)</li>
+                                    <li><i class="fas fa-circle text-muted"></i> Base de données MySQL haute disponibilité</li>
+                                    <li><i class="fas fa-circle text-muted"></i> CDN et optimisation performances</li>
+                                    <li><i class="fas fa-circle text-muted"></i> Monitoring et alertes</li>
+                                </ul>
+                                <div class="tech-stack mt-3">
+                                    <span class="badge badge-secondary">AWS EC2</span>
+                                    <span class="badge badge-secondary">MySQL 8.0</span>
+                                    <span class="badge badge-secondary">Redis</span>
+                                    <span class="badge badge-secondary">Nginx</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Phase 2: Équipe -->
+                    <div class="col-lg-6 mb-4">
+                        <div class="phase-card glass h-100">
+                            <div class="phase-header bg-success text-white p-3">
+                                <h4><i class="fas fa-users"></i> 2. Organisation Équipe</h4>
+                                <span class="badge badge-light">Jours 1-3</span>
+                            </div>
+                            <div class="phase-content p-3">
+                                <div class="roles-grid">
+                                    <div class="role-item mb-2">
+                                        <strong>Product Owner:</strong> <span class="text-primary">Alexandre M.</span>
+                                        <small class="d-block text-muted">Vision produit, priorités</small>
+                                    </div>
+                                    <div class="role-item mb-2">
+                                        <strong>Scrum Master:</strong> <span class="text-info">À définir</span>
+                                        <small class="d-block text-muted">Facilitation, blocages</small>
+                                    </div>
+                                    <div class="role-item mb-2">
+                                        <strong>Dev Lead:</strong> <span class="text-success">À recruter</span>
+                                        <small class="d-block text-muted">Architecture, code review</small>
+                                    </div>
+                                    <div class="role-item mb-2">
+                                        <strong>UX/UI:</strong> <span class="text-warning">Freelance</span>
+                                        <small class="d-block text-muted">Design, ergonomie</small>
+                                    </div>
+                                    <div class="role-item mb-2">
+                                        <strong>QA:</strong> <span class="text-danger">Auto + Externe</span>
+                                        <small class="d-block text-muted">Tests, qualité</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Phase 3 & 4 -->
+                <div class="row">
+                    <!-- Phase 3: Outils -->
+                    <div class="col-lg-6 mb-4">
+                        <div class="phase-card glass h-100">
+                            <div class="phase-header bg-info text-white p-3">
+                                <h4><i class="fas fa-tools"></i> 3. Outils de Gestion</h4>
+                                <span class="badge badge-light">Jours 2-4</span>
+                            </div>
+                            <div class="phase-content p-3">
+                                <div class="tools-list">
+                                    <div class="tool-item d-flex justify-content-between align-items-center mb-3">
+                                        <div>
+                                            <strong>GitHub</strong>
+                                            <small class="d-block text-muted">Code, versions, CI/CD</small>
+                                        </div>
+                                        <span class="badge badge-success">Activé</span>
+                                    </div>
+                                    <div class="tool-item d-flex justify-content-between align-items-center mb-3">
+                                        <div>
+                                            <strong>Jira</strong>
+                                            <small class="d-block text-muted">User Stories, Sprints</small>
+                                        </div>
+                                        <span class="badge badge-warning">En cours</span>
+                                    </div>
+                                    <div class="tool-item d-flex justify-content-between align-items-center mb-3">
+                                        <div>
+                                            <strong>Docker</strong>
+                                            <small class="d-block text-muted">Conteneurisation</small>
+                                        </div>
+                                        <span class="badge badge-secondary">Planifié</span>
+                                    </div>
+                                    <div class="tool-item d-flex justify-content-between align-items-center mb-3">
+                                        <div>
+                                            <strong>SonarQube</strong>
+                                            <small class="d-block text-muted">Qualité code</small>
+                                        </div>
+                                        <span class="badge badge-secondary">Planifié</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Phase 4: Pilote -->
+                    <div class="col-lg-6 mb-4">
+                        <div class="phase-card glass h-100">
+                            <div class="phase-header bg-warning text-dark p-3">
+                                <h4><i class="fas fa-handshake"></i> 4. Partenaire Pilote</h4>
+                                <span class="badge badge-dark">Jours 5-10</span>
+                            </div>
+                            <div class="phase-content p-3">
+                                <div class="pilot-info">
+                                    <h6>Critères de sélection PME:</h6>
+                                    <ul class="pilot-criteria">
+                                        <li>20-100 employés</li>
+                                        <li>Besoin de consultation interne</li>
+                                        <li>Ouverture au numérique</li>
+                                        <li>Budget innovation disponible</li>
+                                    </ul>
+                                    
+                                    <h6 class="mt-3">Ateliers prévus:</h6>
+                                    <div class="workshop-timeline">
+                                        <div class="workshop-item">
+                                            <strong>Atelier 1:</strong> Découverte besoins (2h)
+                                        </div>
+                                        <div class="workshop-item">
+                                            <strong>Atelier 2:</strong> Définition User Stories (3h)
+                                        </div>
+                                        <div class="workshop-item">
+                                            <strong>Atelier 3:</strong> Priorisation & Planning (2h)
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Livrables Sprint 0 -->
+            <div class="deliverables-section mt-5">
+                <h3 class="text-center mb-4">📋 Livrables du Sprint 0</h3>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="deliverable-card glass text-center p-4">
+                            <i class="fas fa-file-code fa-2x text-primary mb-3"></i>
+                            <h5>Code Base</h5>
+                            <p>Projet Flask configuré avec MySQL, authentification, et structure modulaire</p>
+                            <span class="badge badge-success">✓ Fait</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="deliverable-card glass text-center p-4">
+                            <i class="fas fa-book fa-2x text-info mb-3"></i>
+                            <h5>Backlog Initial</h5>
+                            <p>20 User Stories prioritaires définies avec le partenaire pilote</p>
+                            <span class="badge badge-warning">En cours</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="deliverable-card glass text-center p-4">
+                            <i class="fas fa-cogs fa-2x text-success mb-3"></i>
+                            <h5>CI/CD Pipeline</h5>
+                            <p>Déploiement automatisé, tests unitaires, monitoring</p>
+                            <span class="badge badge-secondary">Planifié</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Navigation vers autres sections -->
+    <section class="navigation-footer py-4 bg-light">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-3">
+                    <a href="/cyberdemocratie/architecture" class="btn btn-outline-primary btn-block">
+                        <i class="fas fa-sitemap"></i> Architecture Technique
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="/cyberdemocratie/user-stories" class="btn btn-outline-success btn-block">
+                        <i class="fas fa-user-friends"></i> User Stories
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="/cyberdemocratie/roadmap" class="btn btn-outline-info btn-block">
+                        <i class="fas fa-road"></i> Roadmap Détaillé
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="/cyberdemocratie/metrics" class="btn btn-outline-warning btn-block">
+                        <i class="fas fa-chart-line"></i> Métriques & KPIs
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<style>
+/* Styles spécifiques au PRD Cyberdémocratie */
+.cyberdemocratie-prd {
+    font-family: 'Inter', sans-serif;
+}
+
+.hero-prd {
+    background: linear-gradient(135deg, 
+        rgba(13, 110, 253, 0.1) 0%, 
+        rgba(102, 16, 242, 0.1) 100%);
+    border-radius: 20px;
+    margin: 2rem 0;
+}
+
+.text-gradient {
+    background: linear-gradient(135deg, #0d6efd, #6610f2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.nav-card {
+    transition: all 0.3s ease;
+    border-radius: 15px;
+    text-decoration: none;
+    color: inherit;
+}
+
+.nav-card:hover {
+    transform: translateY(-5px);
+    text-decoration: none;
+    color: inherit;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.phase-card {
+    border-radius: 15px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.phase-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+.phase-header {
+    border-radius: 0;
+    position: relative;
+}
+
+.phase-header h4 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.checklist {
+    list-style: none;
+    padding: 0;
+}
+
+.checklist li {
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.tech-stack .badge {
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.role-item {
+    padding: 0.5rem;
+    background: rgba(0,0,0,0.03);
+    border-radius: 8px;
+}
+
+.tool-item {
+    padding: 0.75rem;
+    background: rgba(0,0,0,0.02);
+    border-radius: 10px;
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
+.pilot-criteria {
+    list-style: none;
+    padding: 0;
+}
+
+.pilot-criteria li {
+    padding: 0.25rem 0;
+    position: relative;
+    padding-left: 1.5rem;
+}
+
+.pilot-criteria li:before {
+    content: "→";
+    position: absolute;
+    left: 0;
+    color: #0d6efd;
+    font-weight: bold;
+}
+
+.workshop-timeline .workshop-item {
+    padding: 0.5rem 0;
+    border-left: 3px solid #0d6efd;
+    padding-left: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.deliverable-card {
+    border-radius: 15px;
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.deliverable-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.badge-lg {
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+}
+
+.meta-info {
+    gap: 1rem;
+}
+
+@media (max-width: 768px) {
+    .meta-info {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .nav-cards .col-md-3 {
+        margin-bottom: 1rem;
+    }
+    
+    .phase-header h4 {
+        font-size: 1rem;
+    }
+}
+</style>
+{% endblock %}

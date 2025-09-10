@@ -1,0 +1,1031 @@
+{% extends "base.html" %}
+
+{% block title %}Métriques & KPIs - PRD Cyberdémocratie{% endblock %}
+
+{% block content %}
+<div class="metrics-prd">
+    <!-- Hero Section -->
+    <section class="hero-metrics glass text-center py-5">
+        <div class="container">
+            <h1 class="display-4 text-gradient mb-3">📊 Métriques & KPIs</h1>
+            <p class="lead">Indicateurs de performance et mesure du succès</p>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb justify-content-center bg-transparent">
+                    <li class="breadcrumb-item"><a href="/cyberdemocratie">PRD Cyberdémocratie</a></li>
+                    <li class="breadcrumb-item active">Métriques & KPIs</li>
+                </ol>
+            </nav>
+        </div>
+    </section>
+
+    <!-- Dashboard Overview -->
+    <section class="dashboard-overview py-5">
+        <div class="container">
+            <div class="dashboard-header text-center mb-5">
+                <h2><i class="fas fa-tachometer-alt text-primary"></i> Dashboard Temps Réel</h2>
+                <p class="lead">Vue d'ensemble des performances actuelles</p>
+                <div class="last-update">
+                    <small class="text-muted">Dernière mise à jour: <span id="last-update">Maintenant</span></small>
+                </div>
+            </div>
+
+            <!-- KPIs Principaux -->
+            <div class="kpi-grid row">
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="kpi-card glass text-center p-4">
+                        <div class="kpi-icon">
+                            <i class="fas fa-users fa-2x text-primary mb-3"></i>
+                        </div>
+                        <div class="kpi-value">
+                            <span class="display-4 text-primary counter" data-target="127">0</span>
+                        </div>
+                        <h5>Utilisateurs Actifs</h5>
+                        <div class="kpi-trend">
+                            <span class="trend-up">
+                                <i class="fas fa-arrow-up text-success"></i>
+                                +12% cette semaine
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="kpi-card glass text-center p-4">
+                        <div class="kpi-icon">
+                            <i class="fas fa-lightbulb fa-2x text-warning mb-3"></i>
+                        </div>
+                        <div class="kpi-value">
+                            <span class="display-4 text-warning counter" data-target="34">0</span>
+                        </div>
+                        <h5>Propositions Actives</h5>
+                        <div class="kpi-trend">
+                            <span class="trend-up">
+                                <i class="fas fa-arrow-up text-success"></i>
+                                +8 cette semaine
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="kpi-card glass text-center p-4">
+                        <div class="kpi-icon">
+                            <i class="fas fa-vote-yea fa-2x text-success mb-3"></i>
+                        </div>
+                        <div class="kpi-value">
+                            <span class="display-4 text-success counter" data-target="892">0</span>
+                        </div>
+                        <h5>Votes Émis</h5>
+                        <div class="kpi-trend">
+                            <span class="trend-up">
+                                <i class="fas fa-arrow-up text-success"></i>
+                                +156 aujourd'hui
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="kpi-card glass text-center p-4">
+                        <div class="kpi-icon">
+                            <i class="fas fa-percentage fa-2x text-info mb-3"></i>
+                        </div>
+                        <div class="kpi-value">
+                            <span class="display-4 text-info counter" data-target="73">0</span>%
+                        </div>
+                        <h5>Taux Participation</h5>
+                        <div class="kpi-trend">
+                            <span class="trend-up">
+                                <i class="fas fa-arrow-up text-success"></i>
+                                +5% ce mois
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Métriques Techniques -->
+    <section class="technical-metrics py-5 bg-light">
+        <div class="container">
+            <div class="section-header text-center mb-5">
+                <h2><i class="fas fa-server text-success"></i> Métriques Techniques</h2>
+                <p class="lead">Performance système et infrastructure</p>
+            </div>
+
+            <div class="row">
+                <!-- Performance -->
+                <div class="col-lg-6 mb-4">
+                    <div class="metric-panel glass">
+                        <div class="panel-header bg-success text-white p-3">
+                            <h4><i class="fas fa-tachometer-alt"></i> Performance</h4>
+                        </div>
+                        <div class="panel-content p-4">
+                            <div class="metric-item mb-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>Temps de réponse moyen</span>
+                                    <strong class="text-success">1.2s</strong>
+                                </div>
+                                <div class="progress mt-2">
+                                    <div class="progress-bar bg-success" style="width: 85%"></div>
+                                </div>
+                                <small class="text-muted">Objectif: < 2s</small>
+                            </div>
+
+                            <div class="metric-item mb-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>Disponibilité (SLA)</span>
+                                    <strong class="text-success">99.95%</strong>
+                                </div>
+                                <div class="progress mt-2">
+                                    <div class="progress-bar bg-success" style="width: 99.95%"></div>
+                                </div>
+                                <small class="text-muted">Objectif: > 99.9%</small>
+                            </div>
+
+                            <div class="metric-item mb-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>Erreurs 5xx</span>
+                                    <strong class="text-success">0.02%</strong>
+                                </div>
+                                <div class="progress mt-2">
+                                    <div class="progress-bar bg-success" style="width: 5%"></div>
+                                </div>
+                                <small class="text-muted">Objectif: < 0.1%</small>
+                            </div>
+
+                            <div class="metric-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>Throughput</span>
+                                    <strong class="text-info">245 req/min</strong>
+                                </div>
+                                <div class="progress mt-2">
+                                    <div class="progress-bar bg-info" style="width: 65%"></div>
+                                </div>
+                                <small class="text-muted">Capacité: 500 req/min</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sécurité -->
+                <div class="col-lg-6 mb-4">
+                    <div class="metric-panel glass">
+                        <div class="panel-header bg-danger text-white p-3">
+                            <h4><i class="fas fa-shield-alt"></i> Sécurité</h4>
+                        </div>
+                        <div class="panel-content p-4">
+                            <div class="metric-item mb-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>Tentatives de connexion malveillantes</span>
+                                    <strong class="text-warning">12</strong>
+                                </div>
+                                <div class="metric-detail">
+                                    <small class="text-muted">Toutes bloquées par rate limiting</small>
+                                </div>
+                            </div>
+
+                            <div class="metric-item mb-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>Certificats SSL</span>
+                                    <strong class="text-success">Valides</strong>
+                                </div>
+                                <div class="metric-detail">
+                                    <small class="text-muted">Expire dans 87 jours</small>
+                                </div>
+                            </div>
+
+                            <div class="metric-item mb-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>Dernière sauvegarde</span>
+                                    <strong class="text-success">Il y a 2h</strong>
+                                </div>
+                                <div class="metric-detail">
+                                    <small class="text-muted">Automatique, toutes les 6h</small>
+                                </div>
+                            </div>
+
+                            <div class="metric-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>Audit logs</span>
+                                    <strong class="text-info">1,247 entrées</strong>
+                                </div>
+                                <div class="metric-detail">
+                                    <small class="text-muted">Dernière 24h</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Métriques Utilisateurs -->
+    <section class="user-metrics py-5">
+        <div class="container">
+            <div class="section-header text-center mb-5">
+                <h2><i class="fas fa-user-friends text-info"></i> Métriques Utilisateurs</h2>
+                <p class="lead">Engagement et comportement des utilisateurs</p>
+            </div>
+
+            <div class="row">
+                <!-- Engagement -->
+                <div class="col-lg-8 mb-4">
+                    <div class="chart-panel glass">
+                        <div class="panel-header p-3">
+                            <h4><i class="fas fa-chart-line text-primary"></i> Évolution Engagement (30 jours)</h4>
+                        </div>
+                        <div class="panel-content p-4">
+                            <div class="chart-container">
+                                <canvas id="engagementChart" width="400" height="200"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Détaillées -->
+                <div class="col-lg-4 mb-4">
+                    <div class="stats-panel glass">
+                        <div class="panel-header bg-info text-white p-3">
+                            <h4><i class="fas fa-chart-pie"></i> Statistiques</h4>
+                        </div>
+                        <div class="panel-content p-3">
+                            <div class="stat-item mb-3">
+                                <div class="stat-label">Sessions par utilisateur</div>
+                                <div class="stat-value text-primary">3.4</div>
+                                <div class="stat-change text-success">+0.2 vs mois dernier</div>
+                            </div>
+
+                            <div class="stat-item mb-3">
+                                <div class="stat-label">Durée session moyenne</div>
+                                <div class="stat-value text-info">12m 34s</div>
+                                <div class="stat-change text-success">+2m 15s vs mois dernier</div>
+                            </div>
+
+                            <div class="stat-item mb-3">
+                                <div class="stat-label">Taux de rebond</div>
+                                <div class="stat-value text-warning">23%</div>
+                                <div class="stat-change text-success">-5% vs mois dernier</div>
+                            </div>
+
+                            <div class="stat-item">
+                                <div class="stat-label">NPS Score</div>
+                                <div class="stat-value text-success">8.2/10</div>
+                                <div class="stat-change text-success">+0.3 vs mois dernier</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Funnel Conversion -->
+            <div class="conversion-funnel mt-5">
+                <h4 class="text-center mb-4"><i class="fas fa-filter text-warning"></i> Funnel de Conversion</h4>
+                <div class="funnel-container glass p-4">
+                    <div class="funnel-stage">
+                        <div class="stage-bar" style="width: 100%; background: #0d6efd;">
+                            <span class="stage-label">Visiteurs</span>
+                            <span class="stage-value">1,254</span>
+                        </div>
+                    </div>
+                    <div class="funnel-stage">
+                        <div class="stage-bar" style="width: 68%; background: #198754;">
+                            <span class="stage-label">Inscriptions</span>
+                            <span class="stage-value">853</span>
+                        </div>
+                    </div>
+                    <div class="funnel-stage">
+                        <div class="stage-bar" style="width: 45%; background: #ffc107;">
+                            <span class="stage-label">Profil complété</span>
+                            <span class="stage-value">564</span>
+                        </div>
+                    </div>
+                    <div class="funnel-stage">
+                        <div class="stage-bar" style="width: 38%; background: #fd7e14;">
+                            <span class="stage-label">Première proposition</span>
+                            <span class="stage-value">476</span>
+                        </div>
+                    </div>
+                    <div class="funnel-stage">
+                        <div class="stage-bar" style="width: 29%; background: #dc3545;">
+                            <span class="stage-label">Premier vote</span>
+                            <span class="stage-value">364</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Objectifs et Cibles -->
+    <section class="objectives py-5 bg-light">
+        <div class="container">
+            <div class="section-header text-center mb-5">
+                <h2><i class="fas fa-bullseye text-danger"></i> Objectifs & Cibles</h2>
+                <p class="lead">Indicateurs de succès à atteindre</p>
+            </div>
+
+            <div class="objectives-timeline">
+                <div class="row">
+                    <!-- Q2 2025 -->
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="objective-card glass">
+                            <div class="objective-header bg-primary text-white p-3">
+                                <h5>Q2 2025</h5>
+                                <small>Avril - Juin</small>
+                            </div>
+                            <div class="objective-content p-3">
+                                <div class="objective-item mb-2">
+                                    <div class="d-flex justify-content-between">
+                                        <span>Utilisateurs actifs</span>
+                                        <strong>500</strong>
+                                    </div>
+                                    <div class="progress mt-1">
+                                        <div class="progress-bar bg-primary" style="width: 25%"></div>
+                                    </div>
+                                    <small class="text-muted">127/500 (25%)</small>
+                                </div>
+
+                                <div class="objective-item mb-2">
+                                    <div class="d-flex justify-content-between">
+                                        <span>Propositions</span>
+                                        <strong>100</strong>
+                                    </div>
+                                    <div class="progress mt-1">
+                                        <div class="progress-bar bg-primary" style="width: 34%"></div>
+                                    </div>
+                                    <small class="text-muted">34/100 (34%)</small>
+                                </div>
+
+                                <div class="objective-item">
+                                    <div class="d-flex justify-content-between">
+                                        <span>Taux participation</span>
+                                        <strong>60%</strong>
+                                    </div>
+                                    <div class="progress mt-1">
+                                        <div class="progress-bar bg-success" style="width: 73%"></div>
+                                    </div>
+                                    <small class="text-success">73% - Objectif dépassé!</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Q3 2025 -->
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="objective-card glass">
+                            <div class="objective-header bg-success text-white p-3">
+                                <h5>Q3 2025</h5>
+                                <small>Juillet - Septembre</small>
+                            </div>
+                            <div class="objective-content p-3">
+                                <div class="objective-item mb-2">
+                                    <div class="d-flex justify-content-between">
+                                        <span>Utilisateurs actifs</span>
+                                        <strong>1,500</strong>
+                                    </div>
+                                    <small class="text-muted">Croissance 3x</small>
+                                </div>
+
+                                <div class="objective-item mb-2">
+                                    <div class="d-flex justify-content-between">
+                                        <span>PME pilotes</span>
+                                        <strong>5</strong>
+                                    </div>
+                                    <small class="text-muted">Déploiement élargi</small>
+                                </div>
+
+                                <div class="objective-item">
+                                    <div class="d-flex justify-content-between">
+                                        <span>App mobile</span>
+                                        <strong>100%</strong>
+                                    </div>
+                                    <small class="text-muted">PWA fonctionnelle</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Q4 2025 -->
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="objective-card glass">
+                            <div class="objective-header bg-warning text-dark p-3">
+                                <h5>Q4 2025</h5>
+                                <small>Octobre - Décembre</small>
+                            </div>
+                            <div class="objective-content p-3">
+                                <div class="objective-item mb-2">
+                                    <div class="d-flex justify-content-between">
+                                        <span>Revenus ARR</span>
+                                        <strong>50K€</strong>
+                                    </div>
+                                    <small class="text-muted">Modèle économique</small>
+                                </div>
+
+                                <div class="objective-item mb-2">
+                                    <div class="d-flex justify-content-between">
+                                        <span>Rétention 6 mois</span>
+                                        <strong>80%</strong>
+                                    </div>
+                                    <small class="text-muted">Engagement long terme</small>
+                                </div>
+
+                                <div class="objective-item">
+                                    <div class="d-flex justify-content-between">
+                                        <span>NPS Score</span>
+                                        <strong>9/10</strong>
+                                    </div>
+                                    <small class="text-muted">Satisfaction client</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Q1 2026 -->
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="objective-card glass">
+                            <div class="objective-header bg-info text-white p-3">
+                                <h5>Q1 2026</h5>
+                                <small>Janvier - Mars</small>
+                            </div>
+                            <div class="objective-content p-3">
+                                <div class="objective-item mb-2">
+                                    <div class="d-flex justify-content-between">
+                                        <span>Expansion EU</span>
+                                        <strong>3 pays</strong>
+                                    </div>
+                                    <small class="text-muted">Internationalisation</small>
+                                </div>
+
+                                <div class="objective-item mb-2">
+                                    <div class="d-flex justify-content-between">
+                                        <span>Partenariats</span>
+                                        <strong>10</strong>
+                                    </div>
+                                    <small class="text-muted">Écosystème</small>
+                                </div>
+
+                                <div class="objective-item">
+                                    <div class="d-flex justify-content-between">
+                                        <span>Levée de fonds</span>
+                                        <strong>Série A</strong>
+                                    </div>
+                                    <small class="text-muted">Croissance accélérée</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Alertes et Monitoring -->
+    <section class="alerts-monitoring py-5">
+        <div class="container">
+            <div class="section-header text-center mb-5">
+                <h2><i class="fas fa-bell text-warning"></i> Alertes & Monitoring</h2>
+                <p class="lead">Surveillance automatique et notifications</p>
+            </div>
+
+            <div class="row">
+                <!-- Alertes Actives -->
+                <div class="col-lg-6 mb-4">
+                    <div class="alerts-panel glass">
+                        <div class="panel-header bg-warning text-dark p-3">
+                            <h4><i class="fas fa-exclamation-triangle"></i> Alertes Actives</h4>
+                        </div>
+                        <div class="panel-content p-3">
+                            <div class="alert-item d-flex align-items-center mb-3">
+                                <div class="alert-status bg-warning"></div>
+                                <div class="alert-content flex-grow-1">
+                                    <strong>Latence élevée</strong>
+                                    <div class="alert-detail">Temps de réponse > 1.5s sur /api/votes</div>
+                                    <small class="text-muted">Il y a 15 min</small>
+                                </div>
+                                <div class="alert-action">
+                                    <button class="btn btn-sm btn-outline-warning">Résoudre</button>
+                                </div>
+                            </div>
+
+                            <div class="alert-item d-flex align-items-center mb-3">
+                                <div class="alert-status bg-info"></div>
+                                <div class="alert-content flex-grow-1">
+                                    <strong>Pic de trafic</strong>
+                                    <div class="alert-detail">300% d'augmentation en 1h</div>
+                                    <small class="text-muted">Il y a 1h</small>
+                                </div>
+                                <div class="alert-action">
+                                    <button class="btn btn-sm btn-outline-info">Voir détails</button>
+                                </div>
+                            </div>
+
+                            <div class="alert-item d-flex align-items-center">
+                                <div class="alert-status bg-success"></div>
+                                <div class="alert-content flex-grow-1">
+                                    <strong>Objectif atteint</strong>
+                                    <div class="alert-detail">Taux participation > 70%</div>
+                                    <small class="text-muted">Il y a 2h</small>
+                                </div>
+                                <div class="alert-action">
+                                    <button class="btn btn-sm btn-outline-success">Célébrer!</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Configuration Monitoring -->
+                <div class="col-lg-6 mb-4">
+                    <div class="monitoring-config glass">
+                        <div class="panel-header bg-dark text-white p-3">
+                            <h4><i class="fas fa-cogs"></i> Configuration Monitoring</h4>
+                        </div>
+                        <div class="panel-content p-3">
+                            <div class="config-section mb-3">
+                                <h6><i class="fas fa-server text-primary"></i> Infrastructure</h6>
+                                <div class="config-list">
+                                    <div class="config-item">
+                                        <span>CPU > 80%</span>
+                                        <span class="badge badge-success">Actif</span>
+                                    </div>
+                                    <div class="config-item">
+                                        <span>RAM > 90%</span>
+                                        <span class="badge badge-success">Actif</span>
+                                    </div>
+                                    <div class="config-item">
+                                        <span>Disk > 85%</span>
+                                        <span class="badge badge-success">Actif</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="config-section mb-3">
+                                <h6><i class="fas fa-users text-info"></i> Utilisateurs</h6>
+                                <div class="config-list">
+                                    <div class="config-item">
+                                        <span>Participation < 50%</span>
+                                        <span class="badge badge-warning">Surveillance</span>
+                                    </div>
+                                    <div class="config-item">
+                                        <span>Inscriptions quotidiennes</span>
+                                        <span class="badge badge-success">Actif</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="config-section">
+                                <h6><i class="fas fa-shield-alt text-danger"></i> Sécurité</h6>
+                                <div class="config-list">
+                                    <div class="config-item">
+                                        <span>Tentatives brute force</span>
+                                        <span class="badge badge-success">Actif</span>
+                                    </div>
+                                    <div class="config-item">
+                                        <span>Certificat SSL expire</span>
+                                        <span class="badge badge-success">Actif</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Navigation -->
+    <section class="navigation-footer py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <a href="/cyberdemocratie/roadmap" class="btn btn-outline-primary btn-block">
+                        <i class="fas fa-arrow-left"></i> Roadmap
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="/cyberdemocratie" class="btn btn-outline-success btn-block">
+                        <i class="fas fa-home"></i> PRD Principal
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="/cyberdemocratie/export" class="btn btn-outline-info btn-block">
+                        <i class="fas fa-download"></i> Export Rapport
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<style>
+.metrics-prd {
+    font-family: 'Inter', sans-serif;
+}
+
+.hero-metrics {
+    background: linear-gradient(135deg, 
+        rgba(220, 53, 69, 0.1) 0%, 
+        rgba(255, 193, 7, 0.1) 100%);
+    border-radius: 20px;
+    margin: 2rem 0;
+}
+
+/* KPI Cards */
+.kpi-card {
+    border-radius: 15px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(45deg, #0d6efd, #6610f2);
+}
+
+.kpi-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+
+.kpi-value {
+    margin: 1rem 0;
+}
+
+.kpi-trend {
+    margin-top: 1rem;
+}
+
+.trend-up {
+    color: #198754;
+    font-size: 0.9rem;
+}
+
+.trend-down {
+    color: #dc3545;
+    font-size: 0.9rem;
+}
+
+/* Counter Animation */
+.counter {
+    display: inline-block;
+}
+
+/* Metric Panels */
+.metric-panel, .stats-panel, .alerts-panel, .monitoring-config {
+    border-radius: 15px;
+    overflow: hidden;
+    height: 100%;
+}
+
+.panel-header {
+    border-radius: 0;
+}
+
+.metric-item {
+    padding: 1rem 0;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.metric-item:last-child {
+    border-bottom: none;
+}
+
+.metric-detail {
+    margin-top: 0.5rem;
+}
+
+/* Chart Container */
+.chart-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+}
+
+/* Stats Panel */
+.stat-item {
+    text-align: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.stat-item:last-child {
+    border-bottom: none;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.stat-change {
+    font-size: 0.8rem;
+}
+
+/* Conversion Funnel */
+.funnel-container {
+    border-radius: 15px;
+}
+
+.funnel-stage {
+    margin-bottom: 0.5rem;
+}
+
+.stage-bar {
+    position: relative;
+    height: 50px;
+    border-radius: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+    color: white;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.stage-bar:hover {
+    transform: scale(1.02);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.stage-label {
+    flex-grow: 1;
+}
+
+.stage-value {
+    font-size: 1.1rem;
+}
+
+/* Objective Cards */
+.objective-card {
+    border-radius: 15px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.objective-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+}
+
+.objective-item {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.objective-item:last-child {
+    border-bottom: none;
+}
+
+/* Alerts */
+.alert-item {
+    padding: 1rem 0;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.alert-item:last-child {
+    border-bottom: none;
+}
+
+.alert-status {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 1rem;
+    flex-shrink: 0;
+}
+
+.alert-detail {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+/* Config Monitoring */
+.config-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    font-size: 0.9rem;
+}
+
+.config-section {
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    padding-bottom: 1rem;
+}
+
+.config-section:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+/* Progress bars custom colors */
+.progress-bar.bg-success {
+    background: linear-gradient(45deg, #198754, #20c997) !important;
+}
+
+.progress-bar.bg-info {
+    background: linear-gradient(45deg, #0dcaf0, #17a2b8) !important;
+}
+
+.progress-bar.bg-warning {
+    background: linear-gradient(45deg, #ffc107, #fd7e14) !important;
+}
+
+.progress-bar.bg-danger {
+    background: linear-gradient(45deg, #dc3545, #e91e63) !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .kpi-value .display-4 {
+        font-size: 2.5rem;
+    }
+    
+    .stage-bar {
+        padding: 0 1rem;
+        font-size: 0.9rem;
+    }
+    
+    .chart-container {
+        height: 250px;
+    }
+}
+
+/* Animation keyframes */
+@keyframes countUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.counter {
+    animation: countUp 1s ease-out;
+}
+</style>
+
+<!-- Chart.js pour les graphiques -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animation des compteurs
+    function animateCounters() {
+        const counters = document.querySelectorAll('.counter');
+        
+        counters.forEach(counter => {
+            const target = parseInt(counter.getAttribute('data-target'));
+            const duration = 2000;
+            const increment = target / (duration / 16);
+            let current = 0;
+            
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+                counter.textContent = Math.floor(current);
+            }, 16);
+        });
+    }
+    
+    // Graphique d'engagement
+    function createEngagementChart() {
+        const ctx = document.getElementById('engagementChart').getContext('2d');
+        
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'],
+                datasets: [{
+                    label: 'Utilisateurs actifs',
+                    data: [45, 67, 89, 127],
+                    borderColor: '#0d6efd',
+                    backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }, {
+                    label: 'Propositions',
+                    data: [12, 18, 25, 34],
+                    borderColor: '#ffc107',
+                    backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }, {
+                    label: 'Votes',
+                    data: [234, 456, 678, 892],
+                    borderColor: '#198754',
+                    backgroundColor: 'rgba(25, 135, 84, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    yAxisID: 'y1'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    intersect: false,
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    }
+                },
+                scales: {
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        beginAtZero: true
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        beginAtZero: true,
+                        grid: {
+                            drawOnChartArea: false,
+                        },
+                    }
+                }
+            }
+        });
+    }
+    
+    // Mise à jour temps réel
+    function updateLastUpdateTime() {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('fr-FR');
+        document.getElementById('last-update').textContent = timeString;
+    }
+    
+    // Hover effects pour les KPI cards
+    const kpiCards = document.querySelectorAll('.kpi-card');
+    kpiCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-12px) scale(1.02)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(-10px) scale(1)';
+        });
+    });
+    
+    // Intersection Observer pour les animations
+    const observerOptions = {
+        threshold: 0.3,
+        rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+                
+                // Animer les compteurs quand ils deviennent visibles
+                if (entry.target.classList.contains('kpi-card')) {
+                    animateCounters();
+                }
+            }
+        });
+    }, observerOptions);
+    
+    // Observer tous les éléments animables
+    document.querySelectorAll('.kpi-card, .metric-panel, .objective-card').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(30px)';
+        el.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+        observer.observe(el);
+    });
+    
+    // Initialisation
+    setTimeout(() => {
+        createEngagementChart();
+        updateLastUpdateTime();
+        
+        // Mise à jour toutes les minutes
+        setInterval(updateLastUpdateTime, 60000);
+    }, 500);
+});
+</script>
+{% endblock %}

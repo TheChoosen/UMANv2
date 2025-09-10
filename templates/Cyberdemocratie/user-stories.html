@@ -1,0 +1,676 @@
+{% extends "base.html" %}
+
+{% block title %}User Stories - PRD Cyberdémocratie{% endblock %}
+
+{% block content %}
+<div class="user-stories-prd">
+    <!-- Hero Section -->
+    <section class="hero-stories glass text-center py-5">
+        <div class="container">
+            <h1 class="display-4 text-gradient mb-3">📋 User Stories</h1>
+            <p class="lead">Fonctionnalités prioritaires définies avec le partenaire pilote</p>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb justify-content-center bg-transparent">
+                    <li class="breadcrumb-item"><a href="/cyberdemocratie">PRD Cyberdémocratie</a></li>
+                    <li class="breadcrumb-item active">User Stories</li>
+                </ol>
+            </nav>
+        </div>
+    </section>
+
+    <!-- Statistiques des Stories -->
+    <section class="stories-stats py-4">
+        <div class="container">
+            <div class="stats-grid row">
+                <div class="col-md-3">
+                    <div class="stat-card glass text-center p-3">
+                        <div class="stat-number text-primary">25</div>
+                        <div class="stat-label">Total Stories</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card glass text-center p-3">
+                        <div class="stat-number text-success">8</div>
+                        <div class="stat-label">Sprint 1</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card glass text-center p-3">
+                        <div class="stat-number text-info">12</div>
+                        <div class="stat-label">Sprint 2-3</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card glass text-center p-3">
+                        <div class="stat-number text-warning">5</div>
+                        <div class="stat-label">Backlog</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Personas -->
+    <section class="personas py-5">
+        <div class="container">
+            <h2 class="text-center mb-5">👥 Personas Principales</h2>
+            <div class="personas-grid row">
+                <div class="col-lg-4 mb-4">
+                    <div class="persona-card glass">
+                        <div class="persona-avatar text-center p-3">
+                            <i class="fas fa-user-tie fa-3x text-primary mb-2"></i>
+                            <h4>Marie - Directrice RH</h4>
+                            <p class="text-muted">PME 80 employés</p>
+                        </div>
+                        <div class="persona-details p-3">
+                            <h6><i class="fas fa-bullseye"></i> Objectifs:</h6>
+                            <ul>
+                                <li>Améliorer engagement employés</li>
+                                <li>Consultation sur politiques RH</li>
+                                <li>Mesurer satisfaction équipes</li>
+                            </ul>
+                            <h6><i class="fas fa-exclamation-triangle"></i> Pain Points:</h6>
+                            <ul>
+                                <li>Faible participation sondages</li>
+                                <li>Feedback peu constructif</li>
+                                <li>Processus lents</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 mb-4">
+                    <div class="persona-card glass">
+                        <div class="persona-avatar text-center p-3">
+                            <i class="fas fa-users fa-3x text-success mb-2"></i>
+                            <h4>Thomas - Employé</h4>
+                            <p class="text-muted">Développeur, 28 ans</p>
+                        </div>
+                        <div class="persona-details p-3">
+                            <h6><i class="fas fa-bullseye"></i> Objectifs:</h6>
+                            <ul>
+                                <li>Faire entendre sa voix</li>
+                                <li>Proposer améliorations</li>
+                                <li>Participer aux décisions</li>
+                            </ul>
+                            <h6><i class="fas fa-exclamation-triangle"></i> Pain Points:</h6>
+                            <ul>
+                                <li>Manque de transparence</li>
+                                <li>Suggestions ignorées</li>
+                                <li>Processus bureaucratiques</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 mb-4">
+                    <div class="persona-card glass">
+                        <div class="persona-avatar text-center p-3">
+                            <i class="fas fa-crown fa-3x text-warning mb-2"></i>
+                            <h4>Jean - PDG</h4>
+                            <p class="text-muted">Dirigeant, 45 ans</p>
+                        </div>
+                        <div class="persona-details p-3">
+                            <h6><i class="fas fa-bullseye"></i> Objectifs:</h6>
+                            <ul>
+                                <li>Prendre meilleures décisions</li>
+                                <li>Impliquer toute l'équipe</li>
+                                <li>Traçabilité des choix</li>
+                            </ul>
+                            <h6><i class="fas fa-exclamation-triangle"></i> Pain Points:</h6>
+                            <ul>
+                                <li>Décisions en vase clos</li>
+                                <li>Résistance au changement</li>
+                                <li>Manque de légitimité</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Epic 1: Authentification & Profils -->
+    <section class="epic-section py-5 bg-light">
+        <div class="container">
+            <div class="epic-header text-center mb-5">
+                <h2><i class="fas fa-user-shield text-primary"></i> Epic 1: Authentification & Profils</h2>
+                <p class="lead">Gestion sécurisée des utilisateurs et de leurs droits</p>
+                <div class="epic-meta">
+                    <span class="badge badge-primary">Sprint 1</span>
+                    <span class="badge badge-success">Priorité Haute</span>
+                    <span class="badge badge-info">8 Story Points</span>
+                </div>
+            </div>
+
+            <div class="stories-list">
+                <div class="story-card glass mb-3">
+                    <div class="story-header d-flex justify-content-between align-items-center p-3">
+                        <div class="story-title">
+                            <h5><strong>US-001:</strong> Inscription sécurisée</h5>
+                            <p class="text-muted mb-0">En tant qu'employé, je veux créer un compte sécurisé pour accéder à la plateforme</p>
+                        </div>
+                        <div class="story-meta">
+                            <span class="badge badge-success">3 pts</span>
+                            <span class="badge badge-primary">Sprint 1</span>
+                        </div>
+                    </div>
+                    <div class="story-content p-3 pt-0">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-check-circle text-success"></i> Critères d'acceptation:</h6>
+                                <ul class="acceptance-criteria">
+                                    <li>Formulaire avec email, mot de passe fort</li>
+                                    <li>Vérification email obligatoire</li>
+                                    <li>Validation côté client et serveur</li>
+                                    <li>Messages d'erreur clairs</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-cogs text-info"></i> Tâches techniques:</h6>
+                                <ul class="technical-tasks">
+                                    <li>API endpoint POST /register</li>
+                                    <li>Validation Flask-WTF</li>
+                                    <li>Hash bcrypt password</li>
+                                    <li>Email confirmation service</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="story-card glass mb-3">
+                    <div class="story-header d-flex justify-content-between align-items-center p-3">
+                        <div class="story-title">
+                            <h5><strong>US-002:</strong> Connexion avec 2FA</h5>
+                            <p class="text-muted mb-0">En tant qu'utilisateur, je veux me connecter de façon sécurisée avec double authentification</p>
+                        </div>
+                        <div class="story-meta">
+                            <span class="badge badge-warning">5 pts</span>
+                            <span class="badge badge-primary">Sprint 1</span>
+                        </div>
+                    </div>
+                    <div class="story-content p-3 pt-0">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-check-circle text-success"></i> Critères d'acceptation:</h6>
+                                <ul class="acceptance-criteria">
+                                    <li>Login email/password</li>
+                                    <li>Code 2FA par SMS/email</li>
+                                    <li>Session JWT sécurisée</li>
+                                    <li>Remember me option</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-cogs text-info"></i> Tâches techniques:</h6>
+                                <ul class="technical-tasks">
+                                    <li>JWT token generation</li>
+                                    <li>2FA service integration</li>
+                                    <li>Session management</li>
+                                    <li>Rate limiting login</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="story-card glass mb-3">
+                    <div class="story-header d-flex justify-content-between align-items-center p-3">
+                        <div class="story-title">
+                            <h5><strong>US-003:</strong> Profil utilisateur</h5>
+                            <p class="text-muted mb-0">En tant qu'utilisateur, je veux gérer mon profil et mes préférences</p>
+                        </div>
+                        <div class="story-meta">
+                            <span class="badge badge-success">2 pts</span>
+                            <span class="badge badge-primary">Sprint 1</span>
+                        </div>
+                    </div>
+                    <div class="story-content p-3 pt-0">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-check-circle text-success"></i> Critères d'acceptation:</h6>
+                                <ul class="acceptance-criteria">
+                                    <li>Édition nom, prénom, département</li>
+                                    <li>Photo de profil optionnelle</li>
+                                    <li>Préférences notifications</li>
+                                    <li>Historique participations</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-cogs text-info"></i> Tâches techniques:</h6>
+                                <ul class="technical-tasks">
+                                    <li>CRUD profil API</li>
+                                    <li>Upload image sécurisé</li>
+                                    <li>Validation données</li>
+                                    <li>Interface responsive</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Epic 2: Propositions & Débats -->
+    <section class="epic-section py-5">
+        <div class="container">
+            <div class="epic-header text-center mb-5">
+                <h2><i class="fas fa-lightbulb text-warning"></i> Epic 2: Propositions & Débats</h2>
+                <p class="lead">Création et discussion des propositions collaboratives</p>
+                <div class="epic-meta">
+                    <span class="badge badge-primary">Sprint 1-2</span>
+                    <span class="badge badge-success">Priorité Haute</span>
+                    <span class="badge badge-info">13 Story Points</span>
+                </div>
+            </div>
+
+            <div class="stories-list">
+                <div class="story-card glass mb-3">
+                    <div class="story-header d-flex justify-content-between align-items-center p-3">
+                        <div class="story-title">
+                            <h5><strong>US-004:</strong> Créer une proposition</h5>
+                            <p class="text-muted mb-0">En tant qu'employé, je veux soumettre une proposition d'amélioration</p>
+                        </div>
+                        <div class="story-meta">
+                            <span class="badge badge-warning">5 pts</span>
+                            <span class="badge badge-primary">Sprint 1</span>
+                        </div>
+                    </div>
+                    <div class="story-content p-3 pt-0">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-check-circle text-success"></i> Critères d'acceptation:</h6>
+                                <ul class="acceptance-criteria">
+                                    <li>Formulaire titre, description, catégorie</li>
+                                    <li>Pièces jointes supportées</li>
+                                    <li>Brouillon sauvegardé auto</li>
+                                    <li>Validation avant publication</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-cogs text-info"></i> Tâches techniques:</h6>
+                                <ul class="technical-tasks">
+                                    <li>API POST /propositions</li>
+                                    <li>Rich text editor</li>
+                                    <li>File upload service</li>
+                                    <li>Auto-save drafts</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="story-card glass mb-3">
+                    <div class="story-header d-flex justify-content-between align-items-center p-3">
+                        <div class="story-title">
+                            <h5><strong>US-005:</strong> Commenter une proposition</h5>
+                            <p class="text-muted mb-0">En tant qu'employé, je veux commenter et enrichir les propositions</p>
+                        </div>
+                        <div class="story-meta">
+                            <span class="badge badge-success">3 pts</span>
+                            <span class="badge badge-info">Sprint 2</span>
+                        </div>
+                    </div>
+                    <div class="story-content p-3 pt-0">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-check-circle text-success"></i> Critères d'acceptation:</h6>
+                                <ul class="acceptance-criteria">
+                                    <li>Système de commentaires threaded</li>
+                                    <li>Réponses aux commentaires</li>
+                                    <li>Moderation automatique</li>
+                                    <li>Notifications auteur</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-cogs text-info"></i> Tâches techniques:</h6>
+                                <ul class="technical-tasks">
+                                    <li>Comments API CRUD</li>
+                                    <li>Nested comments UI</li>
+                                    <li>Content moderation</li>
+                                    <li>Real-time notifications</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="story-card glass mb-3">
+                    <div class="story-header d-flex justify-content-between align-items-center p-3">
+                        <div class="story-title">
+                            <h5><strong>US-006:</strong> Workflow validation</h5>
+                            <p class="text-muted mb-0">En tant que manager, je veux valider les propositions avant mise au vote</p>
+                        </div>
+                        <div class="story-meta">
+                            <span class="badge badge-warning">5 pts</span>
+                            <span class="badge badge-info">Sprint 2</span>
+                        </div>
+                    </div>
+                    <div class="story-content p-3 pt-0">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-check-circle text-success"></i> Critères d'acceptation:</h6>
+                                <ul class="acceptance-criteria">
+                                    <li>États: brouillon, en révision, validé, rejeté</li>
+                                    <li>Assignation validateurs</li>
+                                    <li>Commentaires internes</li>
+                                    <li>Historique des changements</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-cogs text-info"></i> Tâches techniques:</h6>
+                                <ul class="technical-tasks">
+                                    <li>State machine workflow</li>
+                                    <li>Role-based permissions</li>
+                                    <li>Audit trail system</li>
+                                    <li>Email notifications</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Epic 3: Votes & Décisions -->
+    <section class="epic-section py-5 bg-light">
+        <div class="container">
+            <div class="epic-header text-center mb-5">
+                <h2><i class="fas fa-vote-yea text-success"></i> Epic 3: Votes & Décisions</h2>
+                <p class="lead">Système de vote sécurisé et transparent</p>
+                <div class="epic-meta">
+                    <span class="badge badge-info">Sprint 2-3</span>
+                    <span class="badge badge-success">Priorité Haute</span>
+                    <span class="badge badge-info">21 Story Points</span>
+                </div>
+            </div>
+
+            <div class="stories-summary">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="summary-card glass text-center p-4">
+                            <h4><strong>US-007:</strong> Créer scrutin</h4>
+                            <p>Configuration vote: type, durée, éligibilité</p>
+                            <span class="badge badge-warning">8 pts</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="summary-card glass text-center p-4">
+                            <h4><strong>US-008:</strong> Voter anonyme</h4>
+                            <p>Vote sécurisé avec chiffrement et anonymat</p>
+                            <span class="badge badge-danger">8 pts</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="summary-card glass text-center p-4">
+                            <h4><strong>US-009:</strong> Résultats temps réel</h4>
+                            <p>Dashboard résultats avec transparence</p>
+                            <span class="badge badge-warning">5 pts</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Backlog -->
+    <section class="backlog-section py-5">
+        <div class="container">
+            <h2 class="text-center mb-5"><i class="fas fa-list text-info"></i> Product Backlog</h2>
+            
+            <div class="backlog-table">
+                <div class="table-responsive">
+                    <table class="table table-hover glass">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Story</th>
+                                <th>Epic</th>
+                                <th>Points</th>
+                                <th>Sprint</th>
+                                <th>Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>US-010</strong></td>
+                                <td>Analytics participation</td>
+                                <td>Reporting</td>
+                                <td><span class="badge badge-info">5</span></td>
+                                <td><span class="badge badge-secondary">Sprint 3</span></td>
+                                <td><span class="badge badge-secondary">Backlog</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>US-011</strong></td>
+                                <td>Notifications push</td>
+                                <td>Engagement</td>
+                                <td><span class="badge badge-info">3</span></td>
+                                <td><span class="badge badge-secondary">Sprint 3</span></td>
+                                <td><span class="badge badge-secondary">Backlog</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>US-012</strong></td>
+                                <td>Export données RGPD</td>
+                                <td>Conformité</td>
+                                <td><span class="badge badge-warning">8</span></td>
+                                <td><span class="badge badge-secondary">Sprint 4</span></td>
+                                <td><span class="badge badge-secondary">Backlog</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>US-013</strong></td>
+                                <td>API publique</td>
+                                <td>Intégration</td>
+                                <td><span class="badge badge-danger">13</span></td>
+                                <td><span class="badge badge-secondary">Sprint 5</span></td>
+                                <td><span class="badge badge-secondary">Backlog</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>US-014</strong></td>
+                                <td>App mobile PWA</td>
+                                <td>Mobile</td>
+                                <td><span class="badge badge-danger">21</span></td>
+                                <td><span class="badge badge-secondary">Sprint 6</span></td>
+                                <td><span class="badge badge-secondary">Backlog</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Navigation -->
+    <section class="navigation-footer py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <a href="/cyberdemocratie/architecture" class="btn btn-outline-primary btn-block">
+                        <i class="fas fa-arrow-left"></i> Architecture
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="/cyberdemocratie" class="btn btn-outline-success btn-block">
+                        <i class="fas fa-home"></i> PRD Principal
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="/cyberdemocratie/roadmap" class="btn btn-outline-info btn-block">
+                        <i class="fas fa-road"></i> Roadmap
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<style>
+.user-stories-prd {
+    font-family: 'Inter', sans-serif;
+}
+
+.hero-stories {
+    background: linear-gradient(135deg, 
+        rgba(255, 193, 7, 0.1) 0%, 
+        rgba(220, 53, 69, 0.1) 100%);
+    border-radius: 20px;
+    margin: 2rem 0;
+}
+
+.stat-card {
+    border-radius: 15px;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.persona-card {
+    border-radius: 15px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.persona-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.persona-avatar {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.persona-details ul {
+    list-style: none;
+    padding: 0;
+}
+
+.persona-details li {
+    padding: 0.25rem 0;
+    position: relative;
+    padding-left: 1.5rem;
+}
+
+.persona-details li:before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: #0d6efd;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.epic-header {
+    padding: 2rem 0;
+    background: linear-gradient(135deg, rgba(0,0,0,0.02) 0%, rgba(0,0,0,0.05) 100%);
+    border-radius: 15px;
+    margin-bottom: 2rem;
+}
+
+.epic-meta .badge {
+    margin: 0 0.5rem;
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+}
+
+.story-card {
+    border-radius: 15px;
+    transition: all 0.3s ease;
+    border-left: 4px solid #0d6efd;
+}
+
+.story-card:hover {
+    transform: translateX(5px);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+}
+
+.story-title h5 {
+    color: #0d6efd;
+    margin-bottom: 0.5rem;
+}
+
+.story-meta .badge {
+    margin-left: 0.5rem;
+}
+
+.acceptance-criteria, .technical-tasks {
+    list-style: none;
+    padding: 0;
+}
+
+.acceptance-criteria li, .technical-tasks li {
+    padding: 0.25rem 0;
+    position: relative;
+    padding-left: 1.5rem;
+}
+
+.acceptance-criteria li:before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #198754;
+    font-weight: bold;
+}
+
+.technical-tasks li:before {
+    content: "⚙";
+    position: absolute;
+    left: 0;
+    color: #0dcaf0;
+}
+
+.summary-card {
+    border-radius: 15px;
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.summary-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+.backlog-table .table {
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(0,0,0,0.05);
+}
+
+@media (max-width: 768px) {
+    .story-header {
+        flex-direction: column;
+        align-items: flex-start !important;
+    }
+    
+    .story-meta {
+        margin-top: 1rem;
+    }
+    
+    .epic-meta {
+        text-align: center;
+    }
+    
+    .epic-meta .badge {
+        margin: 0.25rem;
+        display: inline-block;
+    }
+}
+</style>
+{% endblock %}
