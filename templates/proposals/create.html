@@ -1,0 +1,1012 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Modifier' if proposal else 'Créer' }} une proposition - {{ space.name }} — {{ organization.name }}{% endblock %}
+
+{% block meta %}
+<link rel="stylesheet" href="{{ url_for('static', filename='refonte.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='proposals.css') }}">
+<script src="https://cdn.ckeditor.com/ckeditor5/35.0.1/classic/ckeditor.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="proposal-editor-layout">
+    <div class="container">
+        <!-- Header with breadcrumb -->
+        <div class="page-header">
+            <nav class="breadcrumb">
+                <a href="{{ url_for('spaces.index') }}">Espaces participatifs</a>
+                <span class="breadcrumb-separator">/</span>
+                <a href="{{ url_for('spaces.detail', type=space.type, id=space.id) }}">{{ space.name }}</a>
+                <span class="breadcrumb-separator">/</span>
+                <a href="{{ url_for('proposals.index', space_id=space.id) }}">Propositions</a>
+                <span class="breadcrumb-separator">/</span>
+                <span class="breadcrumb-current">{{ 'Modifier' if proposal else 'Créer' }}</span>
+            </nav>
+            
+            <div class="header-content">
+                <h1>
+                    <i class="fas fa-{{ 'edit' if proposal else 'plus' }}"></i>
+                    {{ 'Modifier la proposition' if proposal else 'Créer une nouvelle proposition' }}
+                </h1>
+                
+                {% if proposal %}
+                <p>Version {{ proposal.current_version }} - Dernière modification {{ proposal.updated_at.strftime('%d %B %Y à %H:%M') }}</p>
+                {% else %}
+                <p>Proposez une idée, une solution ou une amélioration pour cet espace participatif</p>
+                {% endif %}
+            </div>
+            
+            <div class="header-actions">
+                {% if proposal and proposal.state == 'draft' %}
+                <button class="btn-refonte btn-refonte-success" onclick="publishProposal()">
+                    <i class="fas fa-paper-plane"></i>
+                    Publier maintenant
+                </button>
+                {% endif %}
+                
+                <button class="btn-refonte btn-refonte-outline" onclick="previewProposal()">
+                    <i class="fas fa-eye"></i>
+                    Aperçu
+                </button>
+            </div>
+        </div>
+        
+        <!-- Form validation alerts -->
+        <div id="validation-alerts" class="validation-alerts" style="display: none;">
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div class="alert-content">
+                    <strong>Attention :</strong>
+                    <ul id="validation-errors"></ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main form -->
+        <form id="proposal-form" method="POST" action="{{ url_for('proposals.save') }}" enctype="multipart/form-data">
+            {% if proposal %}
+            <input type="hidden" name="proposal_id" value="{{ proposal.id }}">
+            {% endif %}
+            <input type="hidden" name="space_id" value="{{ space.id }}">
+            <input type="hidden" name="action" id="form-action" value="save_draft">
+            
+            <div class="form-layout">
+                <!-- Main content -->
+                <div class="form-main">
+                    <div class="form-section card-glass-refonte">
+                        <div class="section-header">
+                            <h3>
+                                <i class="fas fa-info-circle"></i>
+                                Informations principales
+                            </h3>
+                            <p>Définissez le titre et le contenu principal de votre proposition</p>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="proposal-title">Titre de la proposition *</label>
+                            <input type="text" id="proposal-title" name="title" class="form-control" 
+                                   value="{{ proposal.title if proposal else '' }}" 
+                                   placeholder="Un titre clair et concis..." 
+                                   maxlength="150" required>
+                            <div class="form-help">
+                                <span id="title-counter">0</span>/150 caractères
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="proposal-summary">Résumé *</label>
+                            <textarea id="proposal-summary" name="summary" class="form-control" rows="3" 
+                                      placeholder="Résumez votre proposition en quelques phrases..." 
+                                      maxlength="500" required>{{ proposal.summary if proposal else '' }}</textarea>
+                            <div class="form-help">
+                                <span id="summary-counter">0</span>/500 caractères - Ce résumé sera affiché dans la liste des propositions
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="proposal-content">Contenu détaillé *</label>
+                            <div class="editor-container">
+                                <textarea id="proposal-content" name="content" class="form-control rich-editor" 
+                                          placeholder="Décrivez votre proposition en détail...">{{ proposal.content if proposal else '' }}</textarea>
+                            </div>
+                            <div class="form-help">
+                                Utilisez l'éditeur pour structurer votre texte et ajouter des liens
+                            </div>
+                        </div>
+                        
+                        <!-- Collaborative editing indicator -->
+                        {% if proposal and proposal.collaborative_draft %}
+                        <div class="collaborative-indicator">
+                            <div class="collab-info">
+                                <i class="fas fa-users"></i>
+                                <span>Brouillon collaboratif - {{ proposal.collaborators | length }} collaborateur{{ 's' if proposal.collaborators | length != 1 else '' }}</span>
+                            </div>
+                            
+                            <div class="active-collaborators">
+                                {% for collaborator in proposal.active_collaborators %}
+                                <div class="collaborator-avatar" title="{{ collaborator.full_name }}">
+                                    {% if collaborator.avatar %}
+                                    <img src="{{ collaborator.avatar }}" alt="{{ collaborator.full_name }}">
+                                    {% else %}
+                                    <div class="avatar-placeholder">{{ collaborator.full_name[:2].upper() }}</div>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Attachments -->
+                    <div class="form-section card-glass-refonte">
+                        <div class="section-header">
+                            <h3>
+                                <i class="fas fa-paperclip"></i>
+                                Documents et justificatifs
+                            </h3>
+                            <p>Ajoutez des documents pour étayer votre proposition</p>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="proposal-attachments">Fichiers joints</label>
+                            <div class="file-upload-zone" id="file-upload-zone">
+                                <input type="file" id="proposal-attachments" name="attachments" 
+                                       multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.xlsx,.pptx">
+                                <div class="upload-content">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <p>Glissez vos fichiers ici ou <span class="upload-link">cliquez pour sélectionner</span></p>
+                                    <small>Formats acceptés : PDF, Word, Excel, PowerPoint, Images (max 10 Mo par fichier)</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Existing attachments -->
+                        {% if proposal and proposal.attachments %}
+                        <div class="existing-attachments">
+                            <h4>Fichiers actuels :</h4>
+                            <div class="attachments-list">
+                                {% for attachment in proposal.attachments %}
+                                <div class="attachment-item" data-attachment-id="{{ attachment.id }}">
+                                    <div class="attachment-info">
+                                        <i class="fas fa-{{ 'file-pdf' if attachment.type == 'pdf' else 'file' }}"></i>
+                                        <div class="attachment-details">
+                                            <div class="attachment-name">{{ attachment.filename }}</div>
+                                            <div class="attachment-meta">{{ attachment.size_formatted }} - {{ attachment.uploaded_at.strftime('%d/%m/%Y') }}</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="attachment-actions">
+                                        <a href="{{ attachment.url }}" target="_blank" class="btn-sm">
+                                            <i class="fas fa-download"></i>
+                                        </a>
+                                        <button type="button" class="btn-sm btn-danger" onclick="removeAttachment({{ attachment.id }})">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- New attachments preview -->
+                        <div id="new-attachments-preview" class="new-attachments" style="display: none;">
+                            <h4>Nouveaux fichiers :</h4>
+                            <div id="attachments-list" class="attachments-list"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Amendments (if editing existing proposal) -->
+                    {% if proposal and proposal.amendments %}
+                    <div class="form-section card-glass-refonte">
+                        <div class="section-header">
+                            <h3>
+                                <i class="fas fa-edit"></i>
+                                Amendements
+                            </h3>
+                            <p>{{ proposal.amendments | length }} amendement{{ 's' if proposal.amendments | length != 1 else '' }} proposé{{ 's' if proposal.amendments | length != 1 else '' }}</p>
+                        </div>
+                        
+                        <div class="amendments-list">
+                            {% for amendment in proposal.amendments %}
+                            <div class="amendment-item">
+                                <div class="amendment-header">
+                                    <div class="amendment-author">
+                                        <div class="author-avatar">
+                                            {% if amendment.author.avatar %}
+                                            <img src="{{ amendment.author.avatar }}" alt="{{ amendment.author.full_name }}">
+                                            {% else %}
+                                            <div class="avatar-placeholder">{{ amendment.author.full_name[:2].upper() }}</div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="author-info">
+                                            <div class="author-name">{{ amendment.author.full_name }}</div>
+                                            <div class="amendment-date">{{ amendment.created_at.strftime('%d %B %Y') }}</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="amendment-status">
+                                        <span class="status-badge status-{{ amendment.status }}">
+                                            {% if amendment.status == 'pending' %}En attente
+                                            {% elif amendment.status == 'accepted' %}Accepté
+                                            {% elif amendment.status == 'rejected' %}Rejeté
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div class="amendment-content">
+                                    <div class="amendment-changes">
+                                        <div class="change-diff">
+                                            {{ amendment.diff_html | safe }}
+                                        </div>
+                                    </div>
+                                    
+                                    {% if amendment.justification %}
+                                    <div class="amendment-justification">
+                                        <strong>Justification :</strong>
+                                        <p>{{ amendment.justification }}</p>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                
+                                {% if amendment.status == 'pending' and proposal.author.id == current_user.id %}
+                                <div class="amendment-actions">
+                                    <button type="button" class="btn-refonte btn-refonte-success btn-sm" 
+                                            onclick="acceptAmendment({{ amendment.id }})">
+                                        <i class="fas fa-check"></i>
+                                        Accepter
+                                    </button>
+                                    
+                                    <button type="button" class="btn-refonte btn-refonte-danger btn-sm" 
+                                            onclick="rejectAmendment({{ amendment.id }})">
+                                        <i class="fas fa-times"></i>
+                                        Rejeter
+                                    </button>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Sidebar -->
+                <div class="form-sidebar">
+                    <!-- Publication settings -->
+                    <div class="sidebar-section card-glass-refonte">
+                        <div class="section-header">
+                            <h4>
+                                <i class="fas fa-cog"></i>
+                                Paramètres
+                            </h4>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="proposal-category">Catégorie</label>
+                            <select id="proposal-category" name="category_id" class="form-control">
+                                <option value="">Sélectionnez une catégorie</option>
+                                {% for category in categories %}
+                                <option value="{{ category.id }}" 
+                                        {{ 'selected' if proposal and proposal.category_id == category.id else '' }}
+                                        style="color: {{ category.color }};">
+                                    {{ category.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="proposal-scope">Portée géographique</label>
+                            <select id="proposal-scope" name="scope_id" class="form-control">
+                                <option value="">Sélectionnez une portée</option>
+                                {% for scope in scopes %}
+                                <option value="{{ scope.id }}" 
+                                        {{ 'selected' if proposal and proposal.scope_id == scope.id else '' }}>
+                                    {{ scope.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Options de publication</label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="allow_comments" id="allow-comments" 
+                                           {{ 'checked' if not proposal or proposal.allow_comments else '' }}>
+                                    <span class="checkmark"></span>
+                                    Autoriser les commentaires
+                                </label>
+                                
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="allow_endorsements" id="allow-endorsements" 
+                                           {{ 'checked' if not proposal or proposal.allow_endorsements else '' }}>
+                                    <span class="checkmark"></span>
+                                    Autoriser les soutiens
+                                </label>
+                                
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="collaborative_draft" id="collaborative-draft" 
+                                           {{ 'checked' if proposal and proposal.collaborative_draft else '' }}>
+                                    <span class="checkmark"></span>
+                                    Brouillon collaboratif
+                                </label>
+                                
+                                {% if space.allows_amendments %}
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="allow_amendments" id="allow-amendments" 
+                                           {{ 'checked' if not proposal or proposal.allow_amendments else '' }}>
+                                    <span class="checkmark"></span>
+                                    Autoriser les amendements
+                                </label>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        {% if proposal %}
+                        <div class="form-group">
+                            <label for="version-note">Note de version</label>
+                            <textarea id="version-note" name="version_note" class="form-control" rows="3" 
+                                      placeholder="Décrivez les modifications apportées..."></textarea>
+                            <div class="form-help">Cette note sera visible dans l'historique des versions</div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Traceability info -->
+                    <div class="sidebar-section card-glass-refonte">
+                        <div class="section-header">
+                            <h4>
+                                <i class="fas fa-shield-alt"></i>
+                                Traçabilité
+                            </h4>
+                        </div>
+                        
+                        <div class="traceability-info">
+                            {% if proposal %}
+                            <div class="trace-item">
+                                <span class="trace-label">Hash actuel :</span>
+                                <code class="trace-value">{{ proposal.current_hash[:16] }}...</code>
+                            </div>
+                            
+                            <div class="trace-item">
+                                <span class="trace-label">Version :</span>
+                                <span class="trace-value">{{ proposal.current_version }}</span>
+                            </div>
+                            
+                            <div class="trace-item">
+                                <span class="trace-label">Signature :</span>
+                                <span class="trace-value {{ 'verified' if proposal.signature_verified else 'pending' }}">
+                                    <i class="fas fa-{{ 'check' if proposal.signature_verified else 'clock' }}"></i>
+                                    {{ 'Vérifiée' if proposal.signature_verified else 'En attente' }}
+                                </span>
+                            </div>
+                            {% else %}
+                            <p class="trace-help">
+                                <i class="fas fa-info-circle"></i>
+                                Les informations de traçabilité seront générées après la première sauvegarde.
+                            </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Save actions -->
+                    <div class="sidebar-section card-glass-refonte">
+                        <div class="section-header">
+                            <h4>
+                                <i class="fas fa-save"></i>
+                                Enregistrement
+                            </h4>
+                        </div>
+                        
+                        <div class="save-actions">
+                            <button type="submit" class="btn-refonte btn-refonte-secondary btn-full" 
+                                    onclick="setFormAction('save_draft')">
+                                <i class="fas fa-save"></i>
+                                Enregistrer le brouillon
+                            </button>
+                            
+                            {% if not proposal or proposal.state == 'draft' %}
+                            <button type="submit" class="btn-refonte btn-refonte-primary btn-full" 
+                                    onclick="setFormAction('publish')">
+                                <i class="fas fa-paper-plane"></i>
+                                Publier la proposition
+                            </button>
+                            {% else %}
+                            <button type="submit" class="btn-refonte btn-refonte-primary btn-full" 
+                                    onclick="setFormAction('update')">
+                                <i class="fas fa-edit"></i>
+                                Mettre à jour
+                            </button>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="auto-save-indicator" id="auto-save-indicator">
+                            <i class="fas fa-clock"></i>
+                            <span>Sauvegarde automatique dans <span id="auto-save-timer">30</span>s</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Version history -->
+                    {% if proposal and proposal.versions | length > 1 %}
+                    <div class="sidebar-section card-glass-refonte">
+                        <div class="section-header">
+                            <h4>
+                                <i class="fas fa-history"></i>
+                                Historique
+                            </h4>
+                        </div>
+                        
+                        <div class="version-history">
+                            {% for version in proposal.versions[-5:] %}
+                            <div class="version-item {{ 'current' if version.version == proposal.current_version else '' }}">
+                                <div class="version-info">
+                                    <span class="version-number">v{{ version.version }}</span>
+                                    <span class="version-date">{{ version.created_at.strftime('%d/%m %H:%M') }}</span>
+                                </div>
+                                
+                                {% if version.note %}
+                                <div class="version-note">{{ version.note }}</div>
+                                {% endif %}
+                                
+                                <div class="version-actions">
+                                    {% if version.version != proposal.current_version %}
+                                    <button type="button" class="btn-sm" onclick="compareVersion({{ version.version }})">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    
+                                    <button type="button" class="btn-sm" onclick="revertToVersion({{ version.version }})">
+                                        <i class="fas fa-undo"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                            
+                            {% if proposal.versions | length > 5 %}
+                            <div class="version-more">
+                                <a href="{{ url_for('proposals.history', id=proposal.id) }}">
+                                    Voir tout l'historique ({{ proposal.versions | length }} versions)
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Preview Modal -->
+<div id="preview-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content modal-xl">
+        <div class="modal-header">
+            <h3>Aperçu de la proposition</h3>
+            <button class="modal-close" onclick="closePreview()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="modal-body">
+            <div id="preview-content" class="proposal-preview">
+                <!-- Preview content will be loaded here -->
+            </div>
+        </div>
+        
+        <div class="modal-footer">
+            <button class="btn-refonte btn-refonte-secondary" onclick="closePreview()">
+                Fermer l'aperçu
+            </button>
+            
+            <button class="btn-refonte btn-refonte-primary" onclick="closePreview(); publishProposal();">
+                Publier cette proposition
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Proposal editor functionality
+let richEditor;
+let autoSaveTimer;
+let autoSaveInterval = 30; // seconds
+let hasUnsavedChanges = false;
+
+// Initialize editor
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize rich text editor
+    ClassicEditor
+        .create(document.querySelector('#proposal-content'), {
+            toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|', 'outdent', 'indent', '|', 'blockQuote', 'insertTable', '|', 'undo', 'redo'],
+            heading: {
+                options: [
+                    { model: 'paragraph', title: 'Paragraph', class: 'ck-heading_paragraph' },
+                    { model: 'heading1', view: 'h1', title: 'Heading 1', class: 'ck-heading_heading1' },
+                    { model: 'heading2', view: 'h2', title: 'Heading 2', class: 'ck-heading_heading2' },
+                    { model: 'heading3', view: 'h3', title: 'Heading 3', class: 'ck-heading_heading3' }
+                ]
+            },
+            link: {
+                decorators: {
+                    openInNewTab: {
+                        mode: 'manual',
+                        label: 'Open in a new tab',
+                        attributes: {
+                            target: '_blank',
+                            rel: 'noopener noreferrer'
+                        }
+                    }
+                }
+            }
+        })
+        .then(editor => {
+            richEditor = editor;
+            
+            // Track changes
+            editor.model.document.on('change:data', () => {
+                hasUnsavedChanges = true;
+                updateCharacterCounters();
+            });
+        })
+        .catch(error => {
+            console.error('Editor initialization error:', error);
+        });
+    
+    // Initialize character counters
+    updateCharacterCounters();
+    
+    // Initialize file upload
+    initializeFileUpload();
+    
+    // Initialize auto-save
+    startAutoSave();
+    
+    // Track form changes
+    document.querySelectorAll('#proposal-form input, #proposal-form textarea, #proposal-form select').forEach(element => {
+        element.addEventListener('change', () => {
+            hasUnsavedChanges = true;
+        });
+    });
+    
+    // Warn before leaving with unsaved changes
+    window.addEventListener('beforeunload', function(e) {
+        if (hasUnsavedChanges) {
+            e.preventDefault();
+            e.returnValue = '';
+        }
+    });
+});
+
+// Character counters
+function updateCharacterCounters() {
+    const title = document.getElementById('proposal-title').value;
+    const summary = document.getElementById('proposal-summary').value;
+    
+    document.getElementById('title-counter').textContent = title.length;
+    document.getElementById('summary-counter').textContent = summary.length;
+    
+    // Update counter colors
+    const titleCounter = document.getElementById('title-counter');
+    const summaryCounter = document.getElementById('summary-counter');
+    
+    titleCounter.className = title.length > 140 ? 'counter-warning' : title.length > 150 ? 'counter-danger' : '';
+    summaryCounter.className = summary.length > 450 ? 'counter-warning' : summary.length > 500 ? 'counter-danger' : '';
+}
+
+// File upload handling
+function initializeFileUpload() {
+    const uploadZone = document.getElementById('file-upload-zone');
+    const fileInput = document.getElementById('proposal-attachments');
+    
+    // Click to select files
+    uploadZone.addEventListener('click', () => {
+        fileInput.click();
+    });
+    
+    // Drag and drop
+    uploadZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadZone.classList.add('drag-over');
+    });
+    
+    uploadZone.addEventListener('dragleave', () => {
+        uploadZone.classList.remove('drag-over');
+    });
+    
+    uploadZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadZone.classList.remove('drag-over');
+        
+        const files = e.dataTransfer.files;
+        handleFileSelection(files);
+    });
+    
+    // File input change
+    fileInput.addEventListener('change', (e) => {
+        handleFileSelection(e.target.files);
+    });
+}
+
+function handleFileSelection(files) {
+    const previewContainer = document.getElementById('new-attachments-preview');
+    const attachmentsList = document.getElementById('attachments-list');
+    
+    if (files.length > 0) {
+        previewContainer.style.display = 'block';
+        attachmentsList.innerHTML = '';
+        
+        Array.from(files).forEach((file, index) => {
+            if (file.size > 10 * 1024 * 1024) { // 10MB limit
+                showValidationError(`Le fichier "${file.name}" dépasse la limite de 10 Mo`);
+                return;
+            }
+            
+            const fileItem = document.createElement('div');
+            fileItem.className = 'attachment-item new-attachment';
+            fileItem.innerHTML = `
+                <div class="attachment-info">
+                    <i class="fas fa-${getFileIcon(file.type)}"></i>
+                    <div class="attachment-details">
+                        <div class="attachment-name">${file.name}</div>
+                        <div class="attachment-meta">${formatFileSize(file.size)} - ${file.type || 'Type inconnu'}</div>
+                    </div>
+                </div>
+                <div class="attachment-actions">
+                    <button type="button" class="btn-sm btn-danger" onclick="removeNewAttachment(${index})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            
+            attachmentsList.appendChild(fileItem);
+        });
+    } else {
+        previewContainer.style.display = 'none';
+    }
+}
+
+function getFileIcon(mimeType) {
+    if (mimeType.includes('pdf')) return 'file-pdf';
+    if (mimeType.includes('word')) return 'file-word';
+    if (mimeType.includes('excel') || mimeType.includes('spreadsheet')) return 'file-excel';
+    if (mimeType.includes('powerpoint') || mimeType.includes('presentation')) return 'file-powerpoint';
+    if (mimeType.includes('image')) return 'file-image';
+    return 'file';
+}
+
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+function removeNewAttachment(index) {
+    const fileInput = document.getElementById('proposal-attachments');
+    const dt = new DataTransfer();
+    
+    Array.from(fileInput.files).forEach((file, i) => {
+        if (i !== index) {
+            dt.items.add(file);
+        }
+    });
+    
+    fileInput.files = dt.files;
+    handleFileSelection(fileInput.files);
+}
+
+function removeAttachment(attachmentId) {
+    if (confirm('Supprimer ce fichier ?')) {
+        fetch(`/api/attachments/${attachmentId}`, {
+            method: 'DELETE',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.querySelector(`[data-attachment-id="${attachmentId}"]`).remove();
+                hasUnsavedChanges = true;
+            } else {
+                showValidationError('Erreur lors de la suppression du fichier');
+            }
+        });
+    }
+}
+
+// Form actions
+function setFormAction(action) {
+    document.getElementById('form-action').value = action;
+}
+
+function publishProposal() {
+    if (validateForm()) {
+        setFormAction('publish');
+        document.getElementById('proposal-form').submit();
+    }
+}
+
+function previewProposal() {
+    const formData = new FormData(document.getElementById('proposal-form'));
+    formData.append('action', 'preview');
+    
+    fetch('/api/proposals/preview', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('preview-content').innerHTML = data.html;
+            document.getElementById('preview-modal').style.display = 'flex';
+        } else {
+            showValidationError('Erreur lors de la génération de l\'aperçu');
+        }
+    });
+}
+
+function closePreview() {
+    document.getElementById('preview-modal').style.display = 'none';
+}
+
+// Auto-save functionality
+function startAutoSave() {
+    let countdown = autoSaveInterval;
+    
+    const timer = setInterval(() => {
+        countdown--;
+        document.getElementById('auto-save-timer').textContent = countdown;
+        
+        if (countdown <= 0) {
+            if (hasUnsavedChanges) {
+                autoSave();
+            }
+            countdown = autoSaveInterval;
+        }
+    }, 1000);
+    
+    autoSaveTimer = timer;
+}
+
+function autoSave() {
+    if (!richEditor) return;
+    
+    const formData = new FormData(document.getElementById('proposal-form'));
+    formData.set('content', richEditor.getData());
+    formData.set('action', 'auto_save');
+    
+    const indicator = document.getElementById('auto-save-indicator');
+    indicator.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Sauvegarde en cours...</span>';
+    
+    fetch('/api/proposals/auto-save', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            hasUnsavedChanges = false;
+            indicator.innerHTML = '<i class="fas fa-check"></i> <span>Sauvegardé automatiquement</span>';
+            
+            // Update hash and version info if available
+            if (data.hash) {
+                const hashElement = document.querySelector('.trace-value code');
+                if (hashElement) {
+                    hashElement.textContent = data.hash.substring(0, 16) + '...';
+                }
+            }
+        } else {
+            indicator.innerHTML = '<i class="fas fa-exclamation-triangle"></i> <span>Erreur de sauvegarde</span>';
+        }
+        
+        setTimeout(() => {
+            indicator.innerHTML = '<i class="fas fa-clock"></i> <span>Sauvegarde automatique dans <span id="auto-save-timer">30</span>s</span>';
+        }, 3000);
+    })
+    .catch(() => {
+        indicator.innerHTML = '<i class="fas fa-exclamation-triangle"></i> <span>Erreur de sauvegarde</span>';
+    });
+}
+
+// Form validation
+function validateForm() {
+    const errors = [];
+    
+    const title = document.getElementById('proposal-title').value.trim();
+    const summary = document.getElementById('proposal-summary').value.trim();
+    const content = richEditor ? richEditor.getData().trim() : '';
+    
+    if (!title) {
+        errors.push('Le titre est obligatoire');
+    } else if (title.length > 150) {
+        errors.push('Le titre ne peut pas dépasser 150 caractères');
+    }
+    
+    if (!summary) {
+        errors.push('Le résumé est obligatoire');
+    } else if (summary.length > 500) {
+        errors.push('Le résumé ne peut pas dépasser 500 caractères');
+    }
+    
+    if (!content || content === '<p>&nbsp;</p>') {
+        errors.push('Le contenu détaillé est obligatoire');
+    }
+    
+    if (errors.length > 0) {
+        showValidationErrors(errors);
+        return false;
+    }
+    
+    hideValidationErrors();
+    return true;
+}
+
+function showValidationErrors(errors) {
+    const alertsContainer = document.getElementById('validation-alerts');
+    const errorsList = document.getElementById('validation-errors');
+    
+    errorsList.innerHTML = '';
+    errors.forEach(error => {
+        const li = document.createElement('li');
+        li.textContent = error;
+        errorsList.appendChild(li);
+    });
+    
+    alertsContainer.style.display = 'block';
+    alertsContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function showValidationError(error) {
+    showValidationErrors([error]);
+}
+
+function hideValidationErrors() {
+    document.getElementById('validation-alerts').style.display = 'none';
+}
+
+// Amendment actions
+function acceptAmendment(amendmentId) {
+    if (confirm('Accepter cet amendement ? Les modifications seront intégrées à votre proposition.')) {
+        fetch(`/api/amendments/${amendmentId}/accept`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                showValidationError(data.message || 'Erreur lors de l\'acceptation de l\'amendement');
+            }
+        });
+    }
+}
+
+function rejectAmendment(amendmentId) {
+    const reason = prompt('Raison du rejet (optionnel) :');
+    
+    fetch(`/api/amendments/${amendmentId}/reject`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({ reason: reason })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            showValidationError(data.message || 'Erreur lors du rejet de l\'amendement');
+        }
+    });
+}
+
+// Version history
+function compareVersion(version) {
+    window.open(`/proposals/{{ proposal.id if proposal else '' }}/versions/${version}`, '_blank');
+}
+
+function revertToVersion(version) {
+    if (confirm(`Revenir à la version ${version} ? Les modifications actuelles seront perdues.`)) {
+        fetch(`/api/proposals/{{ proposal.id if proposal else '' }}/revert/${version}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                showValidationError(data.message || 'Erreur lors de la restauration');
+            }
+        });
+    }
+}
+
+// Form submission handling
+document.getElementById('proposal-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const action = document.getElementById('form-action').value;
+    
+    if (action === 'publish' && !validateForm()) {
+        return;
+    }
+    
+    // Update content from rich editor
+    if (richEditor) {
+        document.getElementById('proposal-content').value = richEditor.getData();
+    }
+    
+    const submitButton = document.querySelector(`button[onclick="setFormAction('${action}')"]`);
+    const originalText = submitButton.innerHTML;
+    
+    submitButton.disabled = true;
+    submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enregistrement...';
+    
+    const formData = new FormData(this);
+    
+    fetch(this.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            hasUnsavedChanges = false;
+            
+            if (action === 'publish' || action === 'update') {
+                window.location.href = data.redirect_url || `/proposals/${data.proposal_id}`;
+            } else {
+                showValidationError('Brouillon sauvegardé avec succès');
+                
+                // Update form with new data if available
+                if (data.proposal_id && !document.querySelector('input[name="proposal_id"]')) {
+                    const hiddenInput = document.createElement('input');
+                    hiddenInput.type = 'hidden';
+                    hiddenInput.name = 'proposal_id';
+                    hiddenInput.value = data.proposal_id;
+                    this.appendChild(hiddenInput);
+                }
+            }
+        } else {
+            showValidationErrors(data.errors || [data.message || 'Erreur lors de l\'enregistrement']);
+        }
+    })
+    .catch(error => {
+        showValidationError('Erreur de connexion lors de l\'enregistrement');
+    })
+    .finally(() => {
+        submitButton.disabled = false;
+        submitButton.innerHTML = originalText;
+    });
+});
+
+// Update character counters on input
+document.getElementById('proposal-title').addEventListener('input', updateCharacterCounters);
+document.getElementById('proposal-summary').addEventListener('input', updateCharacterCounters);
+</script>
+{% endblock %}

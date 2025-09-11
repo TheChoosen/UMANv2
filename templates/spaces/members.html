@@ -1,0 +1,843 @@
+{% extends "base.html" %}
+
+{% block title %}Membres - {{ assembly.name }} — {{ organization.name }}{% endblock %}
+
+{% block meta %}
+<link rel="stylesheet" href="{{ url_for('static', filename='refonte.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='spaces.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="members-layout">
+    <div class="container">
+        <!-- Header with breadcrumb -->
+        <div class="page-header">
+            <nav class="breadcrumb">
+                <a href="{{ url_for('spaces.index') }}">Espaces participatifs</a>
+                <span class="breadcrumb-separator">/</span>
+                <a href="{{ url_for('spaces.assemblies') }}">Assemblées</a>
+                <span class="breadcrumb-separator">/</span>
+                <a href="{{ url_for('spaces.assembly', id=assembly.id) }}">{{ assembly.name }}</a>
+                <span class="breadcrumb-separator">/</span>
+                <span class="breadcrumb-current">Membres</span>
+            </nav>
+            
+            <div class="header-content">
+                <h1>
+                    <i class="fas fa-users"></i>
+                    Membres de {{ assembly.name }}
+                </h1>
+                <p>{{ members | length }} membre{{ 's' if members | length != 1 else '' }} dans cette assemblée</p>
+            </div>
+            
+            {% if can_manage_assembly %}
+            <div class="header-actions">
+                <button class="btn-refonte btn-refonte-outline" onclick="openInviteModal()">
+                    <i class="fas fa-user-plus"></i>
+                    Inviter des membres
+                </button>
+                
+                <button class="btn-refonte btn-refonte-primary" onclick="openAddMemberModal()">
+                    <i class="fas fa-plus"></i>
+                    Ajouter un membre
+                </button>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Members filters -->
+        <div class="members-filters card-glass-refonte">
+            <div class="filters-row">
+                <div class="filter-group">
+                    <label for="member-search">Recherche :</label>
+                    <div class="search-input">
+                        <input type="text" id="member-search" class="form-control" 
+                               placeholder="Nom, prénom ou email..." onInput="filterMembers()">
+                        <i class="fas fa-search"></i>
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="member-role">Rôle :</label>
+                    <select id="member-role" class="form-control" onchange="filterMembers()">
+                        <option value="">Tous les rôles</option>
+                        <option value="admin">Administrateur</option>
+                        <option value="moderator">Modérateur</option>
+                        <option value="member">Membre</option>
+                        <option value="observer">Observateur</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="member-status">Statut :</label>
+                    <select id="member-status" class="form-control" onchange="filterMembers()">
+                        <option value="">Tous les statuts</option>
+                        <option value="active">Actif</option>
+                        <option value="pending">En attente</option>
+                        <option value="inactive">Inactif</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="sort-by">Trier par :</label>
+                    <select id="sort-by" class="form-control" onchange="sortMembers()">
+                        <option value="name">Nom</option>
+                        <option value="joined">Date d'adhésion</option>
+                        <option value="activity">Dernière activité</option>
+                        <option value="role">Rôle</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Members statistics -->
+        <div class="members-stats">
+            <div class="stats-grid">
+                <div class="stat-card card-glass-refonte">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number">{{ active_members_count }}</div>
+                        <div class="stat-label">Membres actifs</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card card-glass-refonte">
+                    <div class="stat-icon">
+                        <i class="fas fa-user-clock"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number">{{ pending_members_count }}</div>
+                        <div class="stat-label">En attente</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card card-glass-refonte">
+                    <div class="stat-icon">
+                        <i class="fas fa-crown"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number">{{ admin_members_count }}</div>
+                        <div class="stat-label">Administrateurs</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card card-glass-refonte">
+                    <div class="stat-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number">{{ new_members_this_month }}</div>
+                        <div class="stat-label">Nouveaux ce mois</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Members list -->
+        <div class="members-list">
+            {% if members %}
+            <div class="members-grid" id="members-grid">
+                {% for member in members %}
+                <div class="member-card card-glass-refonte" 
+                     data-member-id="{{ member.id }}"
+                     data-name="{{ member.full_name | lower }}"
+                     data-email="{{ member.email | lower }}"
+                     data-role="{{ member.role }}"
+                     data-status="{{ member.status }}"
+                     data-joined="{{ member.joined_at.timestamp() }}">
+                    
+                    <div class="member-header">
+                        <div class="member-avatar">
+                            {% if member.avatar %}
+                            <img src="{{ member.avatar }}" alt="{{ member.full_name }}">
+                            {% else %}
+                            <div class="avatar-placeholder">
+                                {{ member.full_name[:2].upper() }}
+                            </div>
+                            {% endif %}
+                            
+                            <div class="member-status-indicator status-{{ member.status }}"></div>
+                        </div>
+                        
+                        <div class="member-info">
+                            <h3 class="member-name">{{ member.full_name }}</h3>
+                            <p class="member-email">{{ member.email }}</p>
+                            
+                            <div class="member-meta">
+                                <span class="member-role role-{{ member.role }}">
+                                    {% if member.role == 'admin' %}
+                                    <i class="fas fa-crown"></i> Administrateur
+                                    {% elif member.role == 'moderator' %}
+                                    <i class="fas fa-shield-alt"></i> Modérateur
+                                    {% elif member.role == 'member' %}
+                                    <i class="fas fa-user"></i> Membre
+                                    {% elif member.role == 'observer' %}
+                                    <i class="fas fa-eye"></i> Observateur
+                                    {% endif %}
+                                </span>
+                                
+                                <span class="member-joined">
+                                    <i class="fas fa-calendar"></i>
+                                    Membre depuis {{ member.joined_at.strftime('%B %Y') }}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        {% if can_manage_assembly %}
+                        <div class="member-actions">
+                            <div class="dropdown">
+                                <button class="btn-admin" onclick="toggleMemberActions({{ member.id }})">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                
+                                <div class="dropdown-menu" id="member-actions-{{ member.id }}">
+                                    <a href="#" onclick="viewMemberProfile({{ member.id }})">
+                                        <i class="fas fa-eye"></i>
+                                        Voir le profil
+                                    </a>
+                                    
+                                    {% if member.role != 'admin' or admin_members_count > 1 %}
+                                    <a href="#" onclick="editMemberRole({{ member.id }})">
+                                        <i class="fas fa-user-edit"></i>
+                                        Modifier le rôle
+                                    </a>
+                                    {% endif %}
+                                    
+                                    <a href="#" onclick="sendMessage({{ member.id }})">
+                                        <i class="fas fa-envelope"></i>
+                                        Envoyer un message
+                                    </a>
+                                    
+                                    {% if member.status == 'pending' %}
+                                    <a href="#" onclick="approveMember({{ member.id }})">
+                                        <i class="fas fa-check"></i>
+                                        Approuver l'adhésion
+                                    </a>
+                                    
+                                    <a href="#" onclick="rejectMember({{ member.id }})">
+                                        <i class="fas fa-times"></i>
+                                        Rejeter l'adhésion
+                                    </a>
+                                    {% elif member.status == 'active' %}
+                                    <a href="#" onclick="suspendMember({{ member.id }})">
+                                        <i class="fas fa-pause"></i>
+                                        Suspendre
+                                    </a>
+                                    {% elif member.status == 'inactive' %}
+                                    <a href="#" onclick="reactivateMember({{ member.id }})">
+                                        <i class="fas fa-play"></i>
+                                        Réactiver
+                                    </a>
+                                    {% endif %}
+                                    
+                                    {% if member.id != current_user.id %}
+                                    <hr class="dropdown-divider">
+                                    <a href="#" onclick="removeMember({{ member.id }})" class="text-danger">
+                                        <i class="fas fa-user-minus"></i>
+                                        Retirer de l'assemblée
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="member-body">
+                        {% if member.bio %}
+                        <p class="member-bio">{{ member.bio | truncate(120) }}</p>
+                        {% endif %}
+                        
+                        {% if member.skills %}
+                        <div class="member-skills">
+                            {% for skill in member.skills[:3] %}
+                            <span class="skill-tag">{{ skill }}</span>
+                            {% endfor %}
+                            {% if member.skills | length > 3 %}
+                            <span class="skill-more">+{{ member.skills | length - 3 }}</span>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                        
+                        <div class="member-activity">
+                            <div class="activity-stat">
+                                <i class="fas fa-comments"></i>
+                                <span>{{ member.comments_count or 0 }} commentaires</span>
+                            </div>
+                            
+                            <div class="activity-stat">
+                                <i class="fas fa-calendar-check"></i>
+                                <span>{{ member.meetings_attended or 0 }} réunions</span>
+                            </div>
+                            
+                            <div class="activity-stat">
+                                <i class="fas fa-lightbulb"></i>
+                                <span>{{ member.proposals_count or 0 }} propositions</span>
+                            </div>
+                        </div>
+                        
+                        {% if member.last_activity %}
+                        <div class="member-last-activity">
+                            <small class="text-muted">
+                                <i class="fas fa-clock"></i>
+                                Dernière activité {{ member.last_activity | timeago }}
+                            </small>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="member-footer">
+                        <button class="btn-refonte btn-refonte-outline btn-sm" 
+                                onclick="viewMemberProfile({{ member.id }})">
+                            <i class="fas fa-user"></i>
+                            Voir le profil
+                        </button>
+                        
+                        {% if member.id != current_user.id %}
+                        <button class="btn-refonte btn-refonte-outline btn-sm" 
+                                onclick="sendMessage({{ member.id }})">
+                            <i class="fas fa-envelope"></i>
+                            Message
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Load more button -->
+            {% if has_more_members %}
+            <div class="load-more-section">
+                <button class="btn-refonte btn-refonte-outline" id="load-more-btn" onclick="loadMoreMembers()">
+                    <i class="fas fa-plus"></i>
+                    Charger plus de membres
+                </button>
+            </div>
+            {% endif %}
+            
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-users"></i>
+                <h3>Aucun membre trouvé</h3>
+                <p>Cette assemblée n'a pas encore de membres ou aucun membre ne correspond aux filtres appliqués.</p>
+                {% if can_manage_assembly %}
+                <button class="btn-refonte btn-refonte-primary" onclick="openAddMemberModal()">
+                    <i class="fas fa-user-plus"></i>
+                    Ajouter le premier membre
+                </button>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Add Member Modal -->
+{% if can_manage_assembly %}
+<div id="add-member-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Ajouter un membre</h3>
+            <button class="modal-close" onclick="closeAddMemberModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <form id="add-member-form" method="POST" action="{{ url_for('assemblies.add_member') }}">
+            <input type="hidden" name="assembly_id" value="{{ assembly.id }}">
+            
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="member-email">Email du membre *</label>
+                    <input type="email" id="member-email" name="email" class="form-control" required>
+                    <small class="form-help">L'utilisateur doit déjà avoir un compte sur la plateforme</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="member-role-select">Rôle *</label>
+                    <select id="member-role-select" name="role" class="form-control" required>
+                        <option value="member">Membre</option>
+                        <option value="moderator">Modérateur</option>
+                        <option value="admin">Administrateur</option>
+                        <option value="observer">Observateur</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="member-message">Message d'accueil (optionnel)</label>
+                    <textarea id="member-message" name="welcome_message" class="form-control" rows="3"
+                              placeholder="Message personnalisé à envoyer au nouveau membre..."></textarea>
+                </div>
+                
+                <div class="checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="send_notification" checked>
+                        <span class="checkmark"></span>
+                        Envoyer une notification au membre
+                    </label>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn-refonte btn-refonte-secondary" onclick="closeAddMemberModal()">
+                    Annuler
+                </button>
+                <button type="submit" class="btn-refonte btn-refonte-primary">
+                    <i class="fas fa-user-plus"></i>
+                    Ajouter le membre
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Invite Members Modal -->
+<div id="invite-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content modal-lg">
+        <div class="modal-header">
+            <h3>Inviter des membres</h3>
+            <button class="modal-close" onclick="closeInviteModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <form id="invite-form" method="POST" action="{{ url_for('assemblies.invite_members') }}">
+            <input type="hidden" name="assembly_id" value="{{ assembly.id }}">
+            
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="invite-emails">Adresses email *</label>
+                    <textarea id="invite-emails" name="emails" class="form-control" rows="6" required
+                              placeholder="Entrez les adresses email séparées par des virgules ou des retours à la ligne..."></textarea>
+                    <small class="form-help">Vous pouvez saisir plusieurs adresses email séparées par des virgules</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="invite-role">Rôle par défaut *</label>
+                    <select id="invite-role" name="default_role" class="form-control" required>
+                        <option value="member">Membre</option>
+                        <option value="observer">Observateur</option>
+                        <option value="moderator">Modérateur</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="invite-subject">Objet de l'invitation</label>
+                    <input type="text" id="invite-subject" name="subject" class="form-control"
+                           value="Invitation à rejoindre {{ assembly.name }}">
+                </div>
+                
+                <div class="form-group">
+                    <label for="invite-message">Message d'invitation *</label>
+                    <textarea id="invite-message" name="message" class="form-control" rows="6" required>Bonjour,
+
+Vous êtes invité(e) à rejoindre l'assemblée "{{ assembly.name }}" sur {{ organization.name }}.
+
+Cette assemblée a pour objectif de {{ assembly.description or 'faciliter la participation citoyenne et la prise de décision collective' }}.
+
+Pour accepter cette invitation, cliquez sur le lien ci-dessous :
+{invitation_link}
+
+Cordialement,
+L'équipe de {{ assembly.name }}</textarea>
+                </div>
+                
+                <div class="checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="require_approval">
+                        <span class="checkmark"></span>
+                        Nécessiter une approbation avant l'adhésion
+                    </label>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn-refonte btn-refonte-secondary" onclick="closeInviteModal()">
+                    Annuler
+                </button>
+                <button type="submit" class="btn-refonte btn-refonte-primary">
+                    <i class="fas fa-paper-plane"></i>
+                    Envoyer les invitations
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Member Role Modal -->
+<div id="edit-role-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Modifier le rôle</h3>
+            <button class="modal-close" onclick="closeEditRoleModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <form id="edit-role-form" method="POST" action="{{ url_for('assemblies.edit_member_role') }}">
+            <input type="hidden" name="assembly_id" value="{{ assembly.id }}">
+            <input type="hidden" name="member_id" id="edit-member-id">
+            
+            <div class="modal-body">
+                <p>Modifier le rôle de <strong id="edit-member-name"></strong> :</p>
+                
+                <div class="form-group">
+                    <label for="new-role">Nouveau rôle *</label>
+                    <select id="new-role" name="new_role" class="form-control" required>
+                        <option value="observer">Observateur</option>
+                        <option value="member">Membre</option>
+                        <option value="moderator">Modérateur</option>
+                        <option value="admin">Administrateur</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="role-change-reason">Raison du changement (optionnel)</label>
+                    <textarea id="role-change-reason" name="reason" class="form-control" rows="3"
+                              placeholder="Expliquez pourquoi vous modifiez ce rôle..."></textarea>
+                </div>
+                
+                <div class="checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="notify_member" checked>
+                        <span class="checkmark"></span>
+                        Notifier le membre du changement de rôle
+                    </label>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn-refonte btn-refonte-secondary" onclick="closeEditRoleModal()">
+                    Annuler
+                </button>
+                <button type="submit" class="btn-refonte btn-refonte-primary">
+                    <i class="fas fa-save"></i>
+                    Modifier le rôle
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+<script>
+// Members functionality
+let membersOffset = {{ members | length }};
+let totalMembers = {{ total_members_count }};
+
+// Filter and search members
+function filterMembers() {
+    const searchTerm = document.getElementById('member-search').value.toLowerCase();
+    const roleFilter = document.getElementById('member-role').value;
+    const statusFilter = document.getElementById('member-status').value;
+    
+    document.querySelectorAll('.member-card').forEach(card => {
+        const name = card.dataset.name;
+        const email = card.dataset.email;
+        const role = card.dataset.role;
+        const status = card.dataset.status;
+        
+        const matchesSearch = !searchTerm || 
+            name.includes(searchTerm) || 
+            email.includes(searchTerm);
+        const matchesRole = !roleFilter || role === roleFilter;
+        const matchesStatus = !statusFilter || status === statusFilter;
+        
+        card.style.display = (matchesSearch && matchesRole && matchesStatus) ? 'block' : 'none';
+    });
+    
+    updateResultsCount();
+}
+
+// Sort members
+function sortMembers() {
+    const sortBy = document.getElementById('sort-by').value;
+    const container = document.getElementById('members-grid');
+    const cards = Array.from(container.querySelectorAll('.member-card'));
+    
+    cards.sort((a, b) => {
+        switch (sortBy) {
+            case 'name':
+                return a.dataset.name.localeCompare(b.dataset.name);
+            case 'joined':
+                return parseFloat(b.dataset.joined) - parseFloat(a.dataset.joined);
+            case 'role':
+                const roleOrder = { 'admin': 0, 'moderator': 1, 'member': 2, 'observer': 3 };
+                return roleOrder[a.dataset.role] - roleOrder[b.dataset.role];
+            default:
+                return 0;
+        }
+    });
+    
+    cards.forEach(card => container.appendChild(card));
+}
+
+// Update results count
+function updateResultsCount() {
+    const visibleCards = document.querySelectorAll('.member-card[style="display: block"], .member-card:not([style*="display: none"])').length;
+    const totalCards = document.querySelectorAll('.member-card').length;
+    
+    // Update header count if needed
+    const headerText = document.querySelector('.header-content p');
+    if (headerText && visibleCards !== totalCards) {
+        headerText.textContent = `${visibleCards} membres trouvés sur ${totalCards}`;
+    }
+}
+
+// Load more members
+function loadMoreMembers() {
+    const button = document.getElementById('load-more-btn');
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Chargement...';
+    
+    fetch(`/api/assemblies/{{ assembly.id }}/members?offset=${membersOffset}&limit=20`, {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success && data.members.length > 0) {
+            const container = document.getElementById('members-grid');
+            
+            data.members.forEach(member => {
+                const memberCard = createMemberCard(member);
+                container.appendChild(memberCard);
+            });
+            
+            membersOffset += data.members.length;
+            
+            if (membersOffset >= totalMembers) {
+                button.style.display = 'none';
+            }
+        }
+    })
+    .finally(() => {
+        button.disabled = false;
+        button.innerHTML = '<i class="fas fa-plus"></i> Charger plus de membres';
+    });
+}
+
+// Member management functions
+{% if can_manage_assembly %}
+function toggleMemberActions(memberId) {
+    // Close all other dropdowns
+    document.querySelectorAll('.dropdown-menu').forEach(menu => {
+        if (menu.id !== `member-actions-${memberId}`) {
+            menu.style.display = 'none';
+        }
+    });
+    
+    const menu = document.getElementById(`member-actions-${memberId}`);
+    menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+}
+
+function openAddMemberModal() {
+    document.getElementById('add-member-modal').style.display = 'flex';
+}
+
+function closeAddMemberModal() {
+    document.getElementById('add-member-modal').style.display = 'none';
+    document.getElementById('add-member-form').reset();
+}
+
+function openInviteModal() {
+    document.getElementById('invite-modal').style.display = 'flex';
+}
+
+function closeInviteModal() {
+    document.getElementById('invite-modal').style.display = 'none';
+    document.getElementById('invite-form').reset();
+}
+
+function editMemberRole(memberId) {
+    const memberCard = document.querySelector(`[data-member-id="${memberId}"]`);
+    const memberName = memberCard.querySelector('.member-name').textContent;
+    const currentRole = memberCard.dataset.role;
+    
+    document.getElementById('edit-member-id').value = memberId;
+    document.getElementById('edit-member-name').textContent = memberName;
+    document.getElementById('new-role').value = currentRole;
+    document.getElementById('edit-role-modal').style.display = 'flex';
+}
+
+function closeEditRoleModal() {
+    document.getElementById('edit-role-modal').style.display = 'none';
+    document.getElementById('edit-role-form').reset();
+}
+
+function approveMember(memberId) {
+    if (confirm('Approuver l\'adhésion de ce membre ?')) {
+        updateMemberStatus(memberId, 'active');
+    }
+}
+
+function rejectMember(memberId) {
+    if (confirm('Rejeter l\'adhésion de ce membre ? Cette action ne peut pas être annulée.')) {
+        updateMemberStatus(memberId, 'rejected');
+    }
+}
+
+function suspendMember(memberId) {
+    if (confirm('Suspendre ce membre ? Il ne pourra plus participer aux activités de l\'assemblée.')) {
+        updateMemberStatus(memberId, 'inactive');
+    }
+}
+
+function reactivateMember(memberId) {
+    if (confirm('Réactiver ce membre ?')) {
+        updateMemberStatus(memberId, 'active');
+    }
+}
+
+function removeMember(memberId) {
+    if (confirm('Retirer définitivement ce membre de l\'assemblée ? Cette action ne peut pas être annulée.')) {
+        fetch(`/api/assemblies/{{ assembly.id }}/members/${memberId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.querySelector(`[data-member-id="${memberId}"]`).remove();
+                updateResultsCount();
+            } else {
+                alert(data.message || 'Erreur lors de la suppression');
+            }
+        });
+    }
+}
+
+function updateMemberStatus(memberId, newStatus) {
+    fetch(`/api/members/${memberId}/status`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({ status: newStatus })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            if (newStatus === 'rejected') {
+                document.querySelector(`[data-member-id="${memberId}"]`).remove();
+            } else {
+                location.reload(); // Reload to update UI
+            }
+        } else {
+            alert(data.message || 'Erreur lors de la mise à jour');
+        }
+    });
+}
+
+// Form submissions
+document.getElementById('add-member-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    
+    fetch(this.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            closeAddMemberModal();
+            location.reload();
+        } else {
+            alert(data.message || 'Erreur lors de l\'ajout du membre');
+        }
+    });
+});
+
+document.getElementById('invite-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    
+    fetch(this.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            closeInviteModal();
+            alert(`${data.sent_count} invitations envoyées avec succès`);
+        } else {
+            alert(data.message || 'Erreur lors de l\'envoi des invitations');
+        }
+    });
+});
+
+document.getElementById('edit-role-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    
+    fetch(this.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            closeEditRoleModal();
+            location.reload();
+        } else {
+            alert(data.message || 'Erreur lors de la modification du rôle');
+        }
+    });
+});
+{% endif %}
+
+// Common functions
+function viewMemberProfile(memberId) {
+    window.location.href = `/profile/${memberId}`;
+}
+
+function sendMessage(memberId) {
+    // This would open a message composition modal or redirect to messaging
+    window.location.href = `/messages/compose?to=${memberId}`;
+}
+
+// Helper function to create member card HTML (for load more functionality)
+function createMemberCard(member) {
+    // This would create a DOM element with the member card HTML
+    // Implementation depends on your specific templating needs
+    const div = document.createElement('div');
+    div.innerHTML = `<!-- Member card HTML would go here -->`;
+    return div.firstElementChild;
+}
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.dropdown')) {
+        document.querySelectorAll('.dropdown-menu').forEach(menu => {
+            menu.style.display = 'none';
+        });
+    }
+});
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    // Any initialization code
+});
+</script>
+{% endblock %}

@@ -1,0 +1,863 @@
+{% extends "base.html" %}
+
+{% block title %}{{ budget.title }} - Budget Participatif - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="budget-detail-layout">
+    <div class="container">
+        <div class="budget-detail-container">
+            <!-- Layout principal -->
+            <div class="budget-layout">
+                <!-- Contenu principal -->
+                <div class="budget-main">
+                    <!-- En-tête du budget -->
+                    <div class="budget-detail-header">
+                        <div class="breadcrumb">
+                            <a href="/budgets">Budgets participatifs</a>
+                            <i class="fas fa-chevron-right"></i>
+                            <span>{{ budget.title }}</span>
+                        </div>
+                        
+                        <div class="budget-status-bar">
+                            <div class="status-badges">
+                                <span class="status-badge status-{{ budget.status }}">
+                                    <i class="fas fa-{{ budget.status_icon }}"></i>
+                                    {{ budget.status_text }}
+                                </span>
+                                
+                                {% if budget.is_featured %}
+                                <span class="featured-badge">
+                                    <i class="fas fa-star"></i>
+                                    Budget phare
+                                </span>
+                                {% endif %}
+                                
+                                <span class="scope-badge scope-{{ budget.scope }}">
+                                    <i class="fas fa-{{ budget.scope_icon }}"></i>
+                                    {{ budget.scope_text }}
+                                </span>
+                            </div>
+                            
+                            <div class="header-actions">
+                                <button class="action-btn" title="Partager" onclick="shareBudget({{ budget.id }})">
+                                    <i class="fas fa-share-alt"></i>
+                                </button>
+                                <button class="action-btn" title="Signaler" onclick="reportBudget({{ budget.id }})">
+                                    <i class="fas fa-flag"></i>
+                                </button>
+                                <button class="action-btn follow-btn {{ 'active' if user_follows else '' }}" 
+                                        title="Suivre" onclick="toggleFollowBudget({{ budget.id }})">
+                                    <i class="fas fa-bell"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Informations principales -->
+                    <div class="budget-content">
+                        <h1 class="budget-title">{{ budget.title }}</h1>
+                        
+                        <div class="budget-description">
+                            {{ budget.description|safe }}
+                        </div>
+                        
+                        {% if budget.tags %}
+                        <div class="budget-tags">
+                            {% for tag in budget.tags %}
+                            <span class="tag">{{ tag }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Détails du budget -->
+                    <div class="budget-details">
+                        <div class="details-grid">
+                            <div class="detail-item">
+                                <div class="detail-icon">
+                                    <i class="fas fa-coins"></i>
+                                </div>
+                                <div class="detail-content">
+                                    <div class="detail-label">Budget total</div>
+                                    <div class="detail-value">{{ budget.total_amount|format_currency }} €</div>
+                                    {% if budget.remaining_amount %}
+                                    <div class="detail-extra">
+                                        {{ budget.remaining_amount|format_currency }} € restants
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="detail-item">
+                                <div class="detail-icon">
+                                    <i class="fas fa-calendar-alt"></i>
+                                </div>
+                                <div class="detail-content">
+                                    <div class="detail-label">Période de vote</div>
+                                    <div class="detail-value">
+                                        {{ budget.voting_start_date|format_date }} - {{ budget.voting_end_date|format_date }}
+                                    </div>
+                                    {% if budget.days_remaining %}
+                                    <div class="detail-extra">
+                                        {{ budget.days_remaining }} jours restants
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="detail-item">
+                                <div class="detail-icon">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <div class="detail-content">
+                                    <div class="detail-label">Participation</div>
+                                    <div class="detail-value">{{ budget.votes_count }} votes</div>
+                                    <div class="detail-extra">
+                                        {{ budget.participation_rate }}% des habitants
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="detail-item">
+                                <div class="detail-icon">
+                                    <i class="fas fa-rules"></i>
+                                </div>
+                                <div class="detail-content">
+                                    <div class="detail-label">Règles de vote</div>
+                                    <div class="detail-value">{{ budget.voting_rules_text }}</div>
+                                    {% if budget.max_selections %}
+                                    <div class="detail-extra">
+                                        Maximum {{ budget.max_selections }} projets
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Interface de vote (si vote en cours) -->
+                    {% if budget.status == 'voting' and user_can_vote %}
+                    <div class="voting-section" id="voting-section">
+                        <div class="voting-header">
+                            <h2>
+                                <i class="fas fa-vote-yea"></i>
+                                Participez au vote
+                            </h2>
+                            
+                            {% if user_has_voted %}
+                            <div class="vote-status voted">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Vous avez déjà voté le {{ user_vote_date|format_date }}</span>
+                                <button class="btn-refonte btn-sm" onclick="showVoteDetails()">
+                                    Voir mon vote
+                                </button>
+                            </div>
+                            {% else %}
+                            <div class="vote-status pending">
+                                <i class="fas fa-info-circle"></i>
+                                <span>Sélectionnez les projets que vous souhaitez voir financés</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Règles de vote -->
+                        <div class="voting-rules-box">
+                            <h4><i class="fas fa-info-circle"></i> Règles de vote</h4>
+                            <ul>
+                                <li>{{ budget.voting_rules_text }}</li>
+                                {% if budget.max_selections %}
+                                <li>Vous pouvez sélectionner maximum {{ budget.max_selections }} projets</li>
+                                {% endif %}
+                                {% if budget.max_budget %}
+                                <li>Le coût total de vos sélections ne peut dépasser {{ budget.max_budget|format_currency }} €</li>
+                                {% endif %}
+                                <li>Un seul vote par personne (vérification requise)</li>
+                                <li>Le vote est définitif une fois confirmé</li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Panier de vote -->
+                        <div class="vote-basket" id="vote-basket">
+                            <div class="basket-header">
+                                <h4>
+                                    <i class="fas fa-shopping-basket"></i>
+                                    Mon panier de vote
+                                </h4>
+                                <button class="clear-basket" onclick="clearVoteBasket()">
+                                    <i class="fas fa-trash"></i>
+                                    Vider
+                                </button>
+                            </div>
+                            
+                            <div class="basket-content">
+                                <div class="basket-empty" id="basket-empty">
+                                    <i class="fas fa-basket-shopping"></i>
+                                    <p>Sélectionnez des projets pour commencer à voter</p>
+                                </div>
+                                
+                                <div class="basket-items" id="basket-items">
+                                    <!-- Les projets sélectionnés apparaîtront ici -->
+                                </div>
+                                
+                                <div class="basket-summary" id="basket-summary" style="display: none;">
+                                    <div class="summary-row">
+                                        <span>Projets sélectionnés:</span>
+                                        <span id="selected-count">0</span>
+                                    </div>
+                                    <div class="summary-row">
+                                        <span>Coût total:</span>
+                                        <span id="selected-total">0 €</span>
+                                    </div>
+                                    {% if budget.max_budget %}
+                                    <div class="summary-row">
+                                        <span>Budget restant:</span>
+                                        <span id="remaining-budget">{{ budget.max_budget|format_currency }} €</span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="basket-actions" id="basket-actions" style="display: none;">
+                                    <button class="btn-refonte btn-full" onclick="submitVote()" 
+                                            id="submit-vote-btn" disabled>
+                                        <i class="fas fa-vote-yea"></i>
+                                        Confirmer mon vote
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Liste des projets -->
+                    <div class="projects-section">
+                        <div class="projects-header">
+                            <h2>
+                                <i class="fas fa-project-diagram"></i>
+                                Projets ({{ budget.projects|length }})
+                            </h2>
+                            
+                            <div class="projects-filters">
+                                <div class="filter-group">
+                                    <select class="filter-select" id="category-filter">
+                                        <option value="">Toutes les catégories</option>
+                                        <option value="infrastructure">Infrastructure</option>
+                                        <option value="environment">Environnement</option>
+                                        <option value="culture">Culture</option>
+                                        <option value="social">Social</option>
+                                        <option value="mobility">Mobilité</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="filter-group">
+                                    <select class="filter-select" id="cost-filter">
+                                        <option value="">Tous les coûts</option>
+                                        <option value="0-10000">0 - 10 000 €</option>
+                                        <option value="10000-50000">10 000 - 50 000 €</option>
+                                        <option value="50000-100000">50 000 - 100 000 €</option>
+                                        <option value="100000+">100 000 € et plus</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="view-toggle-group">
+                                    <button class="view-toggle active" data-view="cards">
+                                        <i class="fas fa-th"></i>
+                                    </button>
+                                    <button class="view-toggle" data-view="table">
+                                        <i class="fas fa-list"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Vue cartes -->
+                        <div class="projects-container view-cards" id="projects-container">
+                            <!-- Projet 1 -->
+                            <div class="project-card" data-project-id="1" data-category="infrastructure" data-cost="45000">
+                                <div class="project-header">
+                                    <div class="project-selection">
+                                        {% if budget.status == 'voting' and user_can_vote and not user_has_voted %}
+                                        <input type="checkbox" class="project-checkbox" id="project-1" 
+                                               data-project-id="1" data-cost="45000" onchange="toggleProjectSelection(this)">
+                                        <label for="project-1" class="selection-checkbox"></label>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="project-badges">
+                                        <span class="category-badge category-infrastructure">
+                                            <i class="fas fa-hard-hat"></i>
+                                            Infrastructure
+                                        </span>
+                                        {% if budget.status == 'results' and project.is_winner %}
+                                        <span class="winner-badge">
+                                            <i class="fas fa-trophy"></i>
+                                            Lauréat
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="project-image">
+                                    <img src="/static/image/project-playground.jpg" alt="Aire de jeux inclusive">
+                                    <div class="project-cost">
+                                        <span class="cost-amount">45 000 €</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="project-content">
+                                    <h3 class="project-title">Aire de jeux inclusive</h3>
+                                    <p class="project-description">
+                                        Création d'une aire de jeux accessible à tous les enfants, 
+                                        y compris ceux en situation de handicap, avec équipements adaptés et sol sécurisé.
+                                    </p>
+                                    
+                                    <div class="project-details">
+                                        <div class="detail-row">
+                                            <i class="fas fa-map-marker-alt"></i>
+                                            <span>Parc des Tilleuls</span>
+                                        </div>
+                                        <div class="detail-row">
+                                            <i class="fas fa-users"></i>
+                                            <span>Bénéficiaires: Familles du quartier</span>
+                                        </div>
+                                        <div class="detail-row">
+                                            <i class="fas fa-calendar"></i>
+                                            <span>Durée: 3 mois de travaux</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="project-stats">
+                                    {% if budget.status in ['voting', 'finished'] %}
+                                    <div class="stat-item">
+                                        <i class="fas fa-vote-yea"></i>
+                                        <span>342 votes</span>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    <div class="stat-item">
+                                        <i class="fas fa-eye"></i>
+                                        <span>1,234 vues</span>
+                                    </div>
+                                    
+                                    <div class="stat-item">
+                                        <i class="fas fa-heart"></i>
+                                        <span>89 soutiens</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="project-footer">
+                                    <div class="project-author">
+                                        <div class="author-avatar">
+                                            <span class="avatar-placeholder">AP</span>
+                                        </div>
+                                        <div class="author-info">
+                                            <div class="author-name">Association Parents</div>
+                                            <div class="author-role">Proposant</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="project-actions">
+                                        <button class="action-btn" title="Plus d'infos" onclick="showProjectDetails(1)">
+                                            <i class="fas fa-info-circle"></i>
+                                        </button>
+                                        <button class="action-btn" title="Partager" onclick="shareProject(1)">
+                                            <i class="fas fa-share-alt"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Projet 2 -->
+                            <div class="project-card" data-project-id="2" data-category="mobility" data-cost="85000">
+                                <div class="project-header">
+                                    <div class="project-selection">
+                                        {% if budget.status == 'voting' and user_can_vote and not user_has_voted %}
+                                        <input type="checkbox" class="project-checkbox" id="project-2" 
+                                               data-project-id="2" data-cost="85000" onchange="toggleProjectSelection(this)">
+                                        <label for="project-2" class="selection-checkbox"></label>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="project-badges">
+                                        <span class="category-badge category-mobility">
+                                            <i class="fas fa-bicycle"></i>
+                                            Mobilité
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div class="project-image">
+                                    <img src="/static/image/project-bike-lane.jpg" alt="Piste cyclable sécurisée">
+                                    <div class="project-cost">
+                                        <span class="cost-amount">85 000 €</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="project-content">
+                                    <h3 class="project-title">Piste cyclable sécurisée</h3>
+                                    <p class="project-description">
+                                        Aménagement d'une piste cyclable protégée de 2km reliant le centre-ville 
+                                        aux écoles, avec signalisation et éclairage LED.
+                                    </p>
+                                    
+                                    <div class="project-details">
+                                        <div class="detail-row">
+                                            <i class="fas fa-route"></i>
+                                            <span>Avenue de la République</span>
+                                        </div>
+                                        <div class="detail-row">
+                                            <i class="fas fa-users"></i>
+                                            <span>Bénéficiaires: Cyclistes quotidiens</span>
+                                        </div>
+                                        <div class="detail-row">
+                                            <i class="fas fa-calendar"></i>
+                                            <span>Durée: 6 mois de travaux</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="project-stats">
+                                    {% if budget.status in ['voting', 'finished'] %}
+                                    <div class="stat-item">
+                                        <i class="fas fa-vote-yea"></i>
+                                        <span>267 votes</span>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    <div class="stat-item">
+                                        <i class="fas fa-eye"></i>
+                                        <span>987 vues</span>
+                                    </div>
+                                    
+                                    <div class="stat-item">
+                                        <i class="fas fa-heart"></i>
+                                        <span>156 soutiens</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="project-footer">
+                                    <div class="project-author">
+                                        <div class="author-avatar">
+                                            <span class="avatar-placeholder">CV</span>
+                                        </div>
+                                        <div class="author-info">
+                                            <div class="author-name">Collectif Vélo</div>
+                                            <div class="author-role">Association</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="project-actions">
+                                        <button class="action-btn" title="Plus d'infos" onclick="showProjectDetails(2)">
+                                            <i class="fas fa-info-circle"></i>
+                                        </button>
+                                        <button class="action-btn" title="Partager" onclick="shareProject(2)">
+                                            <i class="fas fa-share-alt"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Projet 3 -->
+                            <div class="project-card" data-project-id="3" data-category="environment" data-cost="32000">
+                                <div class="project-header">
+                                    <div class="project-selection">
+                                        {% if budget.status == 'voting' and user_can_vote and not user_has_voted %}
+                                        <input type="checkbox" class="project-checkbox" id="project-3" 
+                                               data-project-id="3" data-cost="32000" onchange="toggleProjectSelection(this)">
+                                        <label for="project-3" class="selection-checkbox"></label>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="project-badges">
+                                        <span class="category-badge category-environment">
+                                            <i class="fas fa-leaf"></i>
+                                            Environnement
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div class="project-image">
+                                    <img src="/static/image/project-garden.jpg" alt="Jardin partagé">
+                                    <div class="project-cost">
+                                        <span class="cost-amount">32 000 €</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="project-content">
+                                    <h3 class="project-title">Jardin partagé du quartier</h3>
+                                    <p class="project-description">
+                                        Création d'un jardin communautaire avec parcelles individuelles, 
+                                        compost collectif et abri à outils pour développer le lien social.
+                                    </p>
+                                    
+                                    <div class="project-details">
+                                        <div class="detail-row">
+                                            <i class="fas fa-map-marker-alt"></i>
+                                            <span>Terrain vague rue Pasteur</span>
+                                        </div>
+                                        <div class="detail-row">
+                                            <i class="fas fa-users"></i>
+                                            <span>Bénéficiaires: 50 familles</span>
+                                        </div>
+                                        <div class="detail-row">
+                                            <i class="fas fa-calendar"></i>
+                                            <span>Durée: 2 mois d'aménagement</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="project-stats">
+                                    {% if budget.status in ['voting', 'finished'] %}
+                                    <div class="stat-item">
+                                        <i class="fas fa-vote-yea"></i>
+                                        <span>198 votes</span>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    <div class="stat-item">
+                                        <i class="fas fa-eye"></i>
+                                        <span>756 vues</span>
+                                    </div>
+                                    
+                                    <div class="stat-item">
+                                        <i class="fas fa-heart"></i>
+                                        <span>124 soutiens</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="project-footer">
+                                    <div class="project-author">
+                                        <div class="author-avatar">
+                                            <span class="avatar-placeholder">JV</span>
+                                        </div>
+                                        <div class="author-info">
+                                            <div class="author-name">Jardins Verts</div>
+                                            <div class="author-role">Collectif citoyen</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="project-actions">
+                                        <button class="action-btn" title="Plus d'infos" onclick="showProjectDetails(3)">
+                                            <i class="fas fa-info-circle"></i>
+                                        </button>
+                                        <button class="action-btn" title="Partager" onclick="shareProject(3)">
+                                            <i class="fas fa-share-alt"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Commentaires -->
+                    <div class="comments-section">
+                        <div class="section-header">
+                            <h2>
+                                <i class="fas fa-comments"></i>
+                                Commentaires
+                                <span class="comments-count">({{ budget.comments_count }})</span>
+                            </h2>
+                            
+                            <div class="comments-actions">
+                                <select class="sort-select">
+                                    <option value="newest">Plus récents</option>
+                                    <option value="oldest">Plus anciens</option>
+                                    <option value="most_liked">Plus aimés</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        {% if user_authenticated %}
+                        <div class="comment-form">
+                            <div class="form-header">
+                                <div class="user-avatar">
+                                    {% if user.avatar %}
+                                    <img src="{{ user.avatar }}" alt="{{ user.name }}">
+                                    {% else %}
+                                    <span class="avatar-placeholder">{{ user.name[0] }}</span>
+                                    {% endif %}
+                                </div>
+                                <div class="form-info">
+                                    <strong>{{ user.name }}</strong>
+                                    <span>Ajouter un commentaire</span>
+                                </div>
+                            </div>
+                            
+                            <form id="comment-form" onsubmit="submitComment(event)">
+                                <textarea class="form-control" placeholder="Partagez votre avis sur ce budget participatif..." 
+                                          rows="3" maxlength="1000" required></textarea>
+                                <div class="form-footer">
+                                    <div class="character-count">
+                                        <span id="char-count">0</span>/1000 caractères
+                                    </div>
+                                    <button type="submit" class="btn-refonte">
+                                        <i class="fas fa-paper-plane"></i>
+                                        Publier
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Liste des commentaires -->
+                        <div class="comments-list">
+                            <!-- Commentaire exemple -->
+                            <div class="comment">
+                                <div class="comment-avatar">
+                                    <span class="avatar-placeholder">MC</span>
+                                </div>
+                                <div class="comment-content">
+                                    <div class="comment-header">
+                                        <div class="comment-author">Marie Citoyenne</div>
+                                        <div class="comment-date">Il y a 2 heures</div>
+                                        <div class="comment-actions">
+                                            <button class="action-btn" title="Signaler">
+                                                <i class="fas fa-flag"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="comment-text">
+                                        Excellente initiative ! Le jardin partagé permettra de créer du lien social 
+                                        dans le quartier tout en sensibilisant à l'environnement. J'ai hâte de voir ce projet se réaliser.
+                                    </div>
+                                    <div class="comment-footer">
+                                        <button class="comment-action">
+                                            <i class="fas fa-heart"></i>
+                                            <span>12</span>
+                                        </button>
+                                        <button class="comment-action">
+                                            <i class="fas fa-reply"></i>
+                                            Répondre
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="budget-sidebar">
+                    <!-- Informations rapides -->
+                    <div class="quick-info">
+                        <h3>Informations</h3>
+                        <div class="info-list">
+                            <div class="info-item">
+                                <i class="fas fa-calendar-alt"></i>
+                                <div>
+                                    <strong>Période de vote</strong>
+                                    <span>{{ budget.voting_start_date|format_date }} - {{ budget.voting_end_date|format_date }}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="info-item">
+                                <i class="fas fa-users"></i>
+                                <div>
+                                    <strong>Participation</strong>
+                                    <span>{{ budget.votes_count }} votes ({{ budget.participation_rate }}%)</span>
+                                </div>
+                            </div>
+                            
+                            <div class="info-item">
+                                <i class="fas fa-project-diagram"></i>
+                                <div>
+                                    <strong>Projets</strong>
+                                    <span>{{ budget.projects|length }} proposés</span>
+                                </div>
+                            </div>
+                            
+                            {% if budget.winner_projects %}
+                            <div class="info-item">
+                                <i class="fas fa-trophy"></i>
+                                <div>
+                                    <strong>Lauréats</strong>
+                                    <span>{{ budget.winner_projects|length }} projets financés</span>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Notifications -->
+                    <div class="notifications-widget">
+                        <h3>Notifications</h3>
+                        <div class="notification-options">
+                            <label class="notification-option">
+                                <input type="checkbox" checked>
+                                <span class="checkmark"></span>
+                                Nouveaux projets
+                            </label>
+                            <label class="notification-option">
+                                <input type="checkbox" checked>
+                                <span class="checkmark"></span>
+                                Résultats du vote
+                            </label>
+                            <label class="notification-option">
+                                <input type="checkbox">
+                                <span class="checkmark"></span>
+                                Avancement des projets
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Statistiques -->
+                    <div class="budget-stats">
+                        <h3>Statistiques</h3>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div class="stat-icon">
+                                    <i class="fas fa-eye"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="stat-value">{{ budget.views_count }}</div>
+                                    <div class="stat-label">Vues</div>
+                                </div>
+                            </div>
+                            
+                            <div class="stat-item">
+                                <div class="stat-icon">
+                                    <i class="fas fa-share-alt"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="stat-value">{{ budget.shares_count }}</div>
+                                    <div class="stat-label">Partages</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Budgets similaires -->
+                    <div class="similar-budgets">
+                        <h3>Budgets similaires</h3>
+                        <div class="similar-list">
+                            <div class="similar-item">
+                                <div class="similar-content">
+                                    <h4><a href="/budgets/4">Budget Écoles 2025</a></h4>
+                                    <div class="similar-meta">
+                                        <span>250 000 €</span>
+                                        <span>•</span>
+                                        <span>8 projets</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="similar-item">
+                                <div class="similar-content">
+                                    <h4><a href="/budgets/5">Amélioration des Parcs</a></h4>
+                                    <div class="similar-meta">
+                                        <span>180 000 €</span>
+                                        <span>•</span>
+                                        <span>12 projets</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmation de vote -->
+<div class="modal fade" id="voteConfirmModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmer votre vote</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="vote-summary">
+                    <h6>Vous êtes sur le point de voter pour :</h6>
+                    <div id="vote-summary-list">
+                        <!-- Liste des projets sélectionnés -->
+                    </div>
+                    
+                    <div class="vote-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Attention :</strong> Votre vote est définitif et ne pourra pas être modifié.
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-refonte btn-secondary" data-dismiss="modal">
+                    Annuler
+                </button>
+                <button type="button" class="btn-refonte" onclick="confirmVote()">
+                    <i class="fas fa-vote-yea"></i>
+                    Confirmer mon vote
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Traçabilité UMan API -->
+<div class="traceability-section">
+    <div class="container">
+        <div class="traceability-info">
+            <div class="trace-header">
+                <h4>
+                    <i class="fas fa-shield-alt"></i>
+                    Traçabilité UMan API
+                </h4>
+                <span class="trace-score">Score: 98%</span>
+            </div>
+            
+            <div class="trace-details">
+                <div class="trace-item">
+                    <span class="trace-label">Hash du budget:</span>
+                    <code class="trace-value">a1b2c3d4e5f6...</code>
+                </div>
+                <div class="trace-item">
+                    <span class="trace-label">Signature numérique:</span>
+                    <span class="trace-value verified">
+                        <i class="fas fa-certificate"></i>
+                        Vérifiée
+                    </span>
+                </div>
+                <div class="trace-item">
+                    <span class="trace-label">Dernière modification:</span>
+                    <span class="trace-value">{{ budget.last_modified|format_datetime }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Variables globales pour le vote
+let selectedProjects = [];
+let maxSelections = {{ budget.max_selections or 'null' }};
+let maxBudget = {{ budget.max_budget or 'null' }};
+let currentTotal = 0;
+
+// Initialisation
+document.addEventListener('DOMContentLoaded', function() {
+    // Sera géré par budgets_surveys.js
+    initializeBudgetVoting();
+});
+
+// Fonctions de vote (seront dans budgets_surveys.js)
+function toggleProjectSelection(checkbox) {
+    // Logique de sélection des projets
+}
+
+function updateVoteBasket() {
+    // Mise à jour du panier de vote
+}
+
+function submitVote() {
+    // Soumission du vote
+}
+
+function confirmVote() {
+    // Confirmation finale du vote
+}
+</script>
+{% endblock %}

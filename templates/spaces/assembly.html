@@ -1,0 +1,465 @@
+{% extends "base.html" %}
+
+{% block title %}{{ assembly.title }} — Assemblée{% endblock %}
+
+{% block meta %}
+<meta name="description" content="{{ assembly.short_description }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='refonte.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='spaces.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='assembly.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- Assembly Hero -->
+<section class="assembly-hero">
+    {% if assembly.hero_image %}
+    <div class="assembly-hero-bg" style="background-image: url('{{ assembly.hero_image }}')"></div>
+    {% endif %}
+    
+    <div class="assembly-hero-overlay"></div>
+    
+    <div class="container">
+        <div class="assembly-hero-content">
+            <div class="assembly-breadcrumb">
+                <a href="{{ url_for('spaces.index') }}">Espaces participatifs</a>
+                <i class="fas fa-chevron-right"></i>
+                <span>Assemblée</span>
+            </div>
+            
+            <div class="assembly-header">
+                <div class="assembly-type-badge">
+                    <i class="fas fa-users"></i>
+                    <span>Assemblée {{ assembly.type_text or 'citoyenne' }}</span>
+                </div>
+                
+                <h1>{{ assembly.title }}</h1>
+                <p class="assembly-subtitle">{{ assembly.short_description }}</p>
+                
+                <div class="assembly-meta">
+                    <div class="assembly-stats">
+                        <div class="stat">
+                            <i class="fas fa-user-friends"></i>
+                            <strong>{{ assembly.members_count or 0 }}</strong>
+                            <span>membre(s)</span>
+                        </div>
+                        <div class="stat">
+                            <i class="fas fa-calendar-check"></i>
+                            <strong>{{ assembly.meetings_count or 0 }}</strong>
+                            <span>réunion(s)</span>
+                        </div>
+                        <div class="stat">
+                            <i class="fas fa-file-alt"></i>
+                            <strong>{{ assembly.documents_count or 0 }}</strong>
+                            <span>document(s)</span>
+                        </div>
+                        <div class="stat">
+                            <i class="fas fa-newspaper"></i>
+                            <strong>{{ assembly.posts_count or 0 }}</strong>
+                            <span>actualité(s)</span>
+                        </div>
+                    </div>
+                    
+                    <div class="assembly-actions">
+                        {% if assembly.can_join %}
+                        <button class="btn-refonte btn-refonte-primary" onclick="joinAssembly()">
+                            <i class="fas fa-user-plus"></i>
+                            Rejoindre
+                        </button>
+                        {% elif assembly.is_member %}
+                        <span class="member-badge">
+                            <i class="fas fa-check-circle"></i>
+                            Membre
+                        </span>
+                        {% endif %}
+                        
+                        <button class="btn-refonte btn-refonte-secondary follow-btn" 
+                                data-space-id="{{ assembly.id }}" 
+                                data-following="{{ 'true' if assembly.is_following else 'false' }}">
+                            <i class="fas fa-{{ 'heart' if assembly.is_following else 'heart-o' }}"></i>
+                            {{ 'Suivi' if assembly.is_following else 'Suivre' }}
+                        </button>
+                        
+                        <div class="dropdown">
+                            <button class="btn-refonte btn-refonte-secondary dropdown-toggle" data-toggle="dropdown">
+                                <i class="fas fa-share-alt"></i>
+                                Partager
+                            </button>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="#" onclick="shareOn('facebook')">
+                                    <i class="fab fa-facebook"></i> Facebook
+                                </a>
+                                <a class="dropdown-item" href="#" onclick="shareOn('twitter')">
+                                    <i class="fab fa-twitter"></i> Twitter
+                                </a>
+                                <a class="dropdown-item" href="#" onclick="copyLink()">
+                                    <i class="fas fa-link"></i> Copier le lien
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Assembly Navigation -->
+<section class="assembly-nav">
+    <div class="container">
+        <nav class="assembly-nav-tabs">
+            <a href="#overview" class="nav-tab active" data-tab="overview">
+                <i class="fas fa-home"></i>
+                <span>Vue d'ensemble</span>
+            </a>
+            <a href="#meetings" class="nav-tab" data-tab="meetings">
+                <i class="fas fa-calendar-alt"></i>
+                <span>Réunions</span>
+                <span class="tab-badge">{{ assembly.upcoming_meetings_count or 0 }}</span>
+            </a>
+            <a href="#members" class="nav-tab" data-tab="members">
+                <i class="fas fa-users"></i>
+                <span>Membres</span>
+                <span class="tab-badge">{{ assembly.members_count or 0 }}</span>
+            </a>
+            <a href="#documents" class="nav-tab" data-tab="documents">
+                <i class="fas fa-folder"></i>
+                <span>Documents</span>
+            </a>
+            <a href="#news" class="nav-tab" data-tab="news">
+                <i class="fas fa-newspaper"></i>
+                <span>Actualités</span>
+            </a>
+        </nav>
+    </div>
+</section>
+
+<!-- Assembly Content -->
+<section class="assembly-content">
+    <div class="container">
+        <!-- Overview Tab -->
+        <div class="tab-content active" id="overview-content">
+            <div class="assembly-content-grid">
+                <!-- Main Content -->
+                <div class="assembly-main-content">
+                    <!-- Description -->
+                    <div class="content-section card-glass-refonte">
+                        <h3><i class="fas fa-info-circle"></i> À propos de cette assemblée</h3>
+                        <div class="content-text">
+                            {{ assembly.description|safe }}
+                        </div>
+                        
+                        {% if assembly.objectives %}
+                        <div class="assembly-objectives">
+                            <h4>Objectifs</h4>
+                            <ul>
+                                {% for objective in assembly.objectives %}
+                                <li>{{ objective }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Next Meeting -->
+                    {% if next_meeting %}
+                    <div class="content-section card-glass-refonte">
+                        <h3><i class="fas fa-calendar-check"></i> Prochaine réunion</h3>
+                        <div class="next-meeting-card">
+                            <div class="meeting-date">
+                                <div class="meeting-day">{{ next_meeting.date.strftime('%d') }}</div>
+                                <div class="meeting-month">{{ next_meeting.date.strftime('%b') }}</div>
+                            </div>
+                            <div class="meeting-content">
+                                <h4>{{ next_meeting.title }}</h4>
+                                <div class="meeting-details">
+                                    <div class="meeting-time">
+                                        <i class="fas fa-clock"></i>
+                                        {{ next_meeting.date.strftime('%H:%M') }} - {{ next_meeting.end_time.strftime('%H:%M') if next_meeting.end_time else 'Durée non précisée' }}
+                                    </div>
+                                    {% if next_meeting.location %}
+                                    <div class="meeting-location">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        {{ next_meeting.location }}
+                                    </div>
+                                    {% endif %}
+                                    {% if next_meeting.is_online %}
+                                    <div class="meeting-online">
+                                        <i class="fas fa-video"></i>
+                                        Réunion en ligne
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                {% if next_meeting.agenda %}
+                                <div class="meeting-agenda">
+                                    <strong>Ordre du jour :</strong>
+                                    <p>{{ next_meeting.agenda_preview }}</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="meeting-actions">
+                                <a href="{{ url_for('meetings.detail', id=next_meeting.id) }}" 
+                                   class="btn-refonte btn-refonte-primary">
+                                    Voir les détails
+                                </a>
+                                {% if next_meeting.can_register %}
+                                <button class="btn-refonte btn-refonte-secondary" onclick="registerForMeeting({{ next_meeting.id }})">
+                                    S'inscrire
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Recent Activity -->
+                    {% if recent_activities %}
+                    <div class="content-section">
+                        <h3><i class="fas fa-history"></i> Activité récente</h3>
+                        <div class="activity-feed">
+                            {% for activity in recent_activities %}
+                            <div class="activity-item">
+                                <div class="activity-avatar">
+                                    {% if activity.user.avatar %}
+                                    <img src="{{ activity.user.avatar }}" alt="{{ activity.user.name }}">
+                                    {% else %}
+                                    <i class="fas fa-user-circle"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-text">
+                                        <strong>{{ activity.user.name }}</strong>
+                                        {{ activity.description }}
+                                    </div>
+                                    <div class="activity-meta">
+                                        <span class="activity-time">{{ activity.created_at|timeago }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Sidebar -->
+                <div class="assembly-sidebar">
+                    <!-- Quick Info -->
+                    <div class="sidebar-widget card-glass-refonte">
+                        <h4><i class="fas fa-info"></i> Informations</h4>
+                        <div class="assembly-info">
+                            {% if assembly.created_date %}
+                            <div class="info-item">
+                                <strong>Créée le :</strong>
+                                <span>{{ assembly.created_date.strftime('%d/%m/%Y') }}</span>
+                            </div>
+                            {% endif %}
+                            {% if assembly.type %}
+                            <div class="info-item">
+                                <strong>Type :</strong>
+                                <span>{{ assembly.type_text }}</span>
+                            </div>
+                            {% endif %}
+                            {% if assembly.scope %}
+                            <div class="info-item">
+                                <strong>Portée :</strong>
+                                <span>{{ assembly.scope }}</span>
+                            </div>
+                            {% endif %}
+                            {% if assembly.duration %}
+                            <div class="info-item">
+                                <strong>Durée :</strong>
+                                <span>{{ assembly.duration }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Members Preview -->
+                    {% if assembly.featured_members %}
+                    <div class="sidebar-widget card-glass-refonte">
+                        <h4><i class="fas fa-users"></i> Membres</h4>
+                        <div class="members-preview">
+                            {% for member in assembly.featured_members %}
+                            <div class="member-preview">
+                                <div class="member-avatar">
+                                    {% if member.avatar %}
+                                    <img src="{{ member.avatar }}" alt="{{ member.name }}">
+                                    {% else %}
+                                    <i class="fas fa-user-circle"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="member-info">
+                                    <strong>{{ member.name }}</strong>
+                                    {% if member.role %}
+                                    <span class="member-role">{{ member.role }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                            
+                            {% if assembly.members_count > assembly.featured_members|length %}
+                            <div class="members-more">
+                                <a href="#members" onclick="switchTab('members')">
+                                    +{{ assembly.members_count - assembly.featured_members|length }} autres membres
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Upcoming Meetings -->
+                    {% if upcoming_meetings %}
+                    <div class="sidebar-widget card-glass-refonte">
+                        <h4><i class="fas fa-calendar-alt"></i> Prochaines réunions</h4>
+                        <div class="upcoming-meetings-list">
+                            {% for meeting in upcoming_meetings[:3] %}
+                            <div class="meeting-preview">
+                                <div class="meeting-date-small">
+                                    <div class="date-day">{{ meeting.date.strftime('%d') }}</div>
+                                    <div class="date-month">{{ meeting.date.strftime('%b') }}</div>
+                                </div>
+                                <div class="meeting-info">
+                                    <strong>{{ meeting.title }}</strong>
+                                    <div class="meeting-time">
+                                        <i class="fas fa-clock"></i>
+                                        {{ meeting.date.strftime('%H:%M') }}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        {% if upcoming_meetings|length > 3 %}
+                        <div class="meetings-more">
+                            <a href="#meetings" onclick="switchTab('meetings')">
+                                Voir toutes les réunions
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Contact -->
+                    {% if assembly.contact_info %}
+                    <div class="sidebar-widget card-glass-refonte">
+                        <h4><i class="fas fa-envelope"></i> Contact</h4>
+                        <div class="contact-info">
+                            {% if assembly.contact_info.coordinator %}
+                            <div class="contact-item">
+                                <strong>Coordinateur :</strong>
+                                <div>{{ assembly.contact_info.coordinator.name }}</div>
+                                {% if assembly.contact_info.coordinator.email %}
+                                <a href="mailto:{{ assembly.contact_info.coordinator.email }}">
+                                    {{ assembly.contact_info.coordinator.email }}
+                                </a>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                            
+                            {% if assembly.contact_info.email %}
+                            <div class="contact-item">
+                                <i class="fas fa-envelope"></i>
+                                <a href="mailto:{{ assembly.contact_info.email }}">
+                                    {{ assembly.contact_info.email }}
+                                </a>
+                            </div>
+                            {% endif %}
+                            
+                            {% if assembly.contact_info.phone %}
+                            <div class="contact-item">
+                                <i class="fas fa-phone"></i>
+                                <a href="tel:{{ assembly.contact_info.phone }}">
+                                    {{ assembly.contact_info.phone }}
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Meetings Tab -->
+        <div class="tab-content" id="meetings-content">
+            {% include 'components/meetings_list.html' %}
+        </div>
+        
+        <!-- Members Tab -->
+        <div class="tab-content" id="members-content">
+            {% include 'components/members_list.html' %}
+        </div>
+        
+        <!-- Documents Tab -->
+        <div class="tab-content" id="documents-content">
+            {% include 'components/documents_list.html' %}
+        </div>
+        
+        <!-- News Tab -->
+        <div class="tab-content" id="news-content">
+            {% include 'components/blog_posts.html' %}
+        </div>
+    </div>
+</section>
+
+<!-- Join Assembly Modal -->
+<div class="modal fade" id="joinAssemblyModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content modal-glass-refonte">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-user-plus text-primary"></i>
+                    Rejoindre l'assemblée
+                </h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Vous souhaitez rejoindre <strong>{{ assembly.title }}</strong> ?</p>
+                
+                {% if assembly.membership_requirements %}
+                <div class="membership-requirements">
+                    <h6>Conditions requises :</h6>
+                    <ul>
+                        {% for requirement in assembly.membership_requirements %}
+                        <li>{{ requirement }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+                
+                <form id="joinAssemblyForm">
+                    {% if assembly.requires_application %}
+                    <div class="form-group">
+                        <label for="motivation">Lettre de motivation</label>
+                        <textarea class="form-control" id="motivation" name="motivation" 
+                                  rows="4" placeholder="Expliquez pourquoi vous souhaitez rejoindre cette assemblée..." required></textarea>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="form-group">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="accept_rules" required>
+                            <label class="form-check-label" for="accept_rules">
+                                J'accepte le <a href="{{ url_for('assembly.rules', id=assembly.id) }}" target="_blank">règlement de l'assemblée</a>
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-refonte btn-refonte-secondary" data-dismiss="modal">
+                    Annuler
+                </button>
+                <button type="button" class="btn-refonte btn-refonte-primary" onclick="submitJoinRequest()">
+                    {{ 'Envoyer ma candidature' if assembly.requires_application else 'Rejoindre' }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='spaces/assembly.js') }}"></script>
+{% endblock %}

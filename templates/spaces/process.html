@@ -1,0 +1,464 @@
+{% extends "base.html" %}
+
+{% block title %}{{ process.title }} — Processus participatif{% endblock %}
+
+{% block meta %}
+<meta name="description" content="{{ process.short_description }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='refonte.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='spaces.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='process.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- Process Hero -->
+<section class="process-hero">
+    {% if process.hero_image %}
+    <div class="process-hero-bg" style="background-image: url('{{ process.hero_image }}')"></div>
+    {% endif %}
+    
+    <div class="process-hero-overlay"></div>
+    
+    <div class="container">
+        <div class="process-hero-content">
+            <div class="process-breadcrumb">
+                <a href="{{ url_for('spaces.index') }}">Espaces participatifs</a>
+                <i class="fas fa-chevron-right"></i>
+                <span>Processus</span>
+            </div>
+            
+            <div class="process-header">
+                <div class="process-type-badge">
+                    <i class="fas fa-project-diagram"></i>
+                    <span>Processus participatif</span>
+                </div>
+                
+                <h1>{{ process.title }}</h1>
+                <p class="process-subtitle">{{ process.short_description }}</p>
+                
+                <div class="process-meta">
+                    <div class="process-stats">
+                        <div class="stat">
+                            <i class="fas fa-users"></i>
+                            <strong>{{ process.participants_count or 0 }}</strong>
+                            <span>participant(s)</span>
+                        </div>
+                        <div class="stat">
+                            <i class="fas fa-lightbulb"></i>
+                            <strong>{{ process.proposals_count or 0 }}</strong>
+                            <span>proposition(s)</span>
+                        </div>
+                        <div class="stat">
+                            <i class="fas fa-comments"></i>
+                            <strong>{{ process.comments_count or 0 }}</strong>
+                            <span>commentaire(s)</span>
+                        </div>
+                        {% if process.meetings_count %}
+                        <div class="stat">
+                            <i class="fas fa-calendar"></i>
+                            <strong>{{ process.meetings_count }}</strong>
+                            <span>réunion(s)</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="process-actions">
+                        {% if process.can_participate %}
+                        <button class="btn-refonte btn-refonte-primary" onclick="participateInProcess()">
+                            <i class="fas fa-hand-paper"></i>
+                            Participer
+                        </button>
+                        {% endif %}
+                        
+                        <button class="btn-refonte btn-refonte-secondary follow-btn" 
+                                data-space-id="{{ process.id }}" 
+                                data-following="{{ 'true' if process.is_following else 'false' }}">
+                            <i class="fas fa-{{ 'heart' if process.is_following else 'heart-o' }}"></i>
+                            {{ 'Suivi' if process.is_following else 'Suivre' }}
+                        </button>
+                        
+                        <div class="dropdown">
+                            <button class="btn-refonte btn-refonte-secondary dropdown-toggle" data-toggle="dropdown">
+                                <i class="fas fa-share-alt"></i>
+                                Partager
+                            </button>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="#" onclick="shareOn('facebook')">
+                                    <i class="fab fa-facebook"></i> Facebook
+                                </a>
+                                <a class="dropdown-item" href="#" onclick="shareOn('twitter')">
+                                    <i class="fab fa-twitter"></i> Twitter
+                                </a>
+                                <a class="dropdown-item" href="#" onclick="copyLink()">
+                                    <i class="fas fa-link"></i> Copier le lien
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Process Timeline -->
+<section class="process-timeline-section">
+    <div class="container">
+        <div class="timeline-header">
+            <h2>Phases du processus</h2>
+            <p>Suivez l'évolution du processus participatif à travers ses différentes phases</p>
+        </div>
+        
+        <div class="process-timeline-container">
+            <div class="timeline-progress-bar">
+                <div class="timeline-progress" style="width: {{ process.completion_percentage }}%"></div>
+            </div>
+            
+            <div class="timeline-phases">
+                {% for phase in process.phases %}
+                <div class="timeline-phase-item {{ phase.status }}" data-phase-id="{{ phase.id }}">
+                    <div class="timeline-phase-marker">
+                        <div class="timeline-phase-dot">
+                            {% if phase.status == 'completed' %}
+                            <i class="fas fa-check"></i>
+                            {% elif phase.status == 'active' %}
+                            <i class="fas fa-play"></i>
+                            {% else %}
+                            <i class="fas fa-clock"></i>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-phase-content card-glass-refonte">
+                        <div class="timeline-phase-header">
+                            <h3>{{ phase.title }}</h3>
+                            <div class="timeline-phase-dates">
+                                {% if phase.start_date %}
+                                <span class="start-date">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    {{ phase.start_date.strftime('%d/%m/%Y') }}
+                                </span>
+                                {% endif %}
+                                {% if phase.end_date %}
+                                <span class="end-date">
+                                    <i class="fas fa-calendar-check"></i>
+                                    {{ phase.end_date.strftime('%d/%m/%Y') }}
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <p class="timeline-phase-description">{{ phase.description }}</p>
+                        
+                        {% if phase.components %}
+                        <div class="timeline-phase-components">
+                            {% for component in phase.components %}
+                            <div class="phase-component">
+                                <i class="fas fa-{{ component.icon }}"></i>
+                                <span>{{ component.name }}</span>
+                                {% if component.count %}
+                                <span class="component-count">{{ component.count }}</span>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        {% if phase.status == 'active' %}
+                        <div class="timeline-phase-actions">
+                            {% for action in phase.available_actions %}
+                            <a href="{{ action.url }}" class="btn-refonte btn-refonte-primary btn-sm">
+                                <i class="fas fa-{{ action.icon }}"></i>
+                                {{ action.title }}
+                            </a>
+                            {% endfor %}
+                        </div>
+                        {% elif phase.status == 'upcoming' and phase.can_view_details %}
+                        <div class="timeline-phase-actions">
+                            <button class="btn-refonte btn-refonte-secondary btn-sm" onclick="viewPhaseDetails({{ phase.id }})">
+                                <i class="fas fa-eye"></i>
+                                Voir les détails
+                            </button>
+                        </div>
+                        {% elif phase.status == 'completed' %}
+                        <div class="timeline-phase-results">
+                            <a href="{{ url_for('process.phase_results', id=process.id, phase_id=phase.id) }}" 
+                               class="btn-refonte btn-refonte-secondary btn-sm">
+                                <i class="fas fa-chart-bar"></i>
+                                Voir les résultats
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Process Content -->
+<section class="process-content">
+    <div class="container">
+        <div class="process-content-grid">
+            <!-- Main Content -->
+            <div class="process-main-content">
+                <!-- Description -->
+                <div class="content-section card-glass-refonte">
+                    <h3><i class="fas fa-info-circle"></i> À propos de ce processus</h3>
+                    <div class="content-text">
+                        {{ process.description|safe }}
+                    </div>
+                </div>
+                
+                <!-- Active Components -->
+                {% if current_phase and current_phase.active_components %}
+                <div class="content-section">
+                    <h3><i class="fas fa-bolt"></i> Participez maintenant</h3>
+                    <div class="active-components-grid">
+                        {% for component in current_phase.active_components %}
+                        <div class="active-component-card card-glass-refonte">
+                            <div class="component-icon">
+                                <i class="fas fa-{{ component.icon }}"></i>
+                            </div>
+                            <div class="component-content">
+                                <h4>{{ component.name }}</h4>
+                                <p>{{ component.description }}</p>
+                                {% if component.stats %}
+                                <div class="component-stats">
+                                    {% for stat in component.stats %}
+                                    <span class="stat">
+                                        <strong>{{ stat.value }}</strong> {{ stat.label }}
+                                    </span>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="component-actions">
+                                <a href="{{ component.url }}" class="btn-refonte btn-refonte-primary">
+                                    {{ component.action_text }}
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Recent Activity -->
+                {% if recent_activities %}
+                <div class="content-section">
+                    <h3><i class="fas fa-history"></i> Activité récente</h3>
+                    <div class="activity-feed">
+                        {% for activity in recent_activities %}
+                        <div class="activity-item">
+                            <div class="activity-avatar">
+                                {% if activity.user.avatar %}
+                                <img src="{{ activity.user.avatar }}" alt="{{ activity.user.name }}">
+                                {% else %}
+                                <i class="fas fa-user-circle"></i>
+                                {% endif %}
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-text">
+                                    <strong>{{ activity.user.name }}</strong>
+                                    {{ activity.description }}
+                                </div>
+                                <div class="activity-meta">
+                                    <span class="activity-time">{{ activity.created_at|timeago }}</span>
+                                    {% if activity.component %}
+                                    <span class="activity-component">dans {{ activity.component.name }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% if activity.url %}
+                            <div class="activity-action">
+                                <a href="{{ activity.url }}" class="btn-refonte btn-refonte-secondary btn-sm">
+                                    Voir
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    {% if has_more_activities %}
+                    <div class="activity-load-more">
+                        <button class="btn-refonte btn-refonte-secondary" onclick="loadMoreActivities()">
+                            Voir plus d'activités
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Sidebar -->
+            <div class="process-sidebar">
+                <!-- Quick Stats -->
+                <div class="sidebar-widget card-glass-refonte">
+                    <h4><i class="fas fa-chart-pie"></i> En chiffres</h4>
+                    <div class="quick-stats">
+                        <div class="quick-stat">
+                            <div class="stat-value">{{ process.participants_count or 0 }}</div>
+                            <div class="stat-label">Participants</div>
+                        </div>
+                        <div class="quick-stat">
+                            <div class="stat-value">{{ process.proposals_count or 0 }}</div>
+                            <div class="stat-label">Propositions</div>
+                        </div>
+                        <div class="quick-stat">
+                            <div class="stat-value">{{ process.votes_count or 0 }}</div>
+                            <div class="stat-label">Votes</div>
+                        </div>
+                        <div class="quick-stat">
+                            <div class="stat-value">{{ process.comments_count or 0 }}</div>
+                            <div class="stat-label">Commentaires</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Navigation rapide -->
+                <div class="sidebar-widget card-glass-refonte">
+                    <h4><i class="fas fa-compass"></i> Navigation rapide</h4>
+                    <div class="quick-nav">
+                        {% for phase in process.phases %}
+                        <a href="#phase-{{ phase.id }}" 
+                           class="quick-nav-item {{ phase.status }}"
+                           onclick="scrollToPhase({{ phase.id }})">
+                            <div class="nav-item-icon">
+                                <i class="fas fa-{{ phase.icon or 'circle' }}"></i>
+                            </div>
+                            <div class="nav-item-content">
+                                <strong>{{ phase.title }}</strong>
+                                <span>{{ phase.status_text }}</span>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <!-- Upcoming Events -->
+                {% if upcoming_events %}
+                <div class="sidebar-widget card-glass-refonte">
+                    <h4><i class="fas fa-calendar-alt"></i> Prochains événements</h4>
+                    <div class="upcoming-events">
+                        {% for event in upcoming_events %}
+                        <div class="event-item">
+                            <div class="event-date">
+                                <div class="event-day">{{ event.date.strftime('%d') }}</div>
+                                <div class="event-month">{{ event.date.strftime('%b') }}</div>
+                            </div>
+                            <div class="event-content">
+                                <strong>{{ event.title }}</strong>
+                                <div class="event-time">
+                                    <i class="fas fa-clock"></i>
+                                    {{ event.date.strftime('%H:%M') }}
+                                </div>
+                                {% if event.location %}
+                                <div class="event-location">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    {{ event.location }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Documents -->
+                {% if process.documents %}
+                <div class="sidebar-widget card-glass-refonte">
+                    <h4><i class="fas fa-file-alt"></i> Documents</h4>
+                    <div class="documents-list">
+                        {% for document in process.documents %}
+                        <a href="{{ document.url }}" class="document-item" target="_blank">
+                            <div class="document-icon">
+                                <i class="fas fa-{{ document.icon }}"></i>
+                            </div>
+                            <div class="document-content">
+                                <strong>{{ document.title }}</strong>
+                                <span>{{ document.file_size|filesizeformat }}</span>
+                            </div>
+                            <div class="document-download">
+                                <i class="fas fa-download"></i>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Contact -->
+                {% if process.contact_info %}
+                <div class="sidebar-widget card-glass-refonte">
+                    <h4><i class="fas fa-envelope"></i> Contact</h4>
+                    <div class="contact-info">
+                        {% if process.contact_info.email %}
+                        <div class="contact-item">
+                            <i class="fas fa-envelope"></i>
+                            <a href="mailto:{{ process.contact_info.email }}">
+                                {{ process.contact_info.email }}
+                            </a>
+                        </div>
+                        {% endif %}
+                        {% if process.contact_info.phone %}
+                        <div class="contact-item">
+                            <i class="fas fa-phone"></i>
+                            <a href="tel:{{ process.contact_info.phone }}">
+                                {{ process.contact_info.phone }}
+                            </a>
+                        </div>
+                        {% endif %}
+                        {% if process.contact_info.address %}
+                        <div class="contact-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            {{ process.contact_info.address }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Participation Modal -->
+<div class="modal fade" id="participationModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content modal-glass-refonte">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-hand-paper text-primary"></i>
+                    Participer au processus
+                </h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Choisissez comment vous souhaitez participer à ce processus :</p>
+                <div class="participation-options">
+                    {% if current_phase.components %}
+                    {% for component in current_phase.components %}
+                    <a href="{{ component.url }}" class="participation-option">
+                        <div class="option-icon">
+                            <i class="fas fa-{{ component.icon }}"></i>
+                        </div>
+                        <div class="option-content">
+                            <strong>{{ component.name }}</strong>
+                            <span>{{ component.participation_text }}</span>
+                        </div>
+                    </a>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='spaces/process.js') }}"></script>
+{% endblock %}

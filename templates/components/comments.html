@@ -1,0 +1,481 @@
+<!-- Comments Component -->
+<div class="comments-component" data-commentable-type="{{ commentable_type }}" data-commentable-id="{{ commentable_id }}">
+    <!-- Comments Header -->
+    <div class="comments-header">
+        <h4>
+            <i class="fas fa-comments"></i>
+            Commentaires
+            <span class="comments-count">({{ comments_count or 0 }})</span>
+        </h4>
+        
+        <div class="comments-controls">
+            <div class="comments-sort">
+                <select id="comments-sort" onchange="sortComments(this.value)">
+                    <option value="newest">Plus récents</option>
+                    <option value="oldest">Plus anciens</option>
+                    <option value="most_liked">Plus appréciés</option>
+                    <option value="replies">Plus de réponses</option>
+                </select>
+            </div>
+            
+            {% if current_user.is_authenticated %}
+            <button class="btn-refonte btn-refonte-secondary btn-sm" onclick="toggleCommentForm()">
+                <i class="fas fa-plus"></i>
+                Ajouter un commentaire
+            </button>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Comment Form -->
+    {% if current_user.is_authenticated %}
+    <div class="comment-form-container" id="comment-form-container" style="display: none;">
+        <div class="comment-form card-glass-refonte">
+            <div class="comment-form-header">
+                <div class="comment-author-avatar">
+                    {% if current_user.avatar %}
+                    <img src="{{ current_user.avatar }}" alt="{{ current_user.name }}">
+                    {% else %}
+                    <i class="fas fa-user-circle"></i>
+                    {% endif %}
+                </div>
+                <div class="comment-author-info">
+                    <strong>{{ current_user.name }}</strong>
+                    <span class="comment-as">Commenter en tant que participant</span>
+                </div>
+            </div>
+            
+            <form id="comment-form" onsubmit="submitComment(event)">
+                <div class="comment-form-body">
+                    <textarea id="comment-content" name="content" 
+                              placeholder="Partagez votre point de vue..." 
+                              required minlength="10" maxlength="1000"></textarea>
+                    
+                    <div class="comment-form-options">
+                        <div class="comment-options-left">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="comment-anonymous">
+                                <label class="form-check-label" for="comment-anonymous">
+                                    Commenter anonymement
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="comment-character-count">
+                            <span id="char-count">0</span>/1000
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="comment-form-footer">
+                    <button type="button" class="btn-refonte btn-refonte-secondary" onclick="toggleCommentForm()">
+                        Annuler
+                    </button>
+                    <button type="submit" class="btn-refonte btn-refonte-primary">
+                        <i class="fas fa-paper-plane"></i>
+                        Publier
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% else %}
+    <div class="comment-login-prompt card-glass-refonte">
+        <div class="login-prompt-content">
+            <i class="fas fa-sign-in-alt"></i>
+            <p>Connectez-vous pour participer à la discussion</p>
+            <a href="{{ url_for('auth.login', next=request.url) }}" class="btn-refonte btn-refonte-primary">
+                Se connecter
+            </a>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Comments List -->
+    <div class="comments-list" id="comments-list">
+        {% if comments %}
+        {% for comment in comments %}
+        {% include 'components/comment_item.html' %}
+        {% endfor %}
+        {% else %}
+        <div class="comments-empty" id="comments-empty">
+            <i class="fas fa-comment-slash"></i>
+            <p>Aucun commentaire pour le moment</p>
+            <span>Soyez le premier à partager votre point de vue !</span>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Load More -->
+    {% if has_more_comments %}
+    <div class="comments-load-more">
+        <button class="btn-refonte btn-refonte-secondary" onclick="loadMoreComments()">
+            <i class="fas fa-chevron-down"></i>
+            Voir plus de commentaires
+        </button>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Comment Moderation Modal (for moderators) -->
+{% if current_user.can_moderate_comments %}
+<div class="modal fade" id="moderateCommentModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content modal-glass-refonte">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-shield-alt text-warning"></i>
+                    Modérer le commentaire
+                </h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="moderation-comment-preview" id="moderation-preview">
+                    <!-- Comment content will be loaded here -->
+                </div>
+                
+                <div class="moderation-actions">
+                    <h6>Actions de modération :</h6>
+                    <div class="moderation-options">
+                        <label class="moderation-option">
+                            <input type="radio" name="moderation_action" value="approve">
+                            <div class="option-content">
+                                <i class="fas fa-check-circle text-success"></i>
+                                <strong>Approuver</strong>
+                                <span>Le commentaire respecte les règles</span>
+                            </div>
+                        </label>
+                        
+                        <label class="moderation-option">
+                            <input type="radio" name="moderation_action" value="hide">
+                            <div class="option-content">
+                                <i class="fas fa-eye-slash text-warning"></i>
+                                <strong>Masquer</strong>
+                                <span>Masquer temporairement le commentaire</span>
+                            </div>
+                        </label>
+                        
+                        <label class="moderation-option">
+                            <input type="radio" name="moderation_action" value="delete">
+                            <div class="option-content">
+                                <i class="fas fa-trash text-danger"></i>
+                                <strong>Supprimer</strong>
+                                <span>Supprimer définitivement le commentaire</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="moderation-reason">
+                    <label for="moderation-reason-text">Raison (optionnelle) :</label>
+                    <textarea id="moderation-reason-text" class="form-control" 
+                              placeholder="Expliquez la raison de cette action..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-refonte btn-refonte-secondary" data-dismiss="modal">
+                    Annuler
+                </button>
+                <button type="button" class="btn-refonte btn-refonte-primary" onclick="submitModeration()">
+                    Appliquer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<script>
+// Comments functionality
+let commentsPage = 1;
+let isLoadingComments = false;
+
+// Toggle comment form
+function toggleCommentForm() {
+    const container = document.getElementById('comment-form-container');
+    const textarea = document.getElementById('comment-content');
+    
+    if (container.style.display === 'none') {
+        container.style.display = 'block';
+        textarea.focus();
+    } else {
+        container.style.display = 'none';
+        document.getElementById('comment-form').reset();
+        updateCharCount();
+    }
+}
+
+// Character count
+document.getElementById('comment-content')?.addEventListener('input', updateCharCount);
+
+function updateCharCount() {
+    const textarea = document.getElementById('comment-content');
+    const counter = document.getElementById('char-count');
+    if (textarea && counter) {
+        counter.textContent = textarea.value.length;
+        
+        // Color coding
+        const length = textarea.value.length;
+        const maxLength = 1000;
+        
+        if (length > maxLength * 0.9) {
+            counter.style.color = 'var(--danger-color)';
+        } else if (length > maxLength * 0.7) {
+            counter.style.color = 'var(--warning-color)';
+        } else {
+            counter.style.color = 'var(--text-secondary)';
+        }
+    }
+}
+
+// Submit comment
+function submitComment(event) {
+    event.preventDefault();
+    
+    const form = event.target;
+    const formData = new FormData(form);
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    
+    // Add commentable info
+    formData.append('commentable_type', document.querySelector('.comments-component').dataset.commentableType);
+    formData.append('commentable_id', document.querySelector('.comments-component').dataset.commentableId);
+    
+    // Anonymous option
+    if (document.getElementById('comment-anonymous').checked) {
+        formData.append('anonymous', '1');
+    }
+    
+    // Disable submit button
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Publication...';
+    
+    fetch('/api/comments', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Add comment to list
+            addCommentToList(data.comment);
+            
+            // Update comments count
+            updateCommentsCount(1);
+            
+            // Reset form
+            form.reset();
+            updateCharCount();
+            toggleCommentForm();
+            
+            // Show success message
+            showNotification('Commentaire publié avec succès', 'success');
+        } else {
+            showNotification(data.message || 'Erreur lors de la publication', 'error');
+        }
+    })
+    .catch(error => {
+        showNotification('Erreur lors de la publication', 'error');
+    })
+    .finally(() => {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+    });
+}
+
+// Add comment to list
+function addCommentToList(comment) {
+    const commentsList = document.getElementById('comments-list');
+    const emptyState = document.getElementById('comments-empty');
+    
+    // Remove empty state if present
+    if (emptyState) {
+        emptyState.remove();
+    }
+    
+    // Create comment HTML
+    const commentHTML = createCommentHTML(comment);
+    
+    // Add to top of list
+    commentsList.insertAdjacentHTML('afterbegin', commentHTML);
+    
+    // Animate in
+    const newComment = commentsList.firstElementChild;
+    newComment.style.opacity = '0';
+    newComment.style.transform = 'translateY(-20px)';
+    
+    setTimeout(() => {
+        newComment.style.transition = 'all 0.3s ease';
+        newComment.style.opacity = '1';
+        newComment.style.transform = 'translateY(0)';
+    }, 100);
+}
+
+// Create comment HTML
+function createCommentHTML(comment) {
+    return `
+        <div class="comment-item card-glass-refonte" data-comment-id="${comment.id}">
+            <div class="comment-header">
+                <div class="comment-author">
+                    <div class="comment-avatar">
+                        ${comment.author.avatar ? 
+                            `<img src="${comment.author.avatar}" alt="${comment.author.name}">` :
+                            '<i class="fas fa-user-circle"></i>'
+                        }
+                    </div>
+                    <div class="comment-author-info">
+                        <strong>${comment.author.name}</strong>
+                        <div class="comment-meta">
+                            <span class="comment-time">${comment.created_at}</span>
+                            ${comment.is_edited ? '<span class="comment-edited">(modifié)</span>' : ''}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="comment-actions">
+                    <button class="comment-action-btn" onclick="toggleCommentLike(${comment.id})" 
+                            title="${comment.is_liked ? 'Ne plus aimer' : 'Aimer'}">
+                        <i class="fas fa-heart ${comment.is_liked ? 'liked' : ''}"></i>
+                        <span class="like-count">${comment.likes_count || 0}</span>
+                    </button>
+                    
+                    <button class="comment-action-btn" onclick="toggleReplyForm(${comment.id})" title="Répondre">
+                        <i class="fas fa-reply"></i>
+                        Répondre
+                    </button>
+                    
+                    ${comment.can_edit ? `
+                        <div class="dropdown">
+                            <button class="comment-action-btn dropdown-toggle" data-toggle="dropdown">
+                                <i class="fas fa-ellipsis-h"></i>
+                            </button>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="#" onclick="editComment(${comment.id})">
+                                    <i class="fas fa-edit"></i> Modifier
+                                </a>
+                                <a class="dropdown-item" href="#" onclick="deleteComment(${comment.id})">
+                                    <i class="fas fa-trash"></i> Supprimer
+                                </a>
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+            
+            <div class="comment-content">
+                <p>${comment.content}</p>
+            </div>
+        </div>
+    `;
+}
+
+// Like/Unlike comment
+function toggleCommentLike(commentId) {
+    const commentItem = document.querySelector(`[data-comment-id="${commentId}"]`);
+    const likeBtn = commentItem.querySelector('.comment-action-btn');
+    const likeIcon = likeBtn.querySelector('.fa-heart');
+    const likeCount = likeBtn.querySelector('.like-count');
+    
+    const isLiked = likeIcon.classList.contains('liked');
+    
+    fetch(`/api/comments/${commentId}/like`, {
+        method: isLiked ? 'DELETE' : 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            likeIcon.classList.toggle('liked');
+            likeCount.textContent = data.likes_count;
+            
+            // Animation
+            likeIcon.style.transform = 'scale(1.2)';
+            setTimeout(() => {
+                likeIcon.style.transform = 'scale(1)';
+            }, 200);
+        }
+    })
+    .catch(error => {
+        showNotification('Erreur lors de l\'action', 'error');
+    });
+}
+
+// Sort comments
+function sortComments(sortBy) {
+    const commentsList = document.getElementById('comments-list');
+    
+    // Show loading
+    commentsList.style.opacity = '0.5';
+    
+    fetch(`/api/comments?sort=${sortBy}&commentable_type=${document.querySelector('.comments-component').dataset.commentableType}&commentable_id=${document.querySelector('.comments-component').dataset.commentableId}`)
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Replace comments list
+            commentsList.innerHTML = data.comments.map(comment => createCommentHTML(comment)).join('');
+        }
+    })
+    .finally(() => {
+        commentsList.style.opacity = '1';
+    });
+}
+
+// Load more comments
+function loadMoreComments() {
+    if (isLoadingComments) return;
+    
+    isLoadingComments = true;
+    const loadMoreBtn = document.querySelector('.comments-load-more button');
+    const originalText = loadMoreBtn.innerHTML;
+    
+    loadMoreBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Chargement...';
+    loadMoreBtn.disabled = true;
+    
+    commentsPage++;
+    
+    fetch(`/api/comments?page=${commentsPage}&commentable_type=${document.querySelector('.comments-component').dataset.commentableType}&commentable_id=${document.querySelector('.comments-component').dataset.commentableId}`)
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Append comments
+            const commentsList = document.getElementById('comments-list');
+            data.comments.forEach(comment => {
+                commentsList.insertAdjacentHTML('beforeend', createCommentHTML(comment));
+            });
+            
+            // Hide load more if no more comments
+            if (!data.has_more) {
+                document.querySelector('.comments-load-more').style.display = 'none';
+            }
+        }
+    })
+    .finally(() => {
+        isLoadingComments = false;
+        loadMoreBtn.innerHTML = originalText;
+        loadMoreBtn.disabled = false;
+    });
+}
+
+// Update comments count
+function updateCommentsCount(change) {
+    const countElement = document.querySelector('.comments-count');
+    if (countElement) {
+        const currentCount = parseInt(countElement.textContent.replace(/[()]/g, ''));
+        countElement.textContent = `(${currentCount + change})`;
+    }
+}
+
+// Show notification
+function showNotification(message, type = 'info') {
+    // This should be implemented with your notification system
+    console.log(`${type}: ${message}`);
+}
+</script>

@@ -1,0 +1,481 @@
+<!-- Create Organization Modal -->
+<div class="modal fade" id="createOrgModal" tabindex="-1" role="dialog" aria-labelledby="createOrgModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content modal-glass-refonte">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createOrgModalLabel">
+                    <i class="fas fa-building text-primary"></i>
+                    Créer une nouvelle organisation
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            
+            <form id="createOrgForm" method="POST" action="/admin/system/organizations/create" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <!-- Progress Steps -->
+                    <div class="admin-steps-container">
+                        <div class="admin-steps">
+                            <div class="admin-step active" data-step="1">
+                                <div class="admin-step-number">1</div>
+                                <div class="admin-step-label">Informations</div>
+                            </div>
+                            <div class="admin-step" data-step="2">
+                                <div class="admin-step-number">2</div>
+                                <div class="admin-step-label">Configuration</div>
+                            </div>
+                            <div class="admin-step" data-step="3">
+                                <div class="admin-step-number">3</div>
+                                <div class="admin-step-label">Domaine</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 1: Basic Information -->
+                    <div class="admin-step-content" id="step-1">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="admin-form-group">
+                                    <label for="org_name" class="admin-form-label required">
+                                        Nom de l'organisation
+                                    </label>
+                                    <input type="text" class="admin-form-control" id="org_name" name="name" 
+                                           required placeholder="Ex: Ville de Montréal" 
+                                           onkeyup="generateSlug(this.value)">
+                                    <div class="admin-form-help">
+                                        Le nom complet de l'organisation tel qu'il apparaîtra publiquement
+                                    </div>
+                                </div>
+                                
+                                <div class="admin-form-group">
+                                    <label for="org_slug" class="admin-form-label required">
+                                        Identifiant unique (slug)
+                                    </label>
+                                    <div class="admin-input-group">
+                                        <div class="admin-input-group-prepend">
+                                            <span class="admin-input-group-text">uman.quebec/</span>
+                                        </div>
+                                        <input type="text" class="admin-form-control" id="org_slug" name="slug" 
+                                               required pattern="[a-z0-9-]+" placeholder="ville-montreal">
+                                    </div>
+                                    <div class="admin-form-help">
+                                        URL de l'organisation. Lettres minuscules, chiffres et tirets uniquement
+                                    </div>
+                                </div>
+                                
+                                <div class="admin-form-group">
+                                    <label for="org_description" class="admin-form-label">
+                                        Description
+                                    </label>
+                                    <textarea class="admin-form-control" id="org_description" name="description" 
+                                              rows="3" placeholder="Description de l'organisation..."></textarea>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="admin-form-group">
+                                    <label class="admin-form-label">Logo de l'organisation</label>
+                                    <div class="admin-file-upload">
+                                        <input type="file" id="org_logo" name="logo" accept="image/*" 
+                                               onchange="previewLogo(this)">
+                                        <div class="admin-file-upload-area" onclick="document.getElementById('org_logo').click()">
+                                            <div class="admin-file-preview" id="logo-preview">
+                                                <i class="fas fa-cloud-upload-alt"></i>
+                                                <p>Cliquez pour ajouter un logo</p>
+                                                <small>PNG, JPG, SVG (max 2MB)</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 2: Configuration -->
+                    <div class="admin-step-content" id="step-2" style="display: none;">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="admin-form-group">
+                                    <label for="org_locale" class="admin-form-label required">
+                                        Langue par défaut
+                                    </label>
+                                    <select class="admin-form-control" id="org_locale" name="default_locale" required>
+                                        <option value="fr">Français</option>
+                                        <option value="en">English</option>
+                                        <option value="es">Español</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="admin-form-group">
+                                    <label for="org_timezone" class="admin-form-label required">
+                                        Fuseau horaire
+                                    </label>
+                                    <select class="admin-form-control" id="org_timezone" name="timezone" required>
+                                        <option value="America/Montreal" selected>America/Montreal (UTC-5/-4)</option>
+                                        <option value="America/Toronto">America/Toronto (UTC-5/-4)</option>
+                                        <option value="America/Vancouver">America/Vancouver (UTC-8/-7)</option>
+                                        <option value="Europe/Paris">Europe/Paris (UTC+1/+2)</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="admin-form-group">
+                                    <label for="org_currency" class="admin-form-label">
+                                        Devise
+                                    </label>
+                                    <select class="admin-form-control" id="org_currency" name="currency">
+                                        <option value="CAD" selected>Dollar canadien (CAD)</option>
+                                        <option value="USD">Dollar américain (USD)</option>
+                                        <option value="EUR">Euro (EUR)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="admin-form-group">
+                                    <label class="admin-form-label">Fonctionnalités</label>
+                                    <div class="admin-checkbox-group">
+                                        <label class="admin-checkbox">
+                                            <input type="checkbox" name="features" value="participatory_budgets" checked>
+                                            <span class="admin-checkbox-mark"></span>
+                                            Budgets participatifs
+                                        </label>
+                                        <label class="admin-checkbox">
+                                            <input type="checkbox" name="features" value="consultations" checked>
+                                            <span class="admin-checkbox-mark"></span>
+                                            Consultations publiques
+                                        </label>
+                                        <label class="admin-checkbox">
+                                            <input type="checkbox" name="features" value="proposals" checked>
+                                            <span class="admin-checkbox-mark"></span>
+                                            Propositions citoyennes
+                                        </label>
+                                        <label class="admin-checkbox">
+                                            <input type="checkbox" name="features" value="assemblies">
+                                            <span class="admin-checkbox-mark"></span>
+                                            Assemblées citoyennes
+                                        </label>
+                                        <label class="admin-checkbox">
+                                            <input type="checkbox" name="features" value="surveys">
+                                            <span class="admin-checkbox-mark"></span>
+                                            Sondages
+                                        </label>
+                                        <label class="admin-checkbox">
+                                            <input type="checkbox" name="features" value="blogs">
+                                            <span class="admin-checkbox-mark"></span>
+                                            Blog / Actualités
+                                        </label>
+                                        <label class="admin-checkbox">
+                                            <input type="checkbox" name="features" value="meetings">
+                                            <span class="admin-checkbox-mark"></span>
+                                            Réunions publiques
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="admin-form-group">
+                            <label class="admin-form-label">Options avancées</label>
+                            <div class="admin-checkbox-group">
+                                <label class="admin-checkbox">
+                                    <input type="checkbox" name="enable_registrations" value="1" checked>
+                                    <span class="admin-checkbox-mark"></span>
+                                    Permettre l'inscription des utilisateurs
+                                </label>
+                                <label class="admin-checkbox">
+                                    <input type="checkbox" name="enable_verification" value="1">
+                                    <span class="admin-checkbox-mark"></span>
+                                    Exiger la vérification d'identité
+                                </label>
+                                <label class="admin-checkbox">
+                                    <input type="checkbox" name="enable_notifications" value="1" checked>
+                                    <span class="admin-checkbox-mark"></span>
+                                    Notifications par email
+                                </label>
+                                <label class="admin-checkbox">
+                                    <input type="checkbox" name="public_stats" value="1" checked>
+                                    <span class="admin-checkbox-mark"></span>
+                                    Statistiques publiques
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 3: Domain Configuration -->
+                    <div class="admin-step-content" id="step-3" style="display: none;">
+                        <div class="admin-form-group">
+                            <label class="admin-form-label">Configuration du domaine</label>
+                            <div class="admin-radio-group">
+                                <label class="admin-radio">
+                                    <input type="radio" name="domain_type" value="subdomain" checked onchange="toggleDomainConfig()">
+                                    <span class="admin-radio-mark"></span>
+                                    <div class="admin-radio-content">
+                                        <strong>Sous-domaine UMan</strong>
+                                        <small>Utiliser un sous-domaine gratuit (ex: organisation.uman.quebec)</small>
+                                    </div>
+                                </label>
+                                <label class="admin-radio">
+                                    <input type="radio" name="domain_type" value="custom" onchange="toggleDomainConfig()">
+                                    <span class="admin-radio-mark"></span>
+                                    <div class="admin-radio-content">
+                                        <strong>Domaine personnalisé</strong>
+                                        <small>Utiliser votre propre domaine (ex: participation.votresite.com)</small>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div id="subdomain-config">
+                            <div class="admin-form-group">
+                                <label for="subdomain" class="admin-form-label required">
+                                    Sous-domaine
+                                </label>
+                                <div class="admin-input-group">
+                                    <input type="text" class="admin-form-control" id="subdomain" name="subdomain" 
+                                           placeholder="organisation" pattern="[a-z0-9-]+">
+                                    <div class="admin-input-group-append">
+                                        <span class="admin-input-group-text">.uman.quebec</span>
+                                    </div>
+                                </div>
+                                <div class="admin-form-help">
+                                    Sera automatiquement configuré avec SSL
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="custom-domain-config" style="display: none;">
+                            <div class="admin-form-group">
+                                <label for="custom_domain" class="admin-form-label required">
+                                    Domaine personnalisé
+                                </label>
+                                <input type="text" class="admin-form-control" id="custom_domain" name="custom_domain" 
+                                       placeholder="participation.exemple.com">
+                                <div class="admin-form-help">
+                                    Vous devrez configurer les enregistrements DNS
+                                </div>
+                            </div>
+                            
+                            <div class="admin-alert admin-alert-info">
+                                <i class="fas fa-info-circle"></i>
+                                <div>
+                                    <strong>Configuration DNS requise</strong>
+                                    <p>Après création, vous recevrez les instructions pour configurer vos enregistrements DNS.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="admin-form-group">
+                            <label for="admin_email" class="admin-form-label required">
+                                Email de l'administrateur
+                            </label>
+                            <input type="email" class="admin-form-control" id="admin_email" name="admin_email" 
+                                   required placeholder="admin@exemple.com">
+                            <div class="admin-form-help">
+                                Cet utilisateur aura les droits d'administration de l'organisation
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <div class="admin-modal-footer-content">
+                        <div class="admin-modal-footer-left">
+                            <button type="button" class="btn-refonte btn-refonte-secondary" id="prev-step" 
+                                    onclick="previousStep()" style="display: none;">
+                                <i class="fas fa-chevron-left"></i>
+                                Précédent
+                            </button>
+                        </div>
+                        
+                        <div class="admin-modal-footer-right">
+                            <button type="button" class="btn-refonte btn-refonte-secondary" data-dismiss="modal">
+                                Annuler
+                            </button>
+                            <button type="button" class="btn-refonte btn-refonte-primary" id="next-step" 
+                                    onclick="nextStep()">
+                                Suivant
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                            <button type="submit" class="btn-refonte btn-refonte-primary" id="create-org" 
+                                    style="display: none;">
+                                <i class="fas fa-plus"></i>
+                                Créer l'organisation
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentStep = 1;
+const maxSteps = 3;
+
+function nextStep() {
+    if (validateCurrentStep()) {
+        if (currentStep < maxSteps) {
+            document.getElementById(`step-${currentStep}`).style.display = 'none';
+            document.querySelector(`[data-step="${currentStep}"]`).classList.remove('active');
+            
+            currentStep++;
+            document.getElementById(`step-${currentStep}`).style.display = 'block';
+            document.querySelector(`[data-step="${currentStep}"]`).classList.add('active');
+            
+            updateStepButtons();
+        }
+    }
+}
+
+function previousStep() {
+    if (currentStep > 1) {
+        document.getElementById(`step-${currentStep}`).style.display = 'none';
+        document.querySelector(`[data-step="${currentStep}"]`).classList.remove('active');
+        
+        currentStep--;
+        document.getElementById(`step-${currentStep}`).style.display = 'block';
+        document.querySelector(`[data-step="${currentStep}"]`).classList.add('active');
+        
+        updateStepButtons();
+    }
+}
+
+function updateStepButtons() {
+    const prevBtn = document.getElementById('prev-step');
+    const nextBtn = document.getElementById('next-step');
+    const createBtn = document.getElementById('create-org');
+    
+    prevBtn.style.display = currentStep > 1 ? 'block' : 'none';
+    nextBtn.style.display = currentStep < maxSteps ? 'block' : 'none';
+    createBtn.style.display = currentStep === maxSteps ? 'block' : 'none';
+}
+
+function validateCurrentStep() {
+    const currentStepElement = document.getElementById(`step-${currentStep}`);
+    const requiredInputs = currentStepElement.querySelectorAll('[required]');
+    
+    for (let input of requiredInputs) {
+        if (!input.value.trim()) {
+            input.focus();
+            input.classList.add('is-invalid');
+            return false;
+        }
+        input.classList.remove('is-invalid');
+    }
+    
+    return true;
+}
+
+function generateSlug(name) {
+    const slug = name.toLowerCase()
+        .replace(/[àáâãäå]/g, 'a')
+        .replace(/[èéêë]/g, 'e')
+        .replace(/[ìíîï]/g, 'i')
+        .replace(/[òóôõö]/g, 'o')
+        .replace(/[ùúûü]/g, 'u')
+        .replace(/[ç]/g, 'c')
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '');
+    
+    document.getElementById('org_slug').value = slug;
+    document.getElementById('subdomain').value = slug;
+}
+
+function toggleDomainConfig() {
+    const domainType = document.querySelector('input[name="domain_type"]:checked').value;
+    const subdomainConfig = document.getElementById('subdomain-config');
+    const customDomainConfig = document.getElementById('custom-domain-config');
+    
+    if (domainType === 'subdomain') {
+        subdomainConfig.style.display = 'block';
+        customDomainConfig.style.display = 'none';
+        document.getElementById('subdomain').required = true;
+        document.getElementById('custom_domain').required = false;
+    } else {
+        subdomainConfig.style.display = 'none';
+        customDomainConfig.style.display = 'block';
+        document.getElementById('subdomain').required = false;
+        document.getElementById('custom_domain').required = true;
+    }
+}
+
+function previewLogo(input) {
+    const preview = document.getElementById('logo-preview');
+    
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.innerHTML = `<img src="${e.target.result}" alt="Logo preview" style="max-width: 100%; max-height: 150px; object-fit: contain;">`;
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+// Form submission
+document.getElementById('createOrgForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    if (!validateCurrentStep()) {
+        return;
+    }
+    
+    const formData = new FormData(this);
+    const createBtn = document.getElementById('create-org');
+    
+    createBtn.disabled = true;
+    createBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Création...';
+    
+    fetch('/admin/system/organizations/create', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            $('#createOrgModal').modal('hide');
+            showNotification('Organisation créée avec succès', 'success');
+            window.location.reload();
+        } else {
+            showNotification(data.message || 'Erreur lors de la création', 'error');
+        }
+    })
+    .catch(error => {
+        showNotification('Erreur lors de la création', 'error');
+    })
+    .finally(() => {
+        createBtn.disabled = false;
+        createBtn.innerHTML = '<i class="fas fa-plus"></i> Créer l\'organisation';
+    });
+});
+
+// Reset modal on close
+$('#createOrgModal').on('hidden.bs.modal', function() {
+    currentStep = 1;
+    document.getElementById('createOrgForm').reset();
+    
+    // Reset steps
+    document.querySelectorAll('.admin-step-content').forEach((content, index) => {
+        content.style.display = index === 0 ? 'block' : 'none';
+    });
+    
+    document.querySelectorAll('.admin-step').forEach((step, index) => {
+        step.classList.toggle('active', index === 0);
+    });
+    
+    updateStepButtons();
+    
+    // Reset logo preview
+    document.getElementById('logo-preview').innerHTML = `
+        <i class="fas fa-cloud-upload-alt"></i>
+        <p>Cliquez pour ajouter un logo</p>
+        <small>PNG, JPG, SVG (max 2MB)</small>
+    `;
+});
+</script>

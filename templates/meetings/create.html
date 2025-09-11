@@ -1,0 +1,1326 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Modifier' if meeting else 'Organiser' }} une réunion - {{ space.name }} — {{ organization.name }}{% endblock %}
+
+{% block meta %}
+<link rel="stylesheet" href="{{ url_for('static', filename='refonte.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='proposals.css') }}">
+<script src="https://cdn.ckeditor.com/ckeditor5/35.0.1/classic/ckeditor.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/l10n/fr.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="meetings-form-layout">
+    <div class="container">
+        <!-- Header with breadcrumb -->
+        <div class="page-header">
+            <nav class="breadcrumb">
+                <a href="{{ url_for('spaces.index') }}">Espaces participatifs</a>
+                <span class="breadcrumb-separator">/</span>
+                <a href="{{ url_for('spaces.detail', type=space.type, id=space.id) }}">{{ space.name }}</a>
+                <span class="breadcrumb-separator">/</span>
+                <a href="{{ url_for('meetings.index', space_id=space.id) }}">Réunions</a>
+                <span class="breadcrumb-separator">/</span>
+                <span class="breadcrumb-current">{{ 'Modifier' if meeting else 'Organiser' }}</span>
+            </nav>
+            
+            <div class="header-content">
+                <h1>
+                    <i class="fas fa-{{ 'edit' if meeting else 'plus' }}"></i>
+                    {{ 'Modifier la réunion' if meeting else 'Organiser une nouvelle réunion' }}
+                </h1>
+                <p>{{ 'Modifiez les informations de votre réunion' if meeting else 'Créez un nouvel événement participatif pour rassembler la communauté' }}</p>
+            </div>
+        </div>
+        
+        <!-- Form -->
+        <form id="meeting-form" method="POST" enctype="multipart/form-data" class="meeting-form">
+            {{ csrf_token() }}
+            
+            <div class="form-layout">
+                <!-- Main content -->
+                <div class="form-main">
+                    <!-- Basic information -->
+                    <div class="form-section card-glass-refonte">
+                        <div class="section-header">
+                            <h2>
+                                <i class="fas fa-info-circle"></i>
+                                Informations générales
+                            </h2>
+                            <p>Les informations essentielles de votre réunion</p>
+                        </div>
+                        
+                        <div class="form-grid">
+                            <div class="form-group full-width">
+                                <label for="title" class="required">Titre de la réunion</label>
+                                <input type="text" id="title" name="title" class="form-control" 
+                                       value="{{ meeting.title if meeting else '' }}" 
+                                       placeholder="Ex: Assemblée générale, Discussion sur le budget participatif..."
+                                       required maxlength="100">
+                                <div class="form-help">Un titre clair et descriptif pour votre réunion</div>
+                                <div class="char-counter">
+                                    <span id="title-count">{{ meeting.title | length if meeting else 0 }}</span>/100
+                                </div>
+                            </div>
+                            
+                            <div class="form-group full-width">
+                                <label for="description" class="required">Description</label>
+                                <div class="editor-container">
+                                    <textarea id="description" name="description" class="form-control ckeditor" 
+                                              placeholder="Décrivez l'objectif, l'agenda préliminaire et les points importants de cette réunion..."
+                                              required>{{ meeting.description if meeting else '' }}</textarea>
+                                </div>
+                                <div class="form-help">Présentez clairement l'objectif et le contenu de la réunion</div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="category" class="required">Catégorie</label>
+                                <select id="category" name="category_id" class="form-control" required>
+                                    <option value="">Sélectionner une catégorie</option>
+                                    {% for category in categories %}
+                                    <option value="{{ category.id }}" 
+                                            {{ 'selected' if meeting and meeting.category_id == category.id else '' }}>
+                                        {{ category.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                <div class="form-help">Classez votre réunion pour faciliter la navigation</div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="meeting-type" class="required">Type de réunion</label>
+                                <select id="meeting-type" name="meeting_type" class="form-control" required 
+                                        onchange="updateMeetingTypeOptions()">
+                                    <option value="">Sélectionner un type</option>
+                                    {% if current_user.can_create_official_meeting(space) %}
+                                    <option value="official" {{ 'selected' if meeting and meeting.type == 'official' else '' }}>
+                                        Réunion officielle
+                                    </option>
+                                    {% endif %}
+                                    <option value="participant" {{ 'selected' if meeting and meeting.type == 'participant' else '' }}>
+                                        Réunion de participants
+                                    </option>
+                                </select>
+                                <div class="form-help">
+                                    <div id="type-help-official" style="display: none;">
+                                        Réunion organisée par l'administration avec valeur officielle
+                                    </div>
+                                    <div id="type-help-participant" style="display: none;">
+                                        Réunion organisée par les participants de l'espace
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Date and time -->
+                    <div class="form-section card-glass-refonte">
+                        <div class="section-header">
+                            <h2>
+                                <i class="fas fa-calendar-alt"></i>
+                                Date et horaires
+                            </h2>
+                            <p>Planifiez votre réunion dans le temps</p>
+                        </div>
+                        
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="start-datetime" class="required">Date et heure de début</label>
+                                <input type="text" id="start-datetime" name="start_datetime" class="form-control datetime-picker" 
+                                       value="{{ meeting.start_time.strftime('%Y-%m-%d %H:%M') if meeting else '' }}" 
+                                       placeholder="Sélectionnez date et heure"
+                                       required>
+                                <div class="form-help">Date et heure de début de la réunion</div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="end-datetime">Date et heure de fin</label>
+                                <input type="text" id="end-datetime" name="end_datetime" class="form-control datetime-picker" 
+                                       value="{{ meeting.end_time.strftime('%Y-%m-%d %H:%M') if meeting and meeting.end_time else '' }}" 
+                                       placeholder="Optionnel">
+                                <div class="form-help">Laissez vide si la durée est flexible</div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="duration">Durée estimée</label>
+                                <div class="duration-input">
+                                    <input type="number" id="duration-hours" name="duration_hours" class="form-control" 
+                                           value="{{ meeting.duration_hours if meeting else '2' }}" 
+                                           min="0" max="23" placeholder="2">
+                                    <span class="duration-separator">h</span>
+                                    <input type="number" id="duration-minutes" name="duration_minutes" class="form-control" 
+                                           value="{{ meeting.duration_minutes if meeting else '0' }}" 
+                                           min="0" max="59" step="15" placeholder="00">
+                                    <span class="duration-separator">min</span>
+                                </div>
+                                <div class="form-help">Durée approximative pour informer les participants</div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="timezone">Fuseau horaire</label>
+                                <select id="timezone" name="timezone" class="form-control">
+                                    <option value="Europe/Paris" selected>Europe/Paris (UTC+1/+2)</option>
+                                    <option value="UTC">UTC</option>
+                                    <option value="America/New_York">America/New_York (EST/EDT)</option>
+                                    <option value="America/Los_Angeles">America/Los_Angeles (PST/PDT)</option>
+                                </select>
+                                <div class="form-help">Fuseau horaire de la réunion</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Location and format -->
+                    <div class="form-section card-glass-refonte">
+                        <div class="section-header">
+                            <h2>
+                                <i class="fas fa-map-marker-alt"></i>
+                                Lieu et format
+                            </h2>
+                            <p>Définissez le format et le lieu de la réunion</p>
+                        </div>
+                        
+                        <div class="meeting-format-selector">
+                            <div class="format-options">
+                                <label class="format-option">
+                                    <input type="radio" name="format" value="in_person" 
+                                           {{ 'checked' if meeting and meeting.format == 'in_person' else '' }}
+                                           onchange="updateFormatOptions()">
+                                    <div class="format-card">
+                                        <i class="fas fa-users"></i>
+                                        <h4>Présentiel</h4>
+                                        <p>Réunion en personne dans un lieu physique</p>
+                                    </div>
+                                </label>
+                                
+                                <label class="format-option">
+                                    <input type="radio" name="format" value="online" 
+                                           {{ 'checked' if meeting and meeting.format == 'online' else '' }}
+                                           onchange="updateFormatOptions()">
+                                    <div class="format-card">
+                                        <i class="fas fa-video"></i>
+                                        <h4>En ligne</h4>
+                                        <p>Visioconférence avec lien de connexion</p>
+                                    </div>
+                                </label>
+                                
+                                <label class="format-option">
+                                    <input type="radio" name="format" value="hybrid" 
+                                           {{ 'checked' if meeting and meeting.format == 'hybrid' else '' }}
+                                           onchange="updateFormatOptions()">
+                                    <div class="format-card">
+                                        <i class="fas fa-globe"></i>
+                                        <h4>Hybride</h4>
+                                        <p>Présentiel + en ligne simultanément</p>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- In-person location fields -->
+                        <div id="location-fields" class="location-fields" style="display: none;">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="location-name" class="required">Nom du lieu</label>
+                                    <input type="text" id="location-name" name="location_name" class="form-control" 
+                                           value="{{ meeting.location if meeting else '' }}" 
+                                           placeholder="Ex: Salle des fêtes, Centre communautaire...">
+                                    <div class="form-help">Nom du lieu de rencontre</div>
+                                </div>
+                                
+                                <div class="form-group full-width">
+                                    <label for="address">Adresse complète</label>
+                                    <textarea id="address" name="address" class="form-control" rows="3"
+                                              placeholder="Numéro, rue, ville, code postal..."
+                                    >{{ meeting.address if meeting else '' }}</textarea>
+                                    <div class="form-help">Adresse précise pour que les participants puissent vous rejoindre</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="capacity">Capacité maximale</label>
+                                    <input type="number" id="capacity" name="capacity" class="form-control" 
+                                           value="{{ meeting.capacity if meeting else '' }}" 
+                                           min="1" placeholder="Ex: 50">
+                                    <div class="form-help">Nombre maximal de participants (optionnel)</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="accessibility">Accessibilité</label>
+                                    <div class="checkbox-group">
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" name="accessibility[]" value="wheelchair" 
+                                                   {{ 'checked' if meeting and 'wheelchair' in meeting.accessibility_features else '' }}>
+                                            <span class="checkmark"></span>
+                                            Accessible en fauteuil roulant
+                                        </label>
+                                        
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" name="accessibility[]" value="sign_language" 
+                                                   {{ 'checked' if meeting and 'sign_language' in meeting.accessibility_features else '' }}>
+                                            <span class="checkmark"></span>
+                                            Interprétation en langue des signes
+                                        </label>
+                                        
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" name="accessibility[]" value="audio_loop" 
+                                                   {{ 'checked' if meeting and 'audio_loop' in meeting.accessibility_features else '' }}>
+                                            <span class="checkmark"></span>
+                                            Boucle auditive
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Online meeting fields -->
+                        <div id="online-fields" class="online-fields" style="display: none;">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="video-platform">Plateforme de visioconférence</label>
+                                    <select id="video-platform" name="video_platform" class="form-control"
+                                            onchange="updateVideoPlatformOptions()">
+                                        <option value="">Sélectionner une plateforme</option>
+                                        <option value="jitsi" {{ 'selected' if meeting and meeting.video_platform == 'jitsi' else '' }}>
+                                            Jitsi Meet (recommandé)
+                                        </option>
+                                        <option value="zoom" {{ 'selected' if meeting and meeting.video_platform == 'zoom' else '' }}>
+                                            Zoom
+                                        </option>
+                                        <option value="teams" {{ 'selected' if meeting and meeting.video_platform == 'teams' else '' }}>
+                                            Microsoft Teams
+                                        </option>
+                                        <option value="meet" {{ 'selected' if meeting and meeting.video_platform == 'meet' else '' }}>
+                                            Google Meet
+                                        </option>
+                                        <option value="other" {{ 'selected' if meeting and meeting.video_platform == 'other' else '' }}>
+                                            Autre
+                                        </option>
+                                    </select>
+                                </div>
+                                
+                                <div id="jitsi-room" class="form-group" style="display: none;">
+                                    <label for="jitsi-room-name">Nom de la salle Jitsi</label>
+                                    <div class="input-group">
+                                        <span class="input-group-prepend">meet.jit.si/</span>
+                                        <input type="text" id="jitsi-room-name" name="jitsi_room_name" class="form-control" 
+                                               value="{{ meeting.jitsi_room_name if meeting else '' }}" 
+                                               placeholder="nom-reunion-unique">
+                                    </div>
+                                    <div class="form-help">Laissez vide pour générer automatiquement</div>
+                                </div>
+                                
+                                <div id="meeting-url" class="form-group" style="display: none;">
+                                    <label for="online-url">Lien de connexion</label>
+                                    <input type="url" id="online-url" name="online_meeting_url" class="form-control" 
+                                           value="{{ meeting.online_meeting_url if meeting else '' }}" 
+                                           placeholder="https://...">
+                                    <div class="form-help">Lien de visioconférence pour les participants</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="meeting-id">ID de réunion (optionnel)</label>
+                                    <input type="text" id="meeting-id" name="meeting_id" class="form-control" 
+                                           value="{{ meeting.meeting_id if meeting else '' }}" 
+                                           placeholder="Ex: 123-456-789">
+                                    <div class="form-help">Identifiant de la réunion si nécessaire</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="meeting-password">Mot de passe (optionnel)</label>
+                                    <input type="text" id="meeting-password" name="meeting_password" class="form-control" 
+                                           value="{{ meeting.meeting_password if meeting else '' }}" 
+                                           placeholder="Mot de passe de protection">
+                                    <div class="form-help">Mot de passe pour sécuriser l'accès</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Agenda -->
+                    <div class="form-section card-glass-refonte">
+                        <div class="section-header">
+                            <h2>
+                                <i class="fas fa-list"></i>
+                                Agenda de la réunion
+                            </h2>
+                            <p>Structurez le déroulement de votre réunion</p>
+                        </div>
+                        
+                        <div class="agenda-builder">
+                            <div class="agenda-items" id="agenda-items">
+                                {% if meeting and meeting.agenda_items %}
+                                {% for item in meeting.agenda_items %}
+                                <div class="agenda-item" data-item-id="{{ loop.index0 }}">
+                                    <div class="agenda-item-header">
+                                        <div class="item-handle">
+                                            <i class="fas fa-grip-vertical"></i>
+                                        </div>
+                                        <div class="item-number">{{ loop.index }}.</div>
+                                        <input type="text" name="agenda_items[{{ loop.index0 }}][title]" 
+                                               class="item-title" value="{{ item.title }}" 
+                                               placeholder="Titre du point d'agenda">
+                                        <button type="button" class="item-remove" onclick="removeAgendaItem(this)">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="agenda-item-content">
+                                        <div class="item-details">
+                                            <div class="item-meta">
+                                                <input type="number" name="agenda_items[{{ loop.index0 }}][duration]" 
+                                                       class="item-duration" value="{{ item.duration or 15 }}" 
+                                                       min="5" max="180" step="5">
+                                                <span>min</span>
+                                                
+                                                <select name="agenda_items[{{ loop.index0 }}][type]" class="item-type">
+                                                    <option value="presentation" {{ 'selected' if item.type == 'presentation' else '' }}>
+                                                        Présentation
+                                                    </option>
+                                                    <option value="discussion" {{ 'selected' if item.type == 'discussion' else '' }}>
+                                                        Discussion
+                                                    </option>
+                                                    <option value="decision" {{ 'selected' if item.type == 'decision' else '' }}>
+                                                        Décision
+                                                    </option>
+                                                    <option value="vote" {{ 'selected' if item.type == 'vote' else '' }}>
+                                                        Vote
+                                                    </option>
+                                                    <option value="break" {{ 'selected' if item.type == 'break' else '' }}>
+                                                        Pause
+                                                    </option>
+                                                </select>
+                                            </div>
+                                            
+                                            <textarea name="agenda_items[{{ loop.index0 }}][description]" 
+                                                      class="item-description" rows="2" 
+                                                      placeholder="Description détaillée (optionnel)"
+                                            >{{ item.description or '' }}</textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                                {% endif %}
+                            </div>
+                            
+                            <div class="agenda-actions">
+                                <button type="button" class="btn-refonte btn-refonte-outline" onclick="addAgendaItem()">
+                                    <i class="fas fa-plus"></i>
+                                    Ajouter un point
+                                </button>
+                                
+                                <div class="agenda-templates">
+                                    <button type="button" class="btn-refonte btn-refonte-outline" onclick="loadAgendaTemplate('standard')">
+                                        <i class="fas fa-copy"></i>
+                                        Modèle standard
+                                    </button>
+                                    
+                                    <button type="button" class="btn-refonte btn-refonte-outline" onclick="loadAgendaTemplate('assembly')">
+                                        <i class="fas fa-copy"></i>
+                                        Assemblée
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="agenda-summary">
+                                <div class="summary-item">
+                                    <strong>Durée totale:</strong>
+                                    <span id="total-duration">0 min</span>
+                                </div>
+                                
+                                <div class="summary-item">
+                                    <strong>Points d'agenda:</strong>
+                                    <span id="agenda-count">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Sidebar -->
+                <div class="form-sidebar">
+                    <!-- Publication settings -->
+                    <div class="form-section card-glass-refonte">
+                        <div class="section-header">
+                            <h3>
+                                <i class="fas fa-cog"></i>
+                                Paramètres
+                            </h3>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="visibility">Visibilité</label>
+                            <select id="visibility" name="visibility" class="form-control" onchange="updateVisibilityOptions()">
+                                <option value="public" {{ 'selected' if not meeting or meeting.visibility == 'public' else '' }}>
+                                    Public
+                                </option>
+                                <option value="private" {{ 'selected' if meeting and meeting.visibility == 'private' else '' }}>
+                                    Privé
+                                </option>
+                                {% if current_user.can_create_official_meeting(space) %}
+                                <option value="restricted" {{ 'selected' if meeting and meeting.visibility == 'restricted' else '' }}>
+                                    Accès restreint
+                                </option>
+                                {% endif %}
+                            </select>
+                            
+                            <div id="visibility-help" class="form-help">
+                                <div id="help-public">Visible par tous les membres de l'espace</div>
+                                <div id="help-private" style="display: none;">Visible uniquement par les invités</div>
+                                <div id="help-restricted" style="display: none;">Visible selon les critères définis</div>
+                            </div>
+                        </div>
+                        
+                        <div id="private-invites" class="form-group" style="display: none;">
+                            <label for="invited-users">Participants invités</label>
+                            <select id="invited-users" name="invited_users[]" class="form-control" multiple>
+                                {% for user in space.members %}
+                                <option value="{{ user.id }}" 
+                                        {{ 'selected' if meeting and user in meeting.invited_users else '' }}>
+                                    {{ user.full_name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-help">Sélectionnez les participants autorisés</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Registration settings -->
+                    <div class="form-section card-glass-refonte">
+                        <div class="section-header">
+                            <h3>
+                                <i class="fas fa-user-plus"></i>
+                                Inscriptions
+                            </h3>
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="enable-registration" name="registration_enabled" 
+                                           {{ 'checked' if not meeting or meeting.registration_enabled else '' }}
+                                           onchange="updateRegistrationOptions()">
+                                    <span class="checkmark"></span>
+                                    Activer les inscriptions
+                                </label>
+                            </div>
+                            <div class="form-help">Les participants pourront s'inscrire à la réunion</div>
+                        </div>
+                        
+                        <div id="registration-options" class="registration-options">
+                            <div class="form-group">
+                                <label for="registration-limit">Limite d'inscriptions</label>
+                                <input type="number" id="registration-limit" name="registration_limit" class="form-control" 
+                                       value="{{ meeting.registration_limit if meeting else '' }}" 
+                                       min="1" placeholder="Illimité">
+                                <div class="form-help">Nombre maximum d'inscrits (optionnel)</div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="registration-deadline">Date limite d'inscription</label>
+                                <input type="text" id="registration-deadline" name="registration_deadline" 
+                                       class="form-control datetime-picker" 
+                                       value="{{ meeting.registration_deadline.strftime('%Y-%m-%d %H:%M') if meeting and meeting.registration_deadline else '' }}" 
+                                       placeholder="Jusqu'au début de la réunion">
+                                <div class="form-help">Après cette date, les inscriptions seront fermées</div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <div class="checkbox-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="require_approval" 
+                                               {{ 'checked' if meeting and meeting.require_approval else '' }}>
+                                        <span class="checkmark"></span>
+                                        Approuver les inscriptions
+                                    </label>
+                                    
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="collect_registration_notes" 
+                                               {{ 'checked' if meeting and meeting.collect_registration_notes else '' }}>
+                                        <span class="checkmark"></span>
+                                        Collecter des notes d'inscription
+                                    </label>
+                                    
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="send_reminders" 
+                                               {{ 'checked' if not meeting or meeting.send_reminders else '' }}>
+                                        <span class="checkmark"></span>
+                                        Envoyer des rappels
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Notifications -->
+                    <div class="form-section card-glass-refonte">
+                        <div class="section-header">
+                            <h3>
+                                <i class="fas fa-bell"></i>
+                                Notifications
+                            </h3>
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="notify_followers" 
+                                           {{ 'checked' if not meeting or meeting.notify_followers else '' }}>
+                                    <span class="checkmark"></span>
+                                    Notifier les abonnés de l'espace
+                                </label>
+                                
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="send_calendar_invite" 
+                                           {{ 'checked' if not meeting or meeting.send_calendar_invite else '' }}>
+                                    <span class="checkmark"></span>
+                                    Envoyer des invitations calendrier
+                                </label>
+                                
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="publish_to_feed" 
+                                           {{ 'checked' if not meeting or meeting.publish_to_feed else '' }}>
+                                    <span class="checkmark"></span>
+                                    Publier dans le fil d'actualité
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Advanced options -->
+                    <div class="form-section card-glass-refonte">
+                        <div class="section-header">
+                            <h3>
+                                <i class="fas fa-sliders-h"></i>
+                                Options avancées
+                            </h3>
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="enable_recording" 
+                                           {{ 'checked' if meeting and meeting.enable_recording else '' }}>
+                                    <span class="checkmark"></span>
+                                    Autoriser l'enregistrement
+                                </label>
+                                
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="enable_chat" 
+                                           {{ 'checked' if not meeting or meeting.enable_chat else '' }}>
+                                    <span class="checkmark"></span>
+                                    Activer le chat pendant la réunion
+                                </label>
+                                
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="enable_minutes" 
+                                           {{ 'checked' if not meeting or meeting.enable_minutes else '' }}>
+                                    <span class="checkmark"></span>
+                                    Prendre des notes de réunion
+                                </label>
+                                
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="enable_proposals" 
+                                           {{ 'checked' if meeting and meeting.enable_proposals else '' }}>
+                                    <span class="checkmark"></span>
+                                    Permettre les propositions liées
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="tags">Étiquettes</label>
+                            <input type="text" id="tags" name="tags" class="form-control" 
+                                   value="{{ meeting.tags | join(', ') if meeting and meeting.tags else '' }}" 
+                                   placeholder="Ex: budget, transport, environnement">
+                            <div class="form-help">Mots-clés séparés par des virgules</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Auto-save status -->
+                    <div class="auto-save-status">
+                        <div id="save-status" class="save-status">
+                            <i class="fas fa-save"></i>
+                            <span>Brouillon sauvegardé</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Actions -->
+                    <div class="form-actions">
+                        <button type="button" class="btn-refonte btn-refonte-secondary" onclick="saveDraft()">
+                            <i class="fas fa-save"></i>
+                            Sauvegarder le brouillon
+                        </button>
+                        
+                        <button type="button" class="btn-refonte btn-refonte-outline" onclick="previewMeeting()">
+                            <i class="fas fa-eye"></i>
+                            Aperçu
+                        </button>
+                        
+                        <button type="submit" class="btn-refonte btn-refonte-primary" id="submit-btn">
+                            <i class="fas fa-{{ 'save' if meeting else 'paper-plane' }}"></i>
+                            {{ 'Mettre à jour' if meeting else 'Publier la réunion' }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Preview Modal -->
+<div id="preview-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content modal-large">
+        <div class="modal-header">
+            <h3>Aperçu de la réunion</h3>
+            <button class="modal-close" onclick="closePreviewModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="modal-body">
+            <div id="preview-content">
+                <!-- Preview content will be loaded here -->
+            </div>
+        </div>
+        
+        <div class="modal-footer">
+            <button class="btn-refonte btn-refonte-secondary" onclick="closePreviewModal()">
+                Continuer l'édition
+            </button>
+            
+            <button class="btn-refonte btn-refonte-primary" onclick="submitFromPreview()">
+                <i class="fas fa-paper-plane"></i>
+                Publier maintenant
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Global variables
+let ckEditor;
+let agendaItemCounter = {{ meeting.agenda_items | length if meeting and meeting.agenda_items else 0 }};
+let autoSaveInterval;
+let isFormModified = false;
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize CKEditor
+    initializeCKEditor();
+    
+    // Initialize datetime pickers
+    initializeDateTimePickers();
+    
+    // Initialize form listeners
+    initializeFormListeners();
+    
+    // Initialize drag and drop for agenda
+    initializeAgendaDragDrop();
+    
+    // Update initial states
+    updateMeetingTypeOptions();
+    updateFormatOptions();
+    updateVisibilityOptions();
+    updateRegistrationOptions();
+    updateVideoPlatformOptions();
+    updateAgendaSummary();
+    
+    // Auto-save setup
+    setupAutoSave();
+    
+    // Load from localStorage if creating new meeting
+    {% if not meeting %}
+    loadFromLocalStorage();
+    {% endif %}
+});
+
+// CKEditor initialization
+function initializeCKEditor() {
+    ClassicEditor
+        .create(document.querySelector('#description'), {
+            toolbar: {
+                items: [
+                    'heading', '|',
+                    'bold', 'italic', 'underline', '|',
+                    'bulletedList', 'numberedList', '|',
+                    'link', 'blockQuote', '|',
+                    'insertTable', '|',
+                    'undo', 'redo'
+                ]
+            },
+            heading: {
+                options: [
+                    { model: 'paragraph', title: 'Paragraphe', class: 'ck-heading_paragraph' },
+                    { model: 'heading2', view: 'h2', title: 'Titre 2', class: 'ck-heading_heading2' },
+                    { model: 'heading3', view: 'h3', title: 'Titre 3', class: 'ck-heading_heading3' }
+                ]
+            },
+            language: 'fr'
+        })
+        .then(editor => {
+            ckEditor = editor;
+            
+            // Track changes for auto-save
+            editor.model.document.on('change:data', () => {
+                isFormModified = true;
+            });
+        })
+        .catch(error => {
+            console.error('CKEditor initialization error:', error);
+        });
+}
+
+// DateTime pickers initialization
+function initializeDateTimePickers() {
+    const commonConfig = {
+        enableTime: true,
+        dateFormat: "Y-m-d H:i",
+        time_24hr: true,
+        locale: "fr",
+        minDate: "today"
+    };
+    
+    flatpickr("#start-datetime", {
+        ...commonConfig,
+        onChange: function(selectedDates, dateStr, instance) {
+            // Update end datetime minimum
+            const endPicker = document.querySelector("#end-datetime")._flatpickr;
+            if (endPicker && selectedDates[0]) {
+                endPicker.set('minDate', selectedDates[0]);
+                
+                // Auto-set end time if not set
+                if (!endPicker.selectedDates.length) {
+                    const endTime = new Date(selectedDates[0]);
+                    endTime.setHours(endTime.getHours() + 2);
+                    endPicker.setDate(endTime);
+                }
+            }
+            
+            isFormModified = true;
+        }
+    });
+    
+    flatpickr("#end-datetime", commonConfig);
+    flatpickr("#registration-deadline", commonConfig);
+}
+
+// Form listeners
+function initializeFormListeners() {
+    // Title character counter
+    document.getElementById('title').addEventListener('input', function() {
+        document.getElementById('title-count').textContent = this.value.length;
+        isFormModified = true;
+    });
+    
+    // Duration synchronization
+    document.getElementById('duration-hours').addEventListener('change', updateEndTime);
+    document.getElementById('duration-minutes').addEventListener('change', updateEndTime);
+    
+    // Mark form as modified on any input
+    const formInputs = document.querySelectorAll('#meeting-form input, #meeting-form select, #meeting-form textarea');
+    formInputs.forEach(input => {
+        input.addEventListener('input', () => isFormModified = true);
+        input.addEventListener('change', () => isFormModified = true);
+    });
+    
+    // Form submission
+    document.getElementById('meeting-form').addEventListener('submit', handleFormSubmit);
+    
+    // Prevent accidental navigation
+    window.addEventListener('beforeunload', function(e) {
+        if (isFormModified) {
+            e.preventDefault();
+            e.returnValue = '';
+        }
+    });
+}
+
+// Meeting type options
+function updateMeetingTypeOptions() {
+    const typeSelect = document.getElementById('meeting-type');
+    const selectedType = typeSelect.value;
+    
+    // Show/hide help text
+    document.querySelectorAll('[id^="type-help-"]').forEach(el => {
+        el.style.display = 'none';
+    });
+    
+    if (selectedType) {
+        const helpElement = document.getElementById(`type-help-${selectedType}`);
+        if (helpElement) {
+            helpElement.style.display = 'block';
+        }
+    }
+}
+
+// Format options
+function updateFormatOptions() {
+    const selectedFormat = document.querySelector('input[name="format"]:checked')?.value;
+    const locationFields = document.getElementById('location-fields');
+    const onlineFields = document.getElementById('online-fields');
+    
+    // Reset displays
+    locationFields.style.display = 'none';
+    onlineFields.style.display = 'none';
+    
+    // Show relevant fields
+    if (selectedFormat === 'in_person' || selectedFormat === 'hybrid') {
+        locationFields.style.display = 'block';
+        
+        // Make location required for in-person meetings
+        const locationName = document.getElementById('location-name');
+        if (selectedFormat === 'in_person') {
+            locationName.required = true;
+        } else {
+            locationName.required = false;
+        }
+    }
+    
+    if (selectedFormat === 'online' || selectedFormat === 'hybrid') {
+        onlineFields.style.display = 'block';
+    }
+}
+
+// Video platform options
+function updateVideoPlatformOptions() {
+    const platform = document.getElementById('video-platform').value;
+    const jitsiRoom = document.getElementById('jitsi-room');
+    const meetingUrl = document.getElementById('meeting-url');
+    
+    // Hide all platform-specific fields
+    jitsiRoom.style.display = 'none';
+    meetingUrl.style.display = 'none';
+    
+    // Show relevant fields
+    if (platform === 'jitsi') {
+        jitsiRoom.style.display = 'block';
+    } else if (platform && platform !== '') {
+        meetingUrl.style.display = 'block';
+    }
+}
+
+// Visibility options
+function updateVisibilityOptions() {
+    const visibility = document.getElementById('visibility').value;
+    const privateInvites = document.getElementById('private-invites');
+    
+    // Show/hide help text
+    document.querySelectorAll('[id^="help-"]').forEach(el => {
+        el.style.display = 'none';
+    });
+    
+    const helpElement = document.getElementById(`help-${visibility}`);
+    if (helpElement) {
+        helpElement.style.display = 'block';
+    }
+    
+    // Show/hide private invites
+    privateInvites.style.display = visibility === 'private' ? 'block' : 'none';
+}
+
+// Registration options
+function updateRegistrationOptions() {
+    const enabled = document.getElementById('enable-registration').checked;
+    const options = document.getElementById('registration-options');
+    
+    options.style.display = enabled ? 'block' : 'none';
+}
+
+// Duration and end time synchronization
+function updateEndTime() {
+    const startInput = document.getElementById('start-datetime');
+    const endInput = document.getElementById('end-datetime');
+    const hours = parseInt(document.getElementById('duration-hours').value) || 0;
+    const minutes = parseInt(document.getElementById('duration-minutes').value) || 0;
+    
+    if (startInput.value && !endInput.value) {
+        const startTime = new Date(startInput.value);
+        const endTime = new Date(startTime);
+        endTime.setHours(endTime.getHours() + hours);
+        endTime.setMinutes(endTime.getMinutes() + minutes);
+        
+        const endPicker = endInput._flatpickr;
+        if (endPicker) {
+            endPicker.setDate(endTime);
+        }
+    }
+}
+
+// Agenda management
+function addAgendaItem(title = '', type = 'discussion', duration = 15, description = '') {
+    const container = document.getElementById('agenda-items');
+    const itemHtml = `
+        <div class="agenda-item" data-item-id="${agendaItemCounter}">
+            <div class="agenda-item-header">
+                <div class="item-handle">
+                    <i class="fas fa-grip-vertical"></i>
+                </div>
+                <div class="item-number">${agendaItemCounter + 1}.</div>
+                <input type="text" name="agenda_items[${agendaItemCounter}][title]" 
+                       class="item-title" value="${title}" 
+                       placeholder="Titre du point d'agenda" onchange="updateAgendaSummary()">
+                <button type="button" class="item-remove" onclick="removeAgendaItem(this)">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="agenda-item-content">
+                <div class="item-details">
+                    <div class="item-meta">
+                        <input type="number" name="agenda_items[${agendaItemCounter}][duration]" 
+                               class="item-duration" value="${duration}" 
+                               min="5" max="180" step="5" onchange="updateAgendaSummary()">
+                        <span>min</span>
+                        
+                        <select name="agenda_items[${agendaItemCounter}][type]" class="item-type">
+                            <option value="presentation" ${type === 'presentation' ? 'selected' : ''}>Présentation</option>
+                            <option value="discussion" ${type === 'discussion' ? 'selected' : ''}>Discussion</option>
+                            <option value="decision" ${type === 'decision' ? 'selected' : ''}>Décision</option>
+                            <option value="vote" ${type === 'vote' ? 'selected' : ''}>Vote</option>
+                            <option value="break" ${type === 'break' ? 'selected' : ''}>Pause</option>
+                        </select>
+                    </div>
+                    
+                    <textarea name="agenda_items[${agendaItemCounter}][description]" 
+                              class="item-description" rows="2" 
+                              placeholder="Description détaillée (optionnel)">${description}</textarea>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    container.insertAdjacentHTML('beforeend', itemHtml);
+    agendaItemCounter++;
+    
+    updateAgendaNumbers();
+    updateAgendaSummary();
+    
+    isFormModified = true;
+}
+
+function removeAgendaItem(button) {
+    if (confirm('Supprimer ce point d\'agenda ?')) {
+        button.closest('.agenda-item').remove();
+        updateAgendaNumbers();
+        updateAgendaSummary();
+        isFormModified = true;
+    }
+}
+
+function updateAgendaNumbers() {
+    const items = document.querySelectorAll('.agenda-item');
+    items.forEach((item, index) => {
+        item.querySelector('.item-number').textContent = `${index + 1}.`;
+    });
+}
+
+function updateAgendaSummary() {
+    const items = document.querySelectorAll('.agenda-item');
+    let totalDuration = 0;
+    
+    items.forEach(item => {
+        const duration = parseInt(item.querySelector('.item-duration').value) || 0;
+        totalDuration += duration;
+    });
+    
+    document.getElementById('total-duration').textContent = 
+        totalDuration > 60 ? 
+        `${Math.floor(totalDuration / 60)}h ${totalDuration % 60}min` : 
+        `${totalDuration} min`;
+    
+    document.getElementById('agenda-count').textContent = items.length;
+}
+
+function loadAgendaTemplate(template) {
+    if (!confirm('Remplacer l\'agenda actuel par le modèle sélectionné ?')) return;
+    
+    // Clear existing items
+    document.getElementById('agenda-items').innerHTML = '';
+    agendaItemCounter = 0;
+    
+    const templates = {
+        standard: [
+            { title: 'Ouverture et tour de table', type: 'presentation', duration: 15 },
+            { title: 'Présentation de l\'ordre du jour', type: 'presentation', duration: 5 },
+            { title: 'Point principal de discussion', type: 'discussion', duration: 45 },
+            { title: 'Questions et échanges', type: 'discussion', duration: 20 },
+            { title: 'Décisions et prochaines étapes', type: 'decision', duration: 10 },
+            { title: 'Clôture', type: 'presentation', duration: 5 }
+        ],
+        assembly: [
+            { title: 'Ouverture de l\'assemblée', type: 'presentation', duration: 10 },
+            { title: 'Approbation du procès-verbal précédent', type: 'decision', duration: 5 },
+            { title: 'Rapport d\'activité', type: 'presentation', duration: 30 },
+            { title: 'Rapport financier', type: 'presentation', duration: 20 },
+            { title: 'Questions diverses', type: 'discussion', duration: 30 },
+            { title: 'Votes et décisions', type: 'vote', duration: 15 },
+            { title: 'Prochaine assemblée et clôture', type: 'presentation', duration: 10 }
+        ]
+    };
+    
+    const items = templates[template] || [];
+    items.forEach(item => {
+        addAgendaItem(item.title, item.type, item.duration, item.description || '');
+    });
+}
+
+// Drag and drop for agenda items
+function initializeAgendaDragDrop() {
+    // This would integrate with a drag-and-drop library like SortableJS
+    // For now, we'll implement basic reordering with buttons
+}
+
+// Auto-save functionality
+function setupAutoSave() {
+    autoSaveInterval = setInterval(() => {
+        if (isFormModified) {
+            saveDraft(true); // Silent save
+        }
+    }, 30000); // Save every 30 seconds
+}
+
+function saveDraft(silent = false) {
+    const formData = new FormData(document.getElementById('meeting-form'));
+    
+    // Add CKEditor content
+    if (ckEditor) {
+        formData.set('description', ckEditor.getData());
+    }
+    
+    if (!silent) {
+        document.getElementById('save-status').innerHTML = 
+            '<i class="fas fa-spinner fa-spin"></i> <span>Sauvegarde...</span>';
+    }
+    
+    fetch('/api/meetings/draft', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            isFormModified = false;
+            
+            // Save to localStorage as backup
+            saveToLocalStorage();
+            
+            if (!silent) {
+                document.getElementById('save-status').innerHTML = 
+                    '<i class="fas fa-check"></i> <span>Brouillon sauvegardé</span>';
+                
+                setTimeout(() => {
+                    document.getElementById('save-status').innerHTML = 
+                        '<i class="fas fa-save"></i> <span>Brouillon sauvegardé</span>';
+                }, 2000);
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Auto-save error:', error);
+        if (!silent) {
+            document.getElementById('save-status').innerHTML = 
+                '<i class="fas fa-exclamation-triangle"></i> <span>Erreur de sauvegarde</span>';
+        }
+    });
+}
+
+// Local storage backup
+function saveToLocalStorage() {
+    const formData = new FormData(document.getElementById('meeting-form'));
+    const data = {};
+    
+    for (let [key, value] of formData.entries()) {
+        data[key] = value;
+    }
+    
+    if (ckEditor) {
+        data.description = ckEditor.getData();
+    }
+    
+    localStorage.setItem('meeting-draft-{{ space.id }}', JSON.stringify(data));
+}
+
+function loadFromLocalStorage() {
+    const stored = localStorage.getItem('meeting-draft-{{ space.id }}');
+    if (!stored) return;
+    
+    try {
+        const data = JSON.parse(stored);
+        
+        // Load basic fields
+        Object.keys(data).forEach(key => {
+            const input = document.querySelector(`[name="${key}"]`);
+            if (input && input.type !== 'file') {
+                if (input.type === 'checkbox') {
+                    input.checked = data[key] === 'on';
+                } else {
+                    input.value = data[key];
+                }
+            }
+        });
+        
+        // Load CKEditor content
+        if (data.description && ckEditor) {
+            ckEditor.setData(data.description);
+        }
+        
+        // Update dependent options
+        updateMeetingTypeOptions();
+        updateFormatOptions();
+        updateVisibilityOptions();
+        updateRegistrationOptions();
+        updateVideoPlatformOptions();
+        
+    } catch (error) {
+        console.error('Error loading from localStorage:', error);
+    }
+}
+
+// Preview functionality
+function previewMeeting() {
+    const formData = new FormData(document.getElementById('meeting-form'));
+    
+    if (ckEditor) {
+        formData.set('description', ckEditor.getData());
+    }
+    
+    document.getElementById('preview-content').innerHTML = 
+        '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Génération de l\'aperçu...</div>';
+    
+    document.getElementById('preview-modal').style.display = 'flex';
+    
+    fetch('/api/meetings/preview', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('preview-content').innerHTML = data.html;
+        } else {
+            document.getElementById('preview-content').innerHTML = 
+                '<div class="error">Erreur lors de la génération de l\'aperçu</div>';
+        }
+    });
+}
+
+function closePreviewModal() {
+    document.getElementById('preview-modal').style.display = 'none';
+}
+
+function submitFromPreview() {
+    closePreviewModal();
+    document.getElementById('meeting-form').submit();
+}
+
+// Form submission
+function handleFormSubmit(e) {
+    e.preventDefault();
+    
+    const submitBtn = document.getElementById('submit-btn');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + 
+        ({{ 'true' if meeting else 'false' }} ? 'Mise à jour...' : 'Publication...');
+    
+    // Validate required fields
+    if (!validateForm()) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-' + ({{ 'true' if meeting else 'false' }} ? 'save' : 'paper-plane') + '"></i> ' +
+            ({{ 'true' if meeting else 'false' }} ? 'Mettre à jour' : 'Publier la réunion');
+        return;
+    }
+    
+    const formData = new FormData(e.target);
+    
+    // Add CKEditor content
+    if (ckEditor) {
+        formData.set('description', ckEditor.getData());
+    }
+    
+    fetch(e.target.action || window.location.href, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Clear localStorage
+            localStorage.removeItem('meeting-draft-{{ space.id }}');
+            
+            // Clear auto-save interval
+            clearInterval(autoSaveInterval);
+            
+            // Disable beforeunload warning
+            isFormModified = false;
+            
+            // Redirect to meeting detail
+            window.location.href = data.redirect_url;
+        } else {
+            alert(data.message || 'Erreur lors de la publication');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-' + ({{ 'true' if meeting else 'false' }} ? 'save' : 'paper-plane') + '"></i> ' +
+                ({{ 'true' if meeting else 'false' }} ? 'Mettre à jour' : 'Publier la réunion');
+        }
+    })
+    .catch(error => {
+        console.error('Submission error:', error);
+        alert('Erreur lors de la publication. Veuillez réessayer.');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-' + ({{ 'true' if meeting else 'false' }} ? 'save' : 'paper-plane') + '"></i> ' +
+            ({{ 'true' if meeting else 'false' }} ? 'Mettre à jour' : 'Publier la réunion');
+    });
+}
+
+function validateForm() {
+    const requiredFields = document.querySelectorAll('[required]');
+    let isValid = true;
+    
+    requiredFields.forEach(field => {
+        if (!field.value.trim()) {
+            field.classList.add('error');
+            isValid = false;
+            
+            // Remove error class after user input
+            field.addEventListener('input', function() {
+                this.classList.remove('error');
+            }, { once: true });
+        }
+    });
+    
+    // Validate format-specific fields
+    const selectedFormat = document.querySelector('input[name="format"]:checked')?.value;
+    if (selectedFormat === 'in_person' || selectedFormat === 'hybrid') {
+        const locationName = document.getElementById('location-name');
+        if (!locationName.value.trim()) {
+            locationName.classList.add('error');
+            isValid = false;
+        }
+    }
+    
+    if (!isValid) {
+        alert('Veuillez remplir tous les champs obligatoires.');
+    }
+    
+    return isValid;
+}
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', function() {
+    clearInterval(autoSaveInterval);
+    
+    // Save final state to localStorage
+    if (isFormModified) {
+        saveToLocalStorage();
+    }
+});
+</script>
+{% endblock %}

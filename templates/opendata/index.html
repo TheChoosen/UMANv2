@@ -1,0 +1,1077 @@
+{% extends "base.html" %}
+
+{% block title %}Open Data - Données ouvertes - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="opendata-layout">
+    <div class="container">
+        <div class="opendata-container">
+            <!-- En-tête Open Data -->
+            <div class="opendata-header">
+                <div class="hero-section">
+                    <div class="hero-content">
+                        <h1>
+                            <i class="fas fa-database"></i>
+                            Open Data - Données ouvertes
+                        </h1>
+                        <p class="hero-description">
+                            Accédez librement aux données de la démocratie participative. 
+                            Exports quotidiens JSON/CSV par espace et composant pour transparence totale.
+                        </p>
+                        
+                        <div class="hero-stats">
+                            <div class="stat-item">
+                                <div class="stat-value">{{ total_datasets }}</div>
+                                <div class="stat-label">Jeux de données</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">{{ daily_exports }}</div>
+                                <div class="stat-label">Exports quotidiens</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">{{ last_update_hours }}h</div>
+                                <div class="stat-label">Dernière MAJ</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="hero-actions">
+                        <button class="btn-refonte" onclick="downloadAllData()">
+                            <i class="fas fa-download"></i>
+                            Télécharger tout
+                        </button>
+                        <button class="btn-refonte btn-secondary" onclick="subscribeToUpdates()">
+                            <i class="fas fa-bell"></i>
+                            S'abonner aux MAJ
+                        </button>
+                        <button class="btn-refonte btn-secondary" onclick="viewAPIDocumentation()">
+                            <i class="fas fa-code"></i>
+                            API Documentation
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation catalogue -->
+            <div class="catalogue-navigation">
+                <div class="nav-container">
+                    <div class="nav-filters">
+                        <div class="filter-group">
+                            <label for="component-filter">Composant</label>
+                            <select class="filter-select" id="component-filter" onchange="filterDatasets()">
+                                <option value="">Tous les composants</option>
+                                <option value="proposals">Propositions</option>
+                                <option value="debates">Débats</option>
+                                <option value="meetings">Réunions</option>
+                                <option value="budgets">Budgets participatifs</option>
+                                <option value="surveys">Enquêtes</option>
+                                <option value="sortitions">Sortitions</option>
+                                <option value="accountability">Accountability</option>
+                                <option value="spaces">Espaces participatifs</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="space-filter">Espace participatif</label>
+                            <select class="filter-select" id="space-filter" onchange="filterDatasets()">
+                                <option value="">Tous les espaces</option>
+                                {% for space in spaces %}
+                                <option value="{{ space.id }}">{{ space.title }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="format-filter">Format</label>
+                            <select class="filter-select" id="format-filter" onchange="filterDatasets()">
+                                <option value="">Tous les formats</option>
+                                <option value="json">JSON</option>
+                                <option value="csv">CSV</option>
+                                <option value="xml">XML</option>
+                                <option value="rdf">RDF</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="update-filter">Fréquence MAJ</label>
+                            <select class="filter-select" id="update-filter" onchange="filterDatasets()">
+                                <option value="">Toutes les fréquences</option>
+                                <option value="realtime">Temps réel</option>
+                                <option value="daily">Quotidien</option>
+                                <option value="weekly">Hebdomadaire</option>
+                                <option value="monthly">Mensuel</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="search-group">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="search-input" placeholder="Rechercher un jeu de données..." 
+                                   onkeyup="searchDatasets()" autocomplete="off">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistiques d'utilisation -->
+            <div class="usage-overview">
+                <div class="overview-cards">
+                    <div class="overview-card">
+                        <div class="card-header">
+                            <h3>
+                                <i class="fas fa-download"></i>
+                                Téléchargements populaires
+                            </h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="popular-downloads">
+                                <div class="download-item">
+                                    <div class="download-info">
+                                        <strong>Propositions citoyennes 2025</strong>
+                                        <span>1,234 téléchargements</span>
+                                    </div>
+                                    <div class="download-actions">
+                                        <button class="download-btn" onclick="downloadDataset('proposals-2025')">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="download-item">
+                                    <div class="download-info">
+                                        <strong>Budgets participatifs</strong>
+                                        <span>987 téléchargements</span>
+                                    </div>
+                                    <div class="download-actions">
+                                        <button class="download-btn" onclick="downloadDataset('budgets-participatifs')">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="download-item">
+                                    <div class="download-info">
+                                        <strong>Résultats de sortitions</strong>
+                                        <span>567 téléchargements</span>
+                                    </div>
+                                    <div class="download-actions">
+                                        <button class="download-btn" onclick="downloadDataset('sortitions-results')">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="overview-card">
+                        <div class="card-header">
+                            <h3>
+                                <i class="fas fa-chart-line"></i>
+                                Utilisation API
+                            </h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="api-stats">
+                                <div class="api-metric">
+                                    <div class="metric-value">2,456</div>
+                                    <div class="metric-label">Appels API (24h)</div>
+                                </div>
+                                <div class="api-metric">
+                                    <div class="metric-value">127</div>
+                                    <div class="metric-label">Applications connectées</div>
+                                </div>
+                                <div class="api-metric">
+                                    <div class="metric-value">99.7%</div>
+                                    <div class="metric-label">Disponibilité</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Catalogue des jeux de données -->
+            <div class="catalogue-section">
+                <div class="section-header">
+                    <h2>
+                        <i class="fas fa-folder-open"></i>
+                        Catalogue des jeux de données
+                        <span class="datasets-count">({{ datasets|length }})</span>
+                    </h2>
+                    
+                    <div class="section-actions">
+                        <div class="view-toggle-group">
+                            <button class="view-toggle active" data-view="grid" onclick="toggleCatalogueView('grid')">
+                                <i class="fas fa-th"></i>
+                            </button>
+                            <button class="view-toggle" data-view="list" onclick="toggleCatalogueView('list')">
+                                <i class="fas fa-list"></i>
+                            </button>
+                        </div>
+                        
+                        <select class="sort-select" id="sort-select" onchange="sortDatasets()">
+                            <option value="newest">Plus récents</option>
+                            <option value="popular">Plus téléchargés</option>
+                            <option value="alphabetical">Alphabétique</option>
+                            <option value="size-desc">Taille décroissante</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Vue grille -->
+                <div class="datasets-container view-grid" id="datasets-container">
+                    <!-- Dataset 1 - Propositions -->
+                    <div class="dataset-card" data-component="proposals" data-format="json,csv">
+                        <div class="dataset-header">
+                            <div class="dataset-badges">
+                                <span class="component-badge component-proposals">
+                                    <i class="fas fa-lightbulb"></i>
+                                    Propositions
+                                </span>
+                                <span class="update-badge update-daily">
+                                    <i class="fas fa-clock"></i>
+                                    Quotidien
+                                </span>
+                            </div>
+                            
+                            <div class="dataset-actions">
+                                <button class="action-btn" title="Télécharger JSON" onclick="downloadFormat('proposals', 'json')">
+                                    <i class="fas fa-file-code"></i>
+                                </button>
+                                <button class="action-btn" title="Télécharger CSV" onclick="downloadFormat('proposals', 'csv')">
+                                    <i class="fas fa-file-csv"></i>
+                                </button>
+                                <button class="action-btn" title="API Preview" onclick="previewAPI('proposals')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="action-btn" title="Partager" onclick="shareDataset('proposals')">
+                                    <i class="fas fa-share-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="dataset-content">
+                            <h3 class="dataset-title">Propositions citoyennes</h3>
+                            <p class="dataset-description">
+                                Ensemble complet des propositions soumises par les citoyens dans tous les espaces participatifs, 
+                                incluant texte, votes, commentaires et statuts de traitement.
+                            </p>
+                            
+                            <div class="dataset-scope">
+                                <div class="scope-item">
+                                    <i class="fas fa-users"></i>
+                                    <span>Tous espaces</span>
+                                </div>
+                                <div class="scope-item">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span>2020-2025</span>
+                                </div>
+                                <div class="scope-item">
+                                    <i class="fas fa-database"></i>
+                                    <span>2,456 entrées</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="dataset-formats">
+                            <div class="formats-header">
+                                <h4>Formats disponibles</h4>
+                            </div>
+                            
+                            <div class="format-options">
+                                <div class="format-option">
+                                    <div class="format-info">
+                                        <strong>JSON</strong>
+                                        <span>2.3 MB • Dernière MAJ: aujourd'hui 06:00</span>
+                                    </div>
+                                    <button class="format-download" onclick="downloadFormat('proposals', 'json')">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </div>
+                                
+                                <div class="format-option">
+                                    <div class="format-info">
+                                        <strong>CSV</strong>
+                                        <span>1.8 MB • Export tabulaire complet</span>
+                                    </div>
+                                    <button class="format-download" onclick="downloadFormat('proposals', 'csv')">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="dataset-metadata">
+                            <div class="metadata-header">
+                                <h4>Métadonnées</h4>
+                                <button class="metadata-toggle" onclick="toggleMetadata('proposals')">
+                                    <i class="fas fa-chevron-down"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="metadata-content collapsed" id="metadata-proposals">
+                                <div class="metadata-grid">
+                                    <div class="metadata-item">
+                                        <span class="metadata-label">Licence:</span>
+                                        <span class="metadata-value">CC BY 4.0</span>
+                                    </div>
+                                    <div class="metadata-item">
+                                        <span class="metadata-label">Producteur:</span>
+                                        <span class="metadata-value">Plateforme UMan Démocratie</span>
+                                    </div>
+                                    <div class="metadata-item">
+                                        <span class="metadata-label">Fréquence MAJ:</span>
+                                        <span class="metadata-value">Quotidienne à 06:00</span>
+                                    </div>
+                                    <div class="metadata-item">
+                                        <span class="metadata-label">Encodage:</span>
+                                        <span class="metadata-value">UTF-8</span>
+                                    </div>
+                                    <div class="metadata-item">
+                                        <span class="metadata-label">Mots-clés:</span>
+                                        <span class="metadata-value">démocratie, participation, propositions</span>
+                                    </div>
+                                    <div class="metadata-item">
+                                        <span class="metadata-label">Contact:</span>
+                                        <span class="metadata-value">opendata@plateforme.gov</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="schema-preview">
+                                    <h5>Schéma des données (JSON)</h5>
+                                    <pre class="schema-code">{
+  "id": "integer",
+  "title": "string",
+  "body": "text",
+  "author_id": "integer", 
+  "space_id": "integer",
+  "created_at": "datetime",
+  "updated_at": "datetime",
+  "status": "enum",
+  "votes_count": "integer",
+  "comments_count": "integer",
+  "category": "string"
+}</pre>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="dataset-footer">
+                            <div class="dataset-stats">
+                                <div class="stat-item">
+                                    <i class="fas fa-download"></i>
+                                    <span>1,234 téléchargements</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-star"></i>
+                                    <span>4.8/5 (23 avis)</span>
+                                </div>
+                            </div>
+                            
+                            <div class="dataset-links">
+                                <button class="btn-refonte btn-sm" onclick="viewDatasetDetails('proposals')">
+                                    <i class="fas fa-info-circle"></i>
+                                    Détails
+                                </button>
+                                <button class="btn-refonte btn-sm btn-secondary" onclick="viewAPIEndpoint('proposals')">
+                                    <i class="fas fa-code"></i>
+                                    API
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dataset 2 - Budgets participatifs -->
+                    <div class="dataset-card" data-component="budgets" data-format="json,csv,xml">
+                        <div class="dataset-header">
+                            <div class="dataset-badges">
+                                <span class="component-badge component-budgets">
+                                    <i class="fas fa-coins"></i>
+                                    Budgets
+                                </span>
+                                <span class="update-badge update-daily">
+                                    <i class="fas fa-clock"></i>
+                                    Quotidien
+                                </span>
+                            </div>
+                            
+                            <div class="dataset-actions">
+                                <button class="action-btn" title="Télécharger JSON" onclick="downloadFormat('budgets', 'json')">
+                                    <i class="fas fa-file-code"></i>
+                                </button>
+                                <button class="action-btn" title="Télécharger CSV" onclick="downloadFormat('budgets', 'csv')">
+                                    <i class="fas fa-file-csv"></i>
+                                </button>
+                                <button class="action-btn" title="Télécharger XML" onclick="downloadFormat('budgets', 'xml')">
+                                    <i class="fas fa-file-alt"></i>
+                                </button>
+                                <button class="action-btn" title="API Preview" onclick="previewAPI('budgets')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="dataset-content">
+                            <h3 class="dataset-title">Budgets participatifs</h3>
+                            <p class="dataset-description">
+                                Projets de budget participatif avec votes citoyens, montants alloués, 
+                                statuts d'exécution et suivi de réalisation.
+                            </p>
+                            
+                            <div class="dataset-scope">
+                                <div class="scope-item">
+                                    <i class="fas fa-euro-sign"></i>
+                                    <span>1.2M € total</span>
+                                </div>
+                                <div class="scope-item">
+                                    <i class="fas fa-project-diagram"></i>
+                                    <span>89 projets</span>
+                                </div>
+                                <div class="scope-item">
+                                    <i class="fas fa-vote-yea"></i>
+                                    <span>15,234 votes</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="dataset-formats">
+                            <div class="formats-header">
+                                <h4>Formats disponibles</h4>
+                            </div>
+                            
+                            <div class="format-options">
+                                <div class="format-option">
+                                    <div class="format-info">
+                                        <strong>JSON</strong>
+                                        <span>856 KB • Structure complète</span>
+                                    </div>
+                                    <button class="format-download" onclick="downloadFormat('budgets', 'json')">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </div>
+                                
+                                <div class="format-option">
+                                    <div class="format-info">
+                                        <strong>CSV</strong>
+                                        <span>423 KB • Format tabulaire</span>
+                                    </div>
+                                    <button class="format-download" onclick="downloadFormat('budgets', 'csv')">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </div>
+                                
+                                <div class="format-option">
+                                    <div class="format-info">
+                                        <strong>XML</strong>
+                                        <span>1.1 MB • Standard structuré</span>
+                                    </div>
+                                    <button class="format-download" onclick="downloadFormat('budgets', 'xml')">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="dataset-footer">
+                            <div class="dataset-stats">
+                                <div class="stat-item">
+                                    <i class="fas fa-download"></i>
+                                    <span>987 téléchargements</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-star"></i>
+                                    <span>4.9/5 (18 avis)</span>
+                                </div>
+                            </div>
+                            
+                            <div class="dataset-links">
+                                <button class="btn-refonte btn-sm" onclick="viewDatasetDetails('budgets')">
+                                    <i class="fas fa-info-circle"></i>
+                                    Détails
+                                </button>
+                                <button class="btn-refonte btn-sm btn-secondary" onclick="viewAPIEndpoint('budgets')">
+                                    <i class="fas fa-code"></i>
+                                    API
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dataset 3 - Sortitions -->
+                    <div class="dataset-card" data-component="sortitions" data-format="json,csv">
+                        <div class="dataset-header">
+                            <div class="dataset-badges">
+                                <span class="component-badge component-sortitions">
+                                    <i class="fas fa-dice"></i>
+                                    Sortitions
+                                </span>
+                                <span class="update-badge update-realtime">
+                                    <i class="fas fa-bolt"></i>
+                                    Temps réel
+                                </span>
+                            </div>
+                            
+                            <div class="dataset-actions">
+                                <button class="action-btn" title="Télécharger JSON" onclick="downloadFormat('sortitions', 'json')">
+                                    <i class="fas fa-file-code"></i>
+                                </button>
+                                <button class="action-btn" title="Télécharger CSV" onclick="downloadFormat('sortitions', 'csv')">
+                                    <i class="fas fa-file-csv"></i>
+                                </button>
+                                <button class="action-btn" title="Vérification" onclick="verifySortitions()">
+                                    <i class="fas fa-shield-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="dataset-content">
+                            <h3 class="dataset-title">Résultats de sortitions</h3>
+                            <p class="dataset-description">
+                                Historique complet des sortitions avec seeds cryptographiques, 
+                                témoins de vérification et audit trail pour reproductibilité totale.
+                            </p>
+                            
+                            <div class="dataset-scope">
+                                <div class="scope-item">
+                                    <i class="fas fa-random"></i>
+                                    <span>156 tirages</span>
+                                </div>
+                                <div class="scope-item">
+                                    <i class="fas fa-shield-alt"></i>
+                                    <span>100% vérifiés</span>
+                                </div>
+                                <div class="scope-item">
+                                    <i class="fas fa-eye"></i>
+                                    <span>342 témoins</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="dataset-verification">
+                            <div class="verification-header">
+                                <h4>
+                                    <i class="fas fa-certificate"></i>
+                                    Vérification cryptographique
+                                </h4>
+                            </div>
+                            
+                            <div class="verification-status verified">
+                                <div class="verification-item">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Seeds SHA-256 validés</span>
+                                </div>
+                                <div class="verification-item">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Témoins horodatés</span>
+                                </div>
+                                <div class="verification-item">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Audit trail complet</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="dataset-footer">
+                            <div class="dataset-stats">
+                                <div class="stat-item">
+                                    <i class="fas fa-download"></i>
+                                    <span>567 téléchargements</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-shield-alt"></i>
+                                    <span>Audit OK</span>
+                                </div>
+                            </div>
+                            
+                            <div class="dataset-links">
+                                <button class="btn-refonte btn-sm" onclick="verifyAllSortitions()">
+                                    <i class="fas fa-check-double"></i>
+                                    Vérifier
+                                </button>
+                                <button class="btn-refonte btn-sm btn-secondary" onclick="viewAPIEndpoint('sortitions')">
+                                    <i class="fas fa-code"></i>
+                                    API
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dataset 4 - Accountability -->
+                    <div class="dataset-card" data-component="accountability" data-format="json,csv">
+                        <div class="dataset-header">
+                            <div class="dataset-badges">
+                                <span class="component-badge component-accountability">
+                                    <i class="fas fa-tasks"></i>
+                                    Accountability
+                                </span>
+                                <span class="update-badge update-weekly">
+                                    <i class="fas fa-calendar-week"></i>
+                                    Hebdomadaire
+                                </span>
+                            </div>
+                            
+                            <div class="dataset-actions">
+                                <button class="action-btn" title="Télécharger JSON" onclick="downloadFormat('accountability', 'json')">
+                                    <i class="fas fa-file-code"></i>
+                                </button>
+                                <button class="action-btn" title="Télécharger CSV" onclick="downloadFormat('accountability', 'csv')">
+                                    <i class="fas fa-file-csv"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="dataset-content">
+                            <h3 class="dataset-title">Suivi de réalisation</h3>
+                            <p class="dataset-description">
+                                Résultats et projets liés aux propositions, budgets et réunions avec 
+                                statuts, jalons et liens bidirectionnels pour transparence complète.
+                            </p>
+                            
+                            <div class="dataset-scope">
+                                <div class="scope-item">
+                                    <i class="fas fa-project-diagram"></i>
+                                    <span>78 résultats suivis</span>
+                                </div>
+                                <div class="scope-item">
+                                    <i class="fas fa-link"></i>
+                                    <span>234 liens tracés</span>
+                                </div>
+                                <div class="scope-item">
+                                    <i class="fas fa-chart-line"></i>
+                                    <span>67% taux réalisation</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="dataset-footer">
+                            <div class="dataset-stats">
+                                <div class="stat-item">
+                                    <i class="fas fa-download"></i>
+                                    <span>345 téléchargements</span>
+                                </div>
+                                <div class="stat-item">
+                                    <i class="fas fa-sync-alt"></i>
+                                    <span>MAJ: lundi</span>
+                                </div>
+                            </div>
+                            
+                            <div class="dataset-links">
+                                <button class="btn-refonte btn-sm" onclick="viewDatasetDetails('accountability')">
+                                    <i class="fas fa-info-circle"></i>
+                                    Détails
+                                </button>
+                                <button class="btn-refonte btn-sm btn-secondary" onclick="viewAPIEndpoint('accountability')">
+                                    <i class="fas fa-code"></i>
+                                    API
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section API et Documentation -->
+            <div class="api-section">
+                <div class="section-header">
+                    <h2>
+                        <i class="fas fa-code"></i>
+                        API et Accès programmatique
+                    </h2>
+                </div>
+                
+                <div class="api-grid">
+                    <div class="api-card">
+                        <div class="api-header">
+                            <h3>Endpoints REST</h3>
+                        </div>
+                        <div class="api-content">
+                            <div class="endpoint-list">
+                                <div class="endpoint-item">
+                                    <div class="endpoint-method get">GET</div>
+                                    <div class="endpoint-path">/api/v1/datasets</div>
+                                    <div class="endpoint-desc">Liste tous les jeux de données</div>
+                                </div>
+                                <div class="endpoint-item">
+                                    <div class="endpoint-method get">GET</div>
+                                    <div class="endpoint-path">/api/v1/proposals</div>
+                                    <div class="endpoint-desc">Export propositions (JSON/CSV)</div>
+                                </div>
+                                <div class="endpoint-item">
+                                    <div class="endpoint-method get">GET</div>
+                                    <div class="endpoint-path">/api/v1/budgets</div>
+                                    <div class="endpoint-desc">Export budgets participatifs</div>
+                                </div>
+                                <div class="endpoint-item">
+                                    <div class="endpoint-method get">GET</div>
+                                    <div class="endpoint-path">/api/v1/sortitions</div>
+                                    <div class="endpoint-desc">Résultats sortitions vérifiables</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="api-card">
+                        <div class="api-header">
+                            <h3>Authentification</h3>
+                        </div>
+                        <div class="api-content">
+                            <div class="auth-info">
+                                <div class="auth-method">
+                                    <strong>API Key</strong>
+                                    <p>Clé API requise dans l'en-tête Authorization</p>
+                                    <code>Authorization: Bearer YOUR_API_KEY</code>
+                                </div>
+                                
+                                <div class="rate-limits">
+                                    <strong>Limites de débit</strong>
+                                    <ul>
+                                        <li>1000 requêtes/heure (authentifié)</li>
+                                        <li>100 requêtes/heure (anonyme)</li>
+                                        <li>Exports: 10/jour max</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="api-card">
+                        <div class="api-header">
+                            <h3>Exemples d'utilisation</h3>
+                        </div>
+                        <div class="api-content">
+                            <div class="code-examples">
+                                <div class="example-item">
+                                    <strong>cURL</strong>
+                                    <pre class="code-block">curl -H "Authorization: Bearer YOUR_KEY" \
+  https://api.plateforme.gov/v1/proposals?format=json</pre>
+                                </div>
+                                
+                                <div class="example-item">
+                                    <strong>Python</strong>
+                                    <pre class="code-block">import requests
+headers = {"Authorization": "Bearer YOUR_KEY"}
+response = requests.get("https://api.plateforme.gov/v1/proposals", headers=headers)</pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section planification exports -->
+            <div class="scheduling-section">
+                <div class="section-header">
+                    <h2>
+                        <i class="fas fa-calendar-alt"></i>
+                        Planification des exports
+                    </h2>
+                </div>
+                
+                <div class="scheduling-info">
+                    <div class="schedule-card">
+                        <div class="schedule-header">
+                            <h3>
+                                <i class="fas fa-clock"></i>
+                                Exports automatiques
+                            </h3>
+                        </div>
+                        <div class="schedule-content">
+                            <div class="schedule-list">
+                                <div class="schedule-item">
+                                    <div class="schedule-time">06:00</div>
+                                    <div class="schedule-task">
+                                        <strong>Export quotidien</strong>
+                                        <span>Propositions, débats, commentaires</span>
+                                    </div>
+                                    <div class="schedule-status active">
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
+                                </div>
+                                
+                                <div class="schedule-item">
+                                    <div class="schedule-time">07:00</div>
+                                    <div class="schedule-task">
+                                        <strong>Synchronisation budgets</strong>
+                                        <span>Projets, votes, statuts</span>
+                                    </div>
+                                    <div class="schedule-status active">
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
+                                </div>
+                                
+                                <div class="schedule-item">
+                                    <div class="schedule-time">Temps réel</div>
+                                    <div class="schedule-task">
+                                        <strong>Sortitions</strong>
+                                        <span>Résultats et preuves cryptographiques</span>
+                                    </div>
+                                    <div class="schedule-status active">
+                                        <i class="fas fa-bolt"></i>
+                                    </div>
+                                </div>
+                                
+                                <div class="schedule-item">
+                                    <div class="schedule-time">Lundi 08:00</div>
+                                    <div class="schedule-task">
+                                        <strong>Accountability</strong>
+                                        <span>Mise à jour suivi de réalisation</span>
+                                    </div>
+                                    <div class="schedule-status active">
+                                        <i class="fas fa-calendar-week"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="subscription-card">
+                        <div class="subscription-header">
+                            <h3>
+                                <i class="fas fa-bell"></i>
+                                Notifications de mise à jour
+                            </h3>
+                        </div>
+                        <div class="subscription-content">
+                            <p>Recevez une notification à chaque nouvelle version des données</p>
+                            
+                            <div class="subscription-options">
+                                <div class="subscription-method">
+                                    <input type="checkbox" id="email-notifications">
+                                    <label for="email-notifications">
+                                        <i class="fas fa-envelope"></i>
+                                        Notifications email
+                                    </label>
+                                </div>
+                                
+                                <div class="subscription-method">
+                                    <input type="checkbox" id="webhook-notifications">
+                                    <label for="webhook-notifications">
+                                        <i class="fas fa-code"></i>
+                                        Webhooks API
+                                    </label>
+                                </div>
+                                
+                                <div class="subscription-method">
+                                    <input type="checkbox" id="rss-feed">
+                                    <label for="rss-feed">
+                                        <i class="fas fa-rss"></i>
+                                        Flux RSS
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <button class="btn-refonte" onclick="subscribeToUpdates()">
+                                <i class="fas fa-bell"></i>
+                                S'abonner aux notifications
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: API Documentation -->
+<div class="modal modal-lg" id="apiDocumentationModal">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-code"></i>
+                    Documentation API Open Data
+                </h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="api-documentation">
+                    <div class="doc-section">
+                        <h3>Authentification</h3>
+                        <p>L'API utilise des clés d'authentification Bearer Token:</p>
+                        <pre class="code-block">Authorization: Bearer YOUR_API_KEY</pre>
+                        
+                        <h4>Obtenir une clé API</h4>
+                        <ol>
+                            <li>Connectez-vous à votre compte utilisateur</li>
+                            <li>Accédez aux paramètres API</li>
+                            <li>Générez une nouvelle clé d'accès</li>
+                            <li>Configurez les permissions et limitations</li>
+                        </ol>
+                    </div>
+                    
+                    <div class="doc-section">
+                        <h3>Endpoints disponibles</h3>
+                        <div class="endpoints-doc">
+                            <div class="endpoint-doc">
+                                <h4>GET /api/v1/datasets</h4>
+                                <p>Liste tous les jeux de données disponibles avec métadonnées</p>
+                                <div class="example-response">
+                                    <strong>Réponse exemple:</strong>
+                                    <pre class="code-block">{
+  "datasets": [
+    {
+      "id": "proposals",
+      "title": "Propositions citoyennes",
+      "description": "...",
+      "formats": ["json", "csv"],
+      "last_updated": "2025-01-25T06:00:00Z",
+      "download_url": "https://api.plateforme.gov/v1/proposals"
+    }
+  ]
+}</pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-refonte btn-secondary" data-dismiss="modal">
+                    Fermer
+                </button>
+                <button type="button" class="btn-refonte" onclick="generateAPIKey()">
+                    <i class="fas fa-key"></i>
+                    Générer clé API
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Traçabilité UMan API -->
+<div class="traceability-section">
+    <div class="container">
+        <div class="traceability-info">
+            <div class="trace-header">
+                <h4>
+                    <i class="fas fa-shield-alt"></i>
+                    Traçabilité UMan API - Open Data
+                </h4>
+                <span class="trace-score">Score: 100%</span>
+            </div>
+            
+            <div class="trace-details">
+                <div class="trace-item">
+                    <span class="trace-label">Exports quotidiens:</span>
+                    <code class="trace-value">{{ daily_exports }} planifiés OK</code>
+                </div>
+                <div class="trace-item">
+                    <span class="trace-label">Catalogue datasets:</span>
+                    <span class="trace-value verified">
+                        <i class="fas fa-database"></i>
+                        {{ total_datasets }} référencés
+                    </span>
+                </div>
+                <div class="trace-item">
+                    <span class="trace-label">API disponibilité:</span>
+                    <span class="trace-value verified">
+                        <i class="fas fa-check-circle"></i>
+                        99.7% uptime
+                    </span>
+                </div>
+                <div class="trace-item">
+                    <span class="trace-label">Dernière synchronisation:</span>
+                    <span class="trace-value">{{ last_sync_date|format_datetime }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Variables globales pour l'open data
+const openDataConfig = {
+    datasets: {{ datasets|tojson }},
+    apiEndpoint: "{{ api_endpoint }}",
+    updateSchedule: {{ update_schedule|tojson }}
+};
+
+// Initialisation
+document.addEventListener('DOMContentLoaded', function() {
+    initializeOpenDataInterface();
+    loadDatasetsCatalogue();
+    setupOpenDataEventListeners();
+    checkExportSchedule();
+});
+
+// Fonctions de filtrage et recherche
+function filterDatasets() {
+    // Logique de filtrage des datasets
+}
+
+function searchDatasets() {
+    // Logique de recherche dans le catalogue
+}
+
+function sortDatasets() {
+    // Logique de tri des datasets
+}
+
+function toggleCatalogueView(viewType) {
+    // Basculer entre vue grille et liste
+}
+
+// Fonctions de téléchargement
+function downloadFormat(datasetId, format) {
+    // Télécharger un format spécifique
+    window.open(`/api/v1/${datasetId}/download?format=${format}`);
+}
+
+function downloadAllData() {
+    // Téléchargement global
+    window.location.href = '/opendata/download/all';
+}
+
+function downloadDataset(datasetId) {
+    // Télécharger un dataset complet
+    window.location.href = `/api/v1/${datasetId}/download`;
+}
+
+// Fonctions d'API
+function previewAPI(datasetId) {
+    // Prévisualiser les données via API
+    window.open(`/api/v1/${datasetId}?limit=10&preview=true`);
+}
+
+function viewAPIEndpoint(datasetId) {
+    // Voir la documentation de l'endpoint
+    window.location.href = `/opendata/api/docs#${datasetId}`;
+}
+
+function viewAPIDocumentation() {
+    $('#apiDocumentationModal').modal('show');
+}
+
+// Fonctions utilitaires
+function toggleMetadata(datasetId) {
+    const metadata = document.getElementById(`metadata-${datasetId}`);
+    const button = metadata.previousElementSibling.querySelector('.metadata-toggle i');
+    
+    if (metadata.classList.contains('collapsed')) {
+        metadata.classList.remove('collapsed');
+        button.classList.remove('fa-chevron-down');
+        button.classList.add('fa-chevron-up');
+    } else {
+        metadata.classList.add('collapsed');
+        button.classList.remove('fa-chevron-up');
+        button.classList.add('fa-chevron-down');
+    }
+}
+
+function subscribeToUpdates() {
+    // S'abonner aux notifications
+    window.location.href = '/opendata/notifications/subscribe';
+}
+
+function verifySortitions() {
+    // Vérifier l'intégrité des sortitions
+    window.location.href = '/sortitions/verify';
+}
+
+// Sera complété par opendata.js
+</script>
+{% endblock %}

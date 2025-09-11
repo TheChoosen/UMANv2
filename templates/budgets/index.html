@@ -1,0 +1,597 @@
+{% extends "base.html" %}
+
+{% block title %}Budgets Participatifs - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="budgets-layout">
+    <div class="container">
+        <!-- Header avec titre et actions -->
+        <div class="page-header">
+            <div class="header-content">
+                <h1 class="page-title">
+                    <i class="fas fa-coins"></i>
+                    Budgets Participatifs
+                </h1>
+                <p class="page-subtitle">
+                    Participez aux décisions budgétaires de votre organisation. 
+                    Proposez, votez et suivez la réalisation des projets financés par la collectivité.
+                </p>
+            </div>
+        </div>
+
+        <!-- Actions et filtres -->
+        <div class="header-actions">
+            <div class="filters-section">
+                <div class="filters-row">
+                    <div class="search-container">
+                        <div class="search-input-wrapper">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" class="search-input" placeholder="Rechercher un budget..." id="budgets-search">
+                        </div>
+                    </div>
+                    
+                    <div class="filters-container">
+                        <select class="filter-select" data-filter="status">
+                            <option value="">Tous les statuts</option>
+                            <option value="draft">Brouillon</option>
+                            <option value="voting">Vote en cours</option>
+                            <option value="finished">Vote terminé</option>
+                            <option value="results">Résultats publiés</option>
+                            <option value="implementation">En cours de réalisation</option>
+                        </select>
+                        
+                        <select class="filter-select" data-filter="scope">
+                            <option value="">Tous les périmètres</option>
+                            <option value="city">Ville</option>
+                            <option value="district">Arrondissement</option>
+                            <option value="neighborhood">Quartier</option>
+                        </select>
+                        
+                        <select class="filter-select" data-filter="year">
+                            <option value="">Toutes les années</option>
+                            <option value="2025">2025</option>
+                            <option value="2024">2024</option>
+                            <option value="2023">2023</option>
+                        </select>
+                    </div>
+                    
+                    <div class="view-controls">
+                        <button class="view-toggle active" data-view="grid" title="Vue grille">
+                            <i class="fas fa-th-large"></i>
+                        </button>
+                        <button class="view-toggle" data-view="list" title="Vue liste">
+                            <i class="fas fa-list"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="filters-actions">
+                    <div class="results-summary">
+                        <span class="results-count">12 budgets trouvés</span>
+                        <span class="summary-separator">•</span>
+                        <span class="total-amount">Montant total : 2,4M €</span>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="btn-refonte btn-secondary" onclick="exportBudgets()">
+                            <i class="fas fa-download"></i> Exporter
+                        </button>
+                        {% if user_can_create_budget %}
+                        <a href="/budgets/create" class="btn-refonte">
+                            <i class="fas fa-plus"></i> Nouveau budget
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistiques rapides -->
+        <div class="budgets-stats">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-vote-yea"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number">3</div>
+                        <div class="stat-label">Votes en cours</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number">2,847</div>
+                        <div class="stat-label">Participants</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number">2,4M €</div>
+                        <div class="stat-label">Budget total</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-project-diagram"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number">48</div>
+                        <div class="stat-label">Projets financés</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Liste des budgets -->
+        <div class="budgets-container view-grid" id="budgets-container">
+            <!-- Budget 1 - Vote en cours -->
+            <div class="budget-card" data-budget-id="1">
+                <div class="budget-header">
+                    <div class="budget-badges">
+                        <span class="status-badge status-voting">
+                            <i class="fas fa-vote-yea"></i>
+                            Vote en cours
+                        </span>
+                        <span class="scope-badge scope-city">
+                            <i class="fas fa-city"></i>
+                            Ville
+                        </span>
+                    </div>
+                    
+                    <div class="budget-actions">
+                        <button class="action-btn" title="Partager" onclick="shareBudget(1)">
+                            <i class="fas fa-share-alt"></i>
+                        </button>
+                        <button class="action-btn" title="Suivre" onclick="followBudget(1)">
+                            <i class="fas fa-bell"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="budget-content">
+                    <h3 class="budget-title">
+                        <a href="/budgets/1">Budget Participatif 2025</a>
+                    </h3>
+                    <p class="budget-description">
+                        Décidez ensemble des projets qui amélioreront votre cadre de vie. 
+                        Chaque citoyen peut voter pour les projets qu'il souhaite voir réalisés.
+                    </p>
+                    
+                    <div class="budget-meta">
+                        <div class="budget-amount">
+                            <i class="fas fa-coins"></i>
+                            <span class="amount-total">500 000 €</span>
+                            <span class="amount-detail">disponibles</span>
+                        </div>
+                        
+                        <div class="budget-period">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>Vote du 15 sept. au 15 oct. 2025</span>
+                        </div>
+                        
+                        <div class="voting-rules">
+                            <i class="fas fa-rules"></i>
+                            <span>Maximum 3 projets par vote</span>
+                        </div>
+                    </div>
+                    
+                    <div class="participation-stats">
+                        <div class="stat-item">
+                            <span class="stat-number">1,234</span>
+                            <span class="stat-label">votes</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">24</span>
+                            <span class="stat-label">projets</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">18j</span>
+                            <span class="stat-label">restants</span>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-section">
+                        <div class="progress-header">
+                            <span class="progress-label">Participation</span>
+                            <span class="progress-value">34% (1,234/3,600)</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 34%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="budget-footer">
+                    <div class="budget-organizer">
+                        <div class="organizer-info">
+                            <div class="organizer-avatar">
+                                <img src="/static/image/admin-avatar.jpg" alt="Mairie">
+                            </div>
+                            <div class="organizer-details">
+                                <div class="organizer-name">Mairie de Ville</div>
+                                <div class="organizer-role">Organisation officielle</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="budget-indicators">
+                        <div class="indicator-item verified" title="Budget vérifié">
+                            <i class="fas fa-shield-check"></i>
+                        </div>
+                        <div class="indicator-item" title="Règles transparentes">
+                            <i class="fas fa-balance-scale"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Actions principales -->
+                <div class="budget-main-action">
+                    <a href="/budgets/1" class="btn-refonte btn-full">
+                        <i class="fas fa-vote-yea"></i>
+                        Participer au vote
+                    </a>
+                </div>
+                
+                <!-- Traçabilité UMan API -->
+                <div class="traceability-indicator">
+                    <div class="trace-info">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Score de traçabilité: <span class="trace-score">98%</span></span>
+                    </div>
+                    <div class="signature-verified">
+                        <i class="fas fa-certificate"></i>
+                        <span>Signature vérifiée</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Budget 2 - Résultats publiés -->
+            <div class="budget-card" data-budget-id="2">
+                <div class="budget-header">
+                    <div class="budget-badges">
+                        <span class="status-badge status-results">
+                            <i class="fas fa-chart-bar"></i>
+                            Résultats publiés
+                        </span>
+                        <span class="scope-badge scope-district">
+                            <i class="fas fa-map-marked-alt"></i>
+                            5e Arrondissement
+                        </span>
+                    </div>
+                    
+                    <div class="budget-actions">
+                        <button class="action-btn" title="Partager" onclick="shareBudget(2)">
+                            <i class="fas fa-share-alt"></i>
+                        </button>
+                        <button class="action-btn" title="Suivre" onclick="followBudget(2)">
+                            <i class="fas fa-bell"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="budget-content">
+                    <h3 class="budget-title">
+                        <a href="/budgets/2">Budget de Quartier 2024</a>
+                    </h3>
+                    <p class="budget-description">
+                        Les résultats sont là ! Découvrez les projets lauréats choisis par les habitants 
+                        du 5e arrondissement et suivez leur avancement.
+                    </p>
+                    
+                    <div class="budget-meta">
+                        <div class="budget-amount">
+                            <i class="fas fa-coins"></i>
+                            <span class="amount-total">150 000 €</span>
+                            <span class="amount-detail">alloués</span>
+                        </div>
+                        
+                        <div class="budget-period">
+                            <i class="fas fa-calendar-check"></i>
+                            <span>Vote terminé le 30 juin 2024</span>
+                        </div>
+                        
+                        <div class="voting-rules">
+                            <i class="fas fa-trophy"></i>
+                            <span>8 projets financés</span>
+                        </div>
+                    </div>
+                    
+                    <div class="participation-stats">
+                        <div class="stat-item">
+                            <span class="stat-number">892</span>
+                            <span class="stat-label">votes</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">16</span>
+                            <span class="stat-label">projets</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">67%</span>
+                            <span class="stat-label">taux réalisation</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Projets lauréats (aperçu) -->
+                    <div class="winners-preview">
+                        <div class="winners-header">
+                            <span class="winners-label">Projets financés</span>
+                        </div>
+                        <div class="winners-list">
+                            <div class="winner-item">
+                                <span class="winner-name">Aire de jeux inclusive</span>
+                                <span class="winner-amount">45 000 €</span>
+                            </div>
+                            <div class="winner-item">
+                                <span class="winner-name">Piste cyclable sécurisée</span>
+                                <span class="winner-amount">32 000 €</span>
+                            </div>
+                            <div class="winner-more">+ 6 autres projets</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="budget-footer">
+                    <div class="budget-organizer">
+                        <div class="organizer-info">
+                            <div class="organizer-avatar">
+                                <span class="avatar-placeholder">M5</span>
+                            </div>
+                            <div class="organizer-details">
+                                <div class="organizer-name">Mairie du 5e</div>
+                                <div class="organizer-role">Administration locale</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="budget-indicators">
+                        <div class="indicator-item verified" title="Budget vérifié">
+                            <i class="fas fa-shield-check"></i>
+                        </div>
+                        <div class="indicator-item verified" title="Résultats certifiés">
+                            <i class="fas fa-certificate"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="budget-main-action">
+                    <a href="/budgets/2/results" class="btn-refonte btn-full btn-secondary">
+                        <i class="fas fa-chart-bar"></i>
+                        Voir les résultats
+                    </a>
+                </div>
+                
+                <div class="traceability-indicator">
+                    <div class="trace-info">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Score de traçabilité: <span class="trace-score">100%</span></span>
+                    </div>
+                    <div class="signature-verified">
+                        <i class="fas fa-certificate"></i>
+                        <span>Résultats certifiés</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Budget 3 - En cours de réalisation -->
+            <div class="budget-card" data-budget-id="3">
+                <div class="budget-header">
+                    <div class="budget-badges">
+                        <span class="status-badge status-implementation">
+                            <i class="fas fa-tools"></i>
+                            En réalisation
+                        </span>
+                        <span class="scope-badge scope-neighborhood">
+                            <i class="fas fa-home"></i>
+                            Quartier Latin
+                        </span>
+                    </div>
+                    
+                    <div class="budget-actions">
+                        <button class="action-btn" title="Partager" onclick="shareBudget(3)">
+                            <i class="fas fa-share-alt"></i>
+                        </button>
+                        <button class="action-btn" title="Suivre" onclick="followBudget(3)">
+                            <i class="fas fa-bell"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="budget-content">
+                    <h3 class="budget-title">
+                        <a href="/budgets/3">Amélioration du Quartier Latin</a>
+                    </h3>
+                    <p class="budget-description">
+                        Suivez l'avancement des travaux et projets financés par le budget participatif 2023. 
+                        Transparence totale sur la réalisation de vos choix.
+                    </p>
+                    
+                    <div class="budget-meta">
+                        <div class="budget-amount">
+                            <i class="fas fa-coins"></i>
+                            <span class="amount-total">80 000 €</span>
+                            <span class="amount-detail">en cours</span>
+                        </div>
+                        
+                        <div class="budget-period">
+                            <i class="fas fa-tools"></i>
+                            <span>Travaux jusqu'en déc. 2025</span>
+                        </div>
+                        
+                        <div class="voting-rules">
+                            <i class="fas fa-tasks"></i>
+                            <span>5 projets en cours</span>
+                        </div>
+                    </div>
+                    
+                    <div class="participation-stats">
+                        <div class="stat-item">
+                            <span class="stat-number">3/5</span>
+                            <span class="stat-label">terminés</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">75%</span>
+                            <span class="stat-label">avancement</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">2</span>
+                            <span class="stat-label">mois restants</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Projets en cours -->
+                    <div class="implementation-progress">
+                        <div class="progress-header">
+                            <span class="progress-label">Avancement global</span>
+                            <span class="progress-value">75%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill implementation" style="width: 75%"></div>
+                        </div>
+                        
+                        <div class="current-projects">
+                            <div class="project-status">
+                                <span class="status-dot completed"></span>
+                                <span class="project-name">Bancs publics</span>
+                            </div>
+                            <div class="project-status">
+                                <span class="status-dot in-progress"></span>
+                                <span class="project-name">Éclairage LED</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="budget-footer">
+                    <div class="budget-organizer">
+                        <div class="organizer-info">
+                            <div class="organizer-avatar">
+                                <span class="avatar-placeholder">QL</span>
+                            </div>
+                            <div class="organizer-details">
+                                <div class="organizer-name">Comité de Quartier</div>
+                                <div class="organizer-role">Association citoyenne</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="budget-indicators">
+                        <div class="indicator-item verified" title="Suivi vérifié">
+                            <i class="fas fa-eye"></i>
+                        </div>
+                        <div class="indicator-item" title="Transparence financière">
+                            <i class="fas fa-euro-sign"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="budget-main-action">
+                    <a href="/budgets/3/accountability" class="btn-refonte btn-full btn-secondary">
+                        <i class="fas fa-tasks"></i>
+                        Suivre l'avancement
+                    </a>
+                </div>
+                
+                <div class="traceability-indicator">
+                    <div class="trace-info">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Score de traçabilité: <span class="trace-score">95%</span></span>
+                    </div>
+                    <div class="signature-verified">
+                        <i class="fas fa-certificate"></i>
+                        <span>Suivi certifié</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- État vide -->
+        <div class="empty-budgets" style="display: none;">
+            <i class="fas fa-coins"></i>
+            <h3>Aucun budget participatif</h3>
+            <p>Il n'y a actuellement aucun budget participatif correspondant à vos critères.</p>
+            {% if user_can_create_budget %}
+            <a href="/budgets/create" class="btn-refonte">
+                <i class="fas fa-plus"></i> Créer un budget
+            </a>
+            {% endif %}
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination-container">
+            <nav class="pagination">
+                <a href="#" class="pagination-link disabled">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+                <a href="#" class="pagination-link active">1</a>
+                <a href="#" class="pagination-link">2</a>
+                <a href="#" class="pagination-link">3</a>
+                <a href="#" class="pagination-link">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de partage -->
+<div class="modal fade" id="shareModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Partager ce budget</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="share-options">
+                    <button class="share-option" onclick="shareToSocial('twitter')">
+                        <i class="fab fa-twitter"></i>
+                        Twitter
+                    </button>
+                    <button class="share-option" onclick="shareToSocial('facebook')">
+                        <i class="fab fa-facebook"></i>
+                        Facebook
+                    </button>
+                    <button class="share-option" onclick="shareToSocial('linkedin')">
+                        <i class="fab fa-linkedin"></i>
+                        LinkedIn
+                    </button>
+                    <button class="share-option" onclick="copyBudgetLink()">
+                        <i class="fas fa-link"></i>
+                        Copier le lien
+                    </button>
+                </div>
+                
+                <div class="share-link">
+                    <label>Lien direct</label>
+                    <div class="link-input">
+                        <input type="text" id="share-url" value="" readonly>
+                        <button onclick="copyBudgetLink()">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Initialisation des budgets participatifs
+document.addEventListener('DOMContentLoaded', function() {
+    // Sera géré par budgets_surveys.js
+});
+</script>
+{% endblock %}

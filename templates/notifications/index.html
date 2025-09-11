@@ -1,0 +1,615 @@
+{% extends "base.html" %}
+
+{% block title %}Notifications — {{ organization.name }}{% endblock %}
+
+{% block meta %}
+<link rel="stylesheet" href="{{ url_for('static', filename='refonte.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='notifications.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="notifications-layout">
+    <div class="container">
+        <div class="notifications-header">
+            <h1>
+                <i class="fas fa-bell"></i>
+                Centre de notifications
+            </h1>
+            <p>Gérez vos notifications et préférences de communication</p>
+            
+            <div class="notifications-actions">
+                <button class="btn-refonte btn-refonte-secondary" onclick="markAllAsRead()" 
+                        {% if not unread_count %}disabled{% endif %}>
+                    <i class="fas fa-check-double"></i>
+                    Tout marquer comme lu
+                </button>
+                
+                <a href="{{ url_for('notifications.preferences') }}" class="btn-refonte btn-refonte-primary">
+                    <i class="fas fa-cog"></i>
+                    Préférences
+                </a>
+            </div>
+        </div>
+        
+        <div class="notifications-content">
+            <!-- Notifications Tabs -->
+            <div class="notifications-tabs">
+                <button class="notification-tab active" data-filter="all">
+                    <i class="fas fa-inbox"></i>
+                    <span>Toutes</span>
+                    <span class="tab-count">{{ total_count or 0 }}</span>
+                </button>
+                
+                <button class="notification-tab" data-filter="unread">
+                    <i class="fas fa-circle"></i>
+                    <span>Non lues</span>
+                    {% if unread_count %}
+                    <span class="tab-count unread">{{ unread_count }}</span>
+                    {% endif %}
+                </button>
+                
+                <button class="notification-tab" data-filter="mentions">
+                    <i class="fas fa-at"></i>
+                    <span>Mentions</span>
+                    {% if mentions_count %}
+                    <span class="tab-count">{{ mentions_count }}</span>
+                    {% endif %}
+                </button>
+                
+                <button class="notification-tab" data-filter="follows">
+                    <i class="fas fa-heart"></i>
+                    <span>Suivis</span>
+                    {% if follows_count %}
+                    <span class="tab-count">{{ follows_count }}</span>
+                    {% endif %}
+                </button>
+                
+                <button class="notification-tab" data-filter="system">
+                    <i class="fas fa-cogs"></i>
+                    <span>Système</span>
+                    {% if system_count %}
+                    <span class="tab-count">{{ system_count }}</span>
+                    {% endif %}
+                </button>
+            </div>
+            
+            <!-- Notifications List -->
+            <div class="notifications-list" id="notifications-list">
+                {% if notifications %}
+                {% for notification in notifications %}
+                <div class="notification-item {{ 'unread' if not notification.read_at else 'read' }}" 
+                     data-notification-id="{{ notification.id }}"
+                     data-type="{{ notification.type }}"
+                     onclick="handleNotificationClick({{ notification.id }}, '{{ notification.action_url or '' }}')">
+                    
+                    <div class="notification-indicator">
+                        {% if not notification.read_at %}
+                        <div class="unread-dot"></div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="notification-icon">
+                        <i class="fas fa-{{ notification.icon }}"></i>
+                    </div>
+                    
+                    <div class="notification-content">
+                        <div class="notification-header">
+                            <div class="notification-title">{{ notification.title }}</div>
+                            <div class="notification-time">{{ notification.created_at|timeago }}</div>
+                        </div>
+                        
+                        <div class="notification-body">
+                            <p>{{ notification.message }}</p>
+                            
+                            {% if notification.context %}
+                            <div class="notification-context">
+                                {% if notification.context.space %}
+                                <span class="context-item">
+                                    <i class="fas fa-{{ notification.context.space.icon }}"></i>
+                                    {{ notification.context.space.name }}
+                                </span>
+                                {% endif %}
+                                
+                                {% if notification.context.user %}
+                                <span class="context-item">
+                                    <i class="fas fa-user"></i>
+                                    {{ notification.context.user.name }}
+                                </span>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        {% if notification.actions %}
+                        <div class="notification-actions">
+                            {% for action in notification.actions %}
+                            <button class="notification-action-btn btn-refonte btn-refonte-{{ action.style or 'secondary' }} btn-sm"
+                                    onclick="handleNotificationAction(event, {{ notification.id }}, '{{ action.type }}', '{{ action.url or '' }}')">
+                                {% if action.icon %}
+                                <i class="fas fa-{{ action.icon }}"></i>
+                                {% endif %}
+                                {{ action.label }}
+                            </button>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="notification-menu">
+                        <button class="notification-menu-btn" onclick="toggleNotificationMenu(event, {{ notification.id }})">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        
+                        <div class="notification-dropdown" id="dropdown-{{ notification.id }}">
+                            {% if not notification.read_at %}
+                            <button onclick="markAsRead({{ notification.id }})">
+                                <i class="fas fa-check"></i>
+                                Marquer comme lu
+                            </button>
+                            {% else %}
+                            <button onclick="markAsUnread({{ notification.id }})">
+                                <i class="fas fa-undo"></i>
+                                Marquer comme non lu
+                            </button>
+                            {% endif %}
+                            
+                            <button onclick="archiveNotification({{ notification.id }})">
+                                <i class="fas fa-archive"></i>
+                                Archiver
+                            </button>
+                            
+                            <button onclick="deleteNotification({{ notification.id }})" class="text-danger">
+                                <i class="fas fa-trash"></i>
+                                Supprimer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="notifications-empty">
+                    <i class="fas fa-bell-slash"></i>
+                    <h3>Aucune notification</h3>
+                    <p>Vous n'avez pas encore de notifications.</p>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Load More -->
+            {% if has_more_notifications %}
+            <div class="notifications-load-more">
+                <button class="btn-refonte btn-refonte-secondary" onclick="loadMoreNotifications()">
+                    <i class="fas fa-chevron-down"></i>
+                    Charger plus de notifications
+                </button>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Bulk Actions -->
+<div class="notifications-bulk-actions" id="bulk-actions" style="display: none;">
+    <div class="bulk-actions-content">
+        <span class="bulk-count">0 notification(s) sélectionnée(s)</span>
+        <div class="bulk-buttons">
+            <button class="btn-refonte btn-refonte-secondary" onclick="bulkMarkAsRead()">
+                <i class="fas fa-check"></i>
+                Marquer comme lues
+            </button>
+            <button class="btn-refonte btn-refonte-secondary" onclick="bulkArchive()">
+                <i class="fas fa-archive"></i>
+                Archiver
+            </button>
+            <button class="btn-refonte btn-refonte-secondary text-danger" onclick="bulkDelete()">
+                <i class="fas fa-trash"></i>
+                Supprimer
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Notifications functionality
+let notificationsPage = 1;
+let currentFilter = 'all';
+let selectedNotifications = new Set();
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    // Tab switching
+    document.querySelectorAll('.notification-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            switchTab(this.dataset.filter);
+        });
+    });
+    
+    // Close dropdowns on outside click
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.notification-menu')) {
+            document.querySelectorAll('.notification-dropdown').forEach(dropdown => {
+                dropdown.style.display = 'none';
+            });
+        }
+    });
+});
+
+// Switch tab
+function switchTab(filter) {
+    currentFilter = filter;
+    notificationsPage = 1;
+    
+    // Update active tab
+    document.querySelectorAll('.notification-tab').forEach(tab => {
+        tab.classList.toggle('active', tab.dataset.filter === filter);
+    });
+    
+    // Load notifications
+    loadNotifications(filter);
+}
+
+// Load notifications
+function loadNotifications(filter = 'all', append = false) {
+    const notificationsList = document.getElementById('notifications-list');
+    
+    if (!append) {
+        notificationsList.style.opacity = '0.5';
+    }
+    
+    const params = new URLSearchParams({
+        filter: filter,
+        page: notificationsPage
+    });
+    
+    fetch(`/api/notifications?${params}`, {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            if (append) {
+                // Append notifications
+                data.notifications.forEach(notification => {
+                    notificationsList.insertAdjacentHTML('beforeend', createNotificationHTML(notification));
+                });
+            } else {
+                // Replace notifications
+                notificationsList.innerHTML = data.notifications.length > 0 ? 
+                    data.notifications.map(notification => createNotificationHTML(notification)).join('') :
+                    `<div class="notifications-empty">
+                        <i class="fas fa-bell-slash"></i>
+                        <h3>Aucune notification</h3>
+                        <p>Aucune notification ne correspond à ce filtre.</p>
+                    </div>`;
+            }
+            
+            // Update load more button
+            const loadMoreContainer = document.querySelector('.notifications-load-more');
+            if (loadMoreContainer) {
+                loadMoreContainer.style.display = data.has_more ? 'block' : 'none';
+            }
+            
+            // Update tab counts
+            updateTabCounts(data.counts);
+        }
+    })
+    .finally(() => {
+        notificationsList.style.opacity = '1';
+    });
+}
+
+// Create notification HTML
+function createNotificationHTML(notification) {
+    return `
+        <div class="notification-item ${notification.read_at ? 'read' : 'unread'}" 
+             data-notification-id="${notification.id}"
+             data-type="${notification.type}"
+             onclick="handleNotificationClick(${notification.id}, '${notification.action_url || ''}')">
+            
+            <div class="notification-indicator">
+                ${!notification.read_at ? '<div class="unread-dot"></div>' : ''}
+            </div>
+            
+            <div class="notification-icon">
+                <i class="fas fa-${notification.icon}"></i>
+            </div>
+            
+            <div class="notification-content">
+                <div class="notification-header">
+                    <div class="notification-title">${notification.title}</div>
+                    <div class="notification-time">${notification.created_at}</div>
+                </div>
+                
+                <div class="notification-body">
+                    <p>${notification.message}</p>
+                    
+                    ${notification.context ? `
+                        <div class="notification-context">
+                            ${notification.context.space ? `
+                                <span class="context-item">
+                                    <i class="fas fa-${notification.context.space.icon}"></i>
+                                    ${notification.context.space.name}
+                                </span>
+                            ` : ''}
+                            
+                            ${notification.context.user ? `
+                                <span class="context-item">
+                                    <i class="fas fa-user"></i>
+                                    ${notification.context.user.name}
+                                </span>
+                            ` : ''}
+                        </div>
+                    ` : ''}
+                </div>
+                
+                ${notification.actions ? `
+                    <div class="notification-actions">
+                        ${notification.actions.map(action => `
+                            <button class="notification-action-btn btn-refonte btn-refonte-${action.style || 'secondary'} btn-sm"
+                                    onclick="handleNotificationAction(event, ${notification.id}, '${action.type}', '${action.url || ''}')">
+                                ${action.icon ? `<i class="fas fa-${action.icon}"></i>` : ''}
+                                ${action.label}
+                            </button>
+                        `).join('')}
+                    </div>
+                ` : ''}
+            </div>
+            
+            <div class="notification-menu">
+                <button class="notification-menu-btn" onclick="toggleNotificationMenu(event, ${notification.id})">
+                    <i class="fas fa-ellipsis-v"></i>
+                </button>
+                
+                <div class="notification-dropdown" id="dropdown-${notification.id}">
+                    ${!notification.read_at ? `
+                        <button onclick="markAsRead(${notification.id})">
+                            <i class="fas fa-check"></i>
+                            Marquer comme lu
+                        </button>
+                    ` : `
+                        <button onclick="markAsUnread(${notification.id})">
+                            <i class="fas fa-undo"></i>
+                            Marquer comme non lu
+                        </button>
+                    `}
+                    
+                    <button onclick="archiveNotification(${notification.id})">
+                        <i class="fas fa-archive"></i>
+                        Archiver
+                    </button>
+                    
+                    <button onclick="deleteNotification(${notification.id})" class="text-danger">
+                        <i class="fas fa-trash"></i>
+                        Supprimer
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// Handle notification click
+function handleNotificationClick(notificationId, actionUrl) {
+    // Mark as read if not already
+    const notificationItem = document.querySelector(`[data-notification-id="${notificationId}"]`);
+    if (notificationItem.classList.contains('unread')) {
+        markAsRead(notificationId, false);
+    }
+    
+    // Navigate if there's an action URL
+    if (actionUrl) {
+        window.location.href = actionUrl;
+    }
+}
+
+// Handle notification action
+function handleNotificationAction(event, notificationId, actionType, actionUrl) {
+    event.stopPropagation();
+    
+    fetch(`/api/notifications/${notificationId}/action`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({
+            action_type: actionType
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            if (actionUrl) {
+                window.location.href = actionUrl;
+            }
+            showNotification('Action effectuée', 'success');
+        } else {
+            showNotification(data.message || 'Erreur lors de l\'action', 'error');
+        }
+    });
+}
+
+// Toggle notification menu
+function toggleNotificationMenu(event, notificationId) {
+    event.stopPropagation();
+    
+    const dropdown = document.getElementById(`dropdown-${notificationId}`);
+    const isVisible = dropdown.style.display === 'block';
+    
+    // Close all dropdowns
+    document.querySelectorAll('.notification-dropdown').forEach(d => {
+        d.style.display = 'none';
+    });
+    
+    // Toggle current dropdown
+    dropdown.style.display = isVisible ? 'none' : 'block';
+}
+
+// Mark as read
+function markAsRead(notificationId, showMessage = true) {
+    updateNotificationStatus(notificationId, 'read', showMessage);
+}
+
+// Mark as unread
+function markAsUnread(notificationId, showMessage = true) {
+    updateNotificationStatus(notificationId, 'unread', showMessage);
+}
+
+// Update notification status
+function updateNotificationStatus(notificationId, status, showMessage = true) {
+    fetch(`/api/notifications/${notificationId}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({ status: status })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const notificationItem = document.querySelector(`[data-notification-id="${notificationId}"]`);
+            
+            if (status === 'read') {
+                notificationItem.classList.remove('unread');
+                notificationItem.classList.add('read');
+                notificationItem.querySelector('.unread-dot')?.remove();
+            } else {
+                notificationItem.classList.remove('read');
+                notificationItem.classList.add('unread');
+                if (!notificationItem.querySelector('.unread-dot')) {
+                    notificationItem.querySelector('.notification-indicator').innerHTML = '<div class="unread-dot"></div>';
+                }
+            }
+            
+            // Update tab counts
+            updateTabCounts(data.counts);
+            
+            if (showMessage) {
+                showNotification(`Notification marquée comme ${status === 'read' ? 'lue' : 'non lue'}`, 'success');
+            }
+        }
+    });
+}
+
+// Mark all as read
+function markAllAsRead() {
+    if (confirm('Marquer toutes les notifications comme lues ?')) {
+        fetch('/api/notifications/mark-all-read', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update all notification items
+                document.querySelectorAll('.notification-item.unread').forEach(item => {
+                    item.classList.remove('unread');
+                    item.classList.add('read');
+                    item.querySelector('.unread-dot')?.remove();
+                });
+                
+                // Update tab counts
+                updateTabCounts(data.counts);
+                
+                showNotification('Toutes les notifications ont été marquées comme lues', 'success');
+            }
+        });
+    }
+}
+
+// Archive notification
+function archiveNotification(notificationId) {
+    fetch(`/api/notifications/${notificationId}/archive`, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const notificationItem = document.querySelector(`[data-notification-id="${notificationId}"]`);
+            notificationItem.style.animation = 'slideOut 0.3s ease forwards';
+            
+            setTimeout(() => {
+                notificationItem.remove();
+            }, 300);
+            
+            showNotification('Notification archivée', 'success');
+        }
+    });
+}
+
+// Delete notification
+function deleteNotification(notificationId) {
+    if (confirm('Supprimer définitivement cette notification ?')) {
+        fetch(`/api/notifications/${notificationId}`, {
+            method: 'DELETE',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const notificationItem = document.querySelector(`[data-notification-id="${notificationId}"]`);
+                notificationItem.style.animation = 'slideOut 0.3s ease forwards';
+                
+                setTimeout(() => {
+                    notificationItem.remove();
+                }, 300);
+                
+                showNotification('Notification supprimée', 'success');
+            }
+        });
+    }
+}
+
+// Load more notifications
+function loadMoreNotifications() {
+    notificationsPage++;
+    loadNotifications(currentFilter, true);
+}
+
+// Update tab counts
+function updateTabCounts(counts) {
+    document.querySelectorAll('.notification-tab').forEach(tab => {
+        const filter = tab.dataset.filter;
+        const countElement = tab.querySelector('.tab-count');
+        
+        if (countElement && counts[filter] !== undefined) {
+            if (counts[filter] > 0) {
+                countElement.textContent = counts[filter];
+                countElement.style.display = 'inline';
+            } else {
+                countElement.style.display = 'none';
+            }
+        }
+    });
+}
+
+// Show notification
+function showNotification(message, type = 'info') {
+    // Implementation depends on your notification system
+    console.log(`${type}: ${message}`);
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    if (e.ctrlKey || e.metaKey) {
+        switch(e.key) {
+            case 'a':
+                e.preventDefault();
+                markAllAsRead();
+                break;
+        }
+    }
+});
+</script>
+{% endblock %}

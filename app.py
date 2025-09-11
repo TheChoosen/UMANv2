@@ -407,28 +407,89 @@ def rdkq_logout():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    """Route de connexion simple pour tester le système admin"""
+    """Route de connexion avec création automatique de compte"""
     if request.method == 'POST':
         email = request.form.get('email', '').strip().lower()
-        if email:
-            # Vérifier si l'utilisateur existe et est actif
-            db = get_mysql_db()
-            cur = db.cursor(dictionary=True)
-            cur.execute('SELECT * FROM membres WHERE email = %s AND is_admin = %s', (email, 1))
-            user = cur.fetchone()
-            
-            if user:
-                session['user_id'] = user['id']
-                session['user_email'] = user['email']
-                session['is_admin'] = bool(user['is_admin'])
-                flash('Connexion réussie!', 'success')
-                return redirect(url_for('rdkq_index'))
-            else:
-                flash('Utilisateur non trouvé ou compte non activé.', 'danger')
-        else:
+        security_code = request.form.get('security_code', '').strip()
+        
+        # Validation des entrées
+        if not email:
+            if request.headers.get('Content-Type') == 'application/json' or request.is_json:
+                return jsonify({'success': False, 'message': 'Email requis.'}), 400
             flash('Email requis.', 'danger')
+            return redirect(url_for('index'))
+        
+        if not security_code or len(security_code) != 5 or not security_code.isdigit():
+            if request.headers.get('Content-Type') == 'application/json' or request.is_json:
+                return jsonify({'success': False, 'message': 'Code de sécurité à 5 chiffres requis.'}), 400
+            flash('Code de sécurité à 5 chiffres requis.', 'danger')
+            return redirect(url_for('index'))
+        
+        # Vérification du code de sécurité (codes valides configurables)
+        valid_codes = os.environ.get('VALID_SECURITY_CODES', '12345,54321,11111,22222,33333').split(',')
+        if security_code not in valid_codes:
+            if request.headers.get('Content-Type') == 'application/json' or request.is_json:
+                return jsonify({'success': False, 'message': 'Code de sécurité invalide.'}), 401
+            flash('Code de sécurité invalide.', 'danger')
+            return redirect(url_for('index'))  # Rediriger vers l'accueil plutôt que vers un template inexistant
+        
+        db = get_mysql_db()
+        cur = db.cursor(dictionary=True)
+        
+        # Vérifier si l'utilisateur existe déjà
+        cur.execute('SELECT * FROM membres WHERE email = %s', (email,))
+        user = cur.fetchone()
+        
+        if user:
+            # Utilisateur existant - connexion directe
+            session['user_id'] = user['id']
+            session['user_email'] = user['email']
+            session['username'] = user['username'] or user['email']
+            session['is_admin'] = bool(user['is_admin'])
+            
+            if request.headers.get('Content-Type') == 'application/json' or request.is_json:
+                return jsonify({
+                    'success': True, 
+                    'message': 'Connexion réussie!',
+                    'redirect': url_for('profil')
+                })
+            flash('Connexion réussie!', 'success')
+            return redirect(url_for('profil'))
+        else:
+            # Nouvel utilisateur - création automatique du compte
+            try:
+                username = email.split('@')[0]  # Utiliser la partie avant @ comme nom d'utilisateur
+                now = datetime.now(timezone.utc)
+                
+                cur.execute('''INSERT INTO membres (email, username, password, created_at, is_admin)
+                               VALUES (%s, %s, %s, %s, %s)''',
+                           (email, username, 'activated', now, False))
+                db.commit()
+                
+                # Récupérer l'utilisateur nouvellement créé
+                user_id = cur.lastrowid
+                session['user_id'] = user_id
+                session['user_email'] = email
+                session['username'] = username
+                session['is_admin'] = False
+                
+                if request.headers.get('Content-Type') == 'application/json' or request.is_json:
+                    return jsonify({
+                        'success': True, 
+                        'message': 'Compte créé et connexion réussie!',
+                        'redirect': url_for('profil')
+                    })
+                flash('Compte créé et connexion réussie! Bienvenue!', 'success')
+                return redirect(url_for('profil'))
+                
+            except Exception as e:
+                logger.error(f'Erreur lors de la création du compte: {e}')
+                if request.headers.get('Content-Type') == 'application/json' or request.is_json:
+                    return jsonify({'success': False, 'message': 'Erreur lors de la création du compte.'}), 500
+                flash('Erreur lors de la création du compte.', 'danger')
+                return redirect(url_for('index'))
     
-    return render_template('login.html')
+    return redirect(url_for('index'))  # Pour les requêtes GET, rediriger vers l'accueil
 
 
 @app.route('/logout')

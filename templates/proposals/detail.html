@@ -1,0 +1,1396 @@
+{% extends "base.html" %}
+
+{% block title %}{{ proposal.title }} - {{ space.name }} — {{ organization.name }}{% endblock %}
+
+{% block meta %}
+<link rel="stylesheet" href="{{ url_for('static', filename='refonte.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='proposals.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="proposal-detail-layout">
+    <div class="container">
+        <!-- Header with breadcrumb -->
+        <div class="page-header">
+            <nav class="breadcrumb">
+                <a href="{{ url_for('spaces.index') }}">Espaces participatifs</a>
+                <span class="breadcrumb-separator">/</span>
+                <a href="{{ url_for('spaces.detail', type=space.type, id=space.id) }}">{{ space.name }}</a>
+                <span class="breadcrumb-separator">/</span>
+                <a href="{{ url_for('proposals.index', space_id=space.id) }}">Propositions</a>
+                <span class="breadcrumb-separator">/</span>
+                <span class="breadcrumb-current">{{ proposal.title }}</span>
+            </nav>
+            
+            <div class="header-actions">
+                {% if proposal.author.id == current_user.id or current_user.can_moderate(space) %}
+                <div class="btn-group">
+                    {% if proposal.author.id == current_user.id %}
+                    <a href="{{ url_for('proposals.edit', id=proposal.id) }}" class="btn-refonte btn-refonte-primary">
+                        <i class="fas fa-edit"></i>
+                        Modifier
+                    </a>
+                    {% endif %}
+                    
+                    {% if current_user.can_moderate(space) %}
+                    <button class="btn-refonte btn-refonte-secondary dropdown-toggle" data-toggle="dropdown">
+                        <i class="fas fa-cog"></i>
+                        Modération
+                    </button>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item" href="#" onclick="moderateProposal('feature')">
+                            <i class="fas fa-star"></i>
+                            Mettre en avant
+                        </a>
+                        <a class="dropdown-item" href="#" onclick="moderateProposal('hide')">
+                            <i class="fas fa-eye-slash"></i>
+                            Masquer
+                        </a>
+                        <a class="dropdown-item" href="#" onclick="moderateProposal('archive')">
+                            <i class="fas fa-archive"></i>
+                            Archiver
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item text-danger" href="#" onclick="moderateProposal('delete')">
+                            <i class="fas fa-trash"></i>
+                            Supprimer
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+                
+                <div class="share-actions">
+                    <button class="btn-refonte btn-refonte-outline" onclick="shareProposal()">
+                        <i class="fas fa-share-alt"></i>
+                        Partager
+                    </button>
+                    
+                    <button class="btn-refonte btn-refonte-outline" onclick="printProposal()">
+                        <i class="fas fa-print"></i>
+                        Imprimer
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Proposal status and alerts -->
+        {% if proposal.status_message %}
+        <div class="status-alert alert alert-{{ proposal.status_type }}">
+            <i class="fas fa-info-circle"></i>
+            {{ proposal.status_message }}
+        </div>
+        {% endif %}
+        
+        <div class="proposal-layout">
+            <!-- Main content -->
+            <div class="proposal-main">
+                <!-- Proposal header -->
+                <div class="proposal-header card-glass-refonte">
+                    <div class="proposal-meta">
+                        <div class="meta-left">
+                            <div class="proposal-state">
+                                <span class="state-badge state-{{ proposal.state }}">
+                                    {% if proposal.state == 'draft' %}
+                                    <i class="fas fa-edit"></i> Brouillon
+                                    {% elif proposal.state == 'published' %}
+                                    <i class="fas fa-eye"></i> Publiée
+                                    {% elif proposal.state == 'evaluating' %}
+                                    <i class="fas fa-search"></i> En évaluation
+                                    {% elif proposal.state == 'accepted' %}
+                                    <i class="fas fa-check"></i> Acceptée
+                                    {% elif proposal.state == 'rejected' %}
+                                    <i class="fas fa-times"></i> Rejetée
+                                    {% elif proposal.state == 'withdrawn' %}
+                                    <i class="fas fa-undo"></i> Retirée
+                                    {% endif %}
+                                </span>
+                                
+                                {% if proposal.is_official %}
+                                <span class="official-badge">
+                                    <i class="fas fa-certificate"></i>
+                                    Officielle
+                                </span>
+                                {% endif %}
+                                
+                                {% if proposal.is_featured %}
+                                <span class="featured-badge">
+                                    <i class="fas fa-star"></i>
+                                    Mise en avant
+                                </span>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="proposal-id">
+                                Proposition #{{ proposal.reference }}
+                            </div>
+                        </div>
+                        
+                        <div class="meta-right">
+                            {% if proposal.category %}
+                            <span class="category-tag" style="background-color: {{ proposal.category.color }}20; color: {{ proposal.category.color }};">
+                                {{ proposal.category.name }}
+                            </span>
+                            {% endif %}
+                            
+                            {% if proposal.scope %}
+                            <span class="scope-tag">
+                                <i class="fas fa-map-marker-alt"></i>
+                                {{ proposal.scope.name }}
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <h1 class="proposal-title">{{ proposal.title }}</h1>
+                    
+                    <div class="proposal-summary">
+                        <p>{{ proposal.summary }}</p>
+                    </div>
+                    
+                    <div class="author-info">
+                        <div class="author-avatar">
+                            {% if proposal.author.avatar %}
+                            <img src="{{ proposal.author.avatar }}" alt="{{ proposal.author.full_name }}">
+                            {% else %}
+                            <div class="avatar-placeholder">{{ proposal.author.full_name[:2].upper() }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="author-details">
+                            <div class="author-name">
+                                <a href="{{ url_for('users.profile', id=proposal.author.id) }}">{{ proposal.author.full_name }}</a>
+                                {% if proposal.author.is_verified %}
+                                <i class="fas fa-check-circle verified-badge" title="Compte vérifié"></i>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="author-meta">
+                                Publié {{ proposal.published_at.strftime('%d %B %Y à %H:%M') }}
+                                {% if proposal.updated_at != proposal.published_at %}
+                                · Modifié {{ proposal.updated_at.strftime('%d %B %Y à %H:%M') }}
+                                {% endif %}
+                                
+                                {% if proposal.collaborative_draft %}
+                                <span class="collaborative-indicator">
+                                    <i class="fas fa-users"></i>
+                                    Brouillon collaboratif
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="author-actions">
+                            {% if proposal.author.id != current_user.id %}
+                            <button class="btn-refonte btn-refonte-outline btn-sm" onclick="followAuthor({{ proposal.author.id }})">
+                                <i class="fas fa-user-plus"></i>
+                                {{ 'Ne plus suivre' if current_user.is_following(proposal.author) else 'Suivre' }}
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Proposal content -->
+                <div class="proposal-content card-glass-refonte">
+                    <div class="content-body">
+                        {{ proposal.content | safe }}
+                    </div>
+                    
+                    <!-- Attachments -->
+                    {% if proposal.attachments %}
+                    <div class="attachments-section">
+                        <h4>
+                            <i class="fas fa-paperclip"></i>
+                            Documents joints ({{ proposal.attachments | length }})
+                        </h4>
+                        
+                        <div class="attachments-grid">
+                            {% for attachment in proposal.attachments %}
+                            <div class="attachment-card">
+                                <div class="attachment-icon">
+                                    <i class="fas fa-{{ 'file-pdf' if attachment.type == 'pdf' else 'file-image' if 'image' in attachment.type else 'file' }}"></i>
+                                </div>
+                                
+                                <div class="attachment-info">
+                                    <div class="attachment-name">{{ attachment.filename }}</div>
+                                    <div class="attachment-meta">{{ attachment.size_formatted }}</div>
+                                </div>
+                                
+                                <div class="attachment-actions">
+                                    <a href="{{ attachment.url }}" target="_blank" class="btn-sm btn-primary">
+                                        <i class="fas fa-download"></i>
+                                        Télécharger
+                                    </a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Amendments -->
+                {% if proposal.amendments %}
+                <div class="amendments-section card-glass-refonte">
+                    <div class="section-header">
+                        <h3>
+                            <i class="fas fa-edit"></i>
+                            Amendements ({{ proposal.amendments | length }})
+                        </h3>
+                        
+                        {% if proposal.allow_amendments and proposal.state == 'published' %}
+                        <button class="btn-refonte btn-refonte-primary" onclick="proposeAmendment()">
+                            <i class="fas fa-plus"></i>
+                            Proposer un amendement
+                        </button>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="amendments-list">
+                        {% for amendment in proposal.amendments %}
+                        <div class="amendment-item">
+                            <div class="amendment-header">
+                                <div class="amendment-author">
+                                    <div class="author-avatar">
+                                        {% if amendment.author.avatar %}
+                                        <img src="{{ amendment.author.avatar }}" alt="{{ amendment.author.full_name }}">
+                                        {% else %}
+                                        <div class="avatar-placeholder">{{ amendment.author.full_name[:2].upper() }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="author-info">
+                                        <div class="author-name">{{ amendment.author.full_name }}</div>
+                                        <div class="amendment-date">{{ amendment.created_at.strftime('%d %B %Y') }}</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="amendment-status">
+                                    <span class="status-badge status-{{ amendment.status }}">
+                                        {% if amendment.status == 'pending' %}En attente
+                                        {% elif amendment.status == 'accepted' %}Accepté
+                                        {% elif amendment.status == 'rejected' %}Rejeté
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="amendment-content">
+                                {% if amendment.justification %}
+                                <div class="amendment-justification">
+                                    <strong>Justification :</strong>
+                                    <p>{{ amendment.justification }}</p>
+                                </div>
+                                {% endif %}
+                                
+                                <div class="amendment-changes">
+                                    <h5>Modifications proposées :</h5>
+                                    <div class="change-diff">
+                                        {{ amendment.diff_html | safe }}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="amendment-actions">
+                                {% if amendment.author.id == current_user.id %}
+                                <button class="btn-refonte btn-refonte-outline btn-sm" onclick="editAmendment({{ amendment.id }})">
+                                    <i class="fas fa-edit"></i>
+                                    Modifier
+                                </button>
+                                {% endif %}
+                                
+                                {% if proposal.author.id == current_user.id and amendment.status == 'pending' %}
+                                <button class="btn-refonte btn-refonte-success btn-sm" onclick="acceptAmendment({{ amendment.id }})">
+                                    <i class="fas fa-check"></i>
+                                    Accepter
+                                </button>
+                                
+                                <button class="btn-refonte btn-refonte-danger btn-sm" onclick="rejectAmendment({{ amendment.id }})">
+                                    <i class="fas fa-times"></i>
+                                    Rejeter
+                                </button>
+                                {% endif %}
+                                
+                                <button class="btn-refonte btn-refonte-outline btn-sm" onclick="toggleAmendmentComments({{ amendment.id }})">
+                                    <i class="fas fa-comments"></i>
+                                    Commentaires ({{ amendment.comments | length }})
+                                </button>
+                            </div>
+                            
+                            <!-- Amendment comments -->
+                            <div id="amendment-comments-{{ amendment.id }}" class="amendment-comments" style="display: none;">
+                                {% for comment in amendment.comments %}
+                                <div class="comment-item">
+                                    <div class="comment-author">
+                                        <div class="author-avatar">
+                                            {% if comment.author.avatar %}
+                                            <img src="{{ comment.author.avatar }}" alt="{{ comment.author.full_name }}">
+                                            {% else %}
+                                            <div class="avatar-placeholder">{{ comment.author.full_name[:2].upper() }}</div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="author-info">
+                                            <div class="author-name">{{ comment.author.full_name }}</div>
+                                            <div class="comment-date">{{ comment.created_at.strftime('%d %B %Y à %H:%M') }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="comment-content">
+                                        {{ comment.content }}
+                                    </div>
+                                </div>
+                                {% endfor %}
+                                
+                                <div class="comment-form">
+                                    <textarea class="form-control" placeholder="Commentez cet amendement..." rows="2"></textarea>
+                                    <button class="btn-refonte btn-refonte-primary btn-sm" 
+                                            onclick="submitAmendmentComment({{ amendment.id }})">
+                                        Commenter
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Comments section -->
+                {% if proposal.allow_comments %}
+                <div class="comments-section card-glass-refonte">
+                    <div class="section-header">
+                        <h3>
+                            <i class="fas fa-comments"></i>
+                            Commentaires ({{ proposal.comments | length }})
+                        </h3>
+                        
+                        <div class="comments-controls">
+                            <select id="comments-sort" class="form-control-sm" onchange="sortComments()">
+                                <option value="newest">Plus récents</option>
+                                <option value="oldest">Plus anciens</option>
+                                <option value="most_liked">Plus appréciés</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Comment form -->
+                    <div class="comment-form-container">
+                        <div class="comment-form">
+                            <div class="form-header">
+                                <div class="user-avatar">
+                                    {% if current_user.avatar %}
+                                    <img src="{{ current_user.avatar }}" alt="{{ current_user.full_name }}">
+                                    {% else %}
+                                    <div class="avatar-placeholder">{{ current_user.full_name[:2].upper() }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="form-title">Ajouter un commentaire</div>
+                            </div>
+                            
+                            <textarea id="comment-content" class="form-control" 
+                                      placeholder="Partagez votre opinion sur cette proposition..." rows="3"></textarea>
+                            
+                            <div class="form-actions">
+                                <div class="form-options">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="comment-anonymous">
+                                        <span class="checkmark"></span>
+                                        Publier anonymement
+                                    </label>
+                                </div>
+                                
+                                <button class="btn-refonte btn-refonte-primary" onclick="submitComment()">
+                                    <i class="fas fa-paper-plane"></i>
+                                    Publier le commentaire
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Comments list -->
+                    <div id="comments-list" class="comments-list">
+                        {% for comment in proposal.comments %}
+                        <div class="comment-item" data-comment-id="{{ comment.id }}">
+                            <div class="comment-content">
+                                <div class="comment-header">
+                                    <div class="comment-author">
+                                        <div class="author-avatar">
+                                            {% if comment.is_anonymous %}
+                                            <div class="avatar-placeholder anonymous">
+                                                <i class="fas fa-user-secret"></i>
+                                            </div>
+                                            {% elif comment.author.avatar %}
+                                            <img src="{{ comment.author.avatar }}" alt="{{ comment.author.full_name }}">
+                                            {% else %}
+                                            <div class="avatar-placeholder">{{ comment.author.full_name[:2].upper() }}</div>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <div class="author-info">
+                                            <div class="author-name">
+                                                {% if comment.is_anonymous %}
+                                                Anonyme
+                                                {% else %}
+                                                {{ comment.author.full_name }}
+                                                {% if comment.author.id == proposal.author.id %}
+                                                <span class="author-badge">Auteur</span>
+                                                {% endif %}
+                                                {% endif %}
+                                            </div>
+                                            <div class="comment-date">{{ comment.created_at.strftime('%d %B %Y à %H:%M') }}</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="comment-actions">
+                                        <button class="action-btn" onclick="likeComment({{ comment.id }})" 
+                                                title="J'aime">
+                                            <i class="fas fa-thumbs-up {{ 'active' if current_user.has_liked_comment(comment) else '' }}"></i>
+                                            <span>{{ comment.likes_count }}</span>
+                                        </button>
+                                        
+                                        <button class="action-btn" onclick="replyToComment({{ comment.id }})" 
+                                                title="Répondre">
+                                            <i class="fas fa-reply"></i>
+                                            Répondre
+                                        </button>
+                                        
+                                        {% if comment.author.id == current_user.id or current_user.can_moderate(space) %}
+                                        <div class="dropdown">
+                                            <button class="action-btn dropdown-toggle" data-toggle="dropdown">
+                                                <i class="fas fa-ellipsis-h"></i>
+                                            </button>
+                                            <div class="dropdown-menu">
+                                                {% if comment.author.id == current_user.id %}
+                                                <a class="dropdown-item" href="#" onclick="editComment({{ comment.id }})">
+                                                    <i class="fas fa-edit"></i>
+                                                    Modifier
+                                                </a>
+                                                {% endif %}
+                                                
+                                                {% if current_user.can_moderate(space) %}
+                                                <a class="dropdown-item" href="#" onclick="moderateComment({{ comment.id }}, 'hide')">
+                                                    <i class="fas fa-eye-slash"></i>
+                                                    Masquer
+                                                </a>
+                                                {% endif %}
+                                                
+                                                <a class="dropdown-item text-danger" href="#" onclick="deleteComment({{ comment.id }})">
+                                                    <i class="fas fa-trash"></i>
+                                                    Supprimer
+                                                </a>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        
+                                        <button class="action-btn" onclick="reportComment({{ comment.id }})" 
+                                                title="Signaler">
+                                            <i class="fas fa-flag"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="comment-text">
+                                    {{ comment.content | nl2br }}
+                                </div>
+                                
+                                {% if comment.edited_at %}
+                                <div class="comment-edited">
+                                    <i class="fas fa-edit"></i>
+                                    Modifié {{ comment.edited_at.strftime('%d %B %Y à %H:%M') }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Replies -->
+                            {% if comment.replies %}
+                            <div class="comment-replies">
+                                {% for reply in comment.replies %}
+                                <div class="comment-item reply" data-comment-id="{{ reply.id }}">
+                                    <!-- Same structure as main comment -->
+                                    <div class="comment-content">
+                                        <div class="comment-header">
+                                            <div class="comment-author">
+                                                <div class="author-avatar">
+                                                    {% if reply.is_anonymous %}
+                                                    <div class="avatar-placeholder anonymous">
+                                                        <i class="fas fa-user-secret"></i>
+                                                    </div>
+                                                    {% elif reply.author.avatar %}
+                                                    <img src="{{ reply.author.avatar }}" alt="{{ reply.author.full_name }}">
+                                                    {% else %}
+                                                    <div class="avatar-placeholder">{{ reply.author.full_name[:2].upper() }}</div>
+                                                    {% endif %}
+                                                </div>
+                                                
+                                                <div class="author-info">
+                                                    <div class="author-name">
+                                                        {% if reply.is_anonymous %}
+                                                        Anonyme
+                                                        {% else %}
+                                                        {{ reply.author.full_name }}
+                                                        {% if reply.author.id == proposal.author.id %}
+                                                        <span class="author-badge">Auteur</span>
+                                                        {% endif %}
+                                                        {% endif %}
+                                                    </div>
+                                                    <div class="comment-date">{{ reply.created_at.strftime('%d %B %Y à %H:%M') }}</div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="comment-actions">
+                                                <button class="action-btn" onclick="likeComment({{ reply.id }})" 
+                                                        title="J'aime">
+                                                    <i class="fas fa-thumbs-up {{ 'active' if current_user.has_liked_comment(reply) else '' }}"></i>
+                                                    <span>{{ reply.likes_count }}</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="comment-text">
+                                            {{ reply.content | nl2br }}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            
+                            <!-- Reply form (hidden by default) -->
+                            <div id="reply-form-{{ comment.id }}" class="reply-form" style="display: none;">
+                                <textarea class="form-control" placeholder="Répondre à ce commentaire..." rows="2"></textarea>
+                                <div class="form-actions">
+                                    <button class="btn-refonte btn-refonte-outline btn-sm" onclick="cancelReply({{ comment.id }})">
+                                        Annuler
+                                    </button>
+                                    <button class="btn-refonte btn-refonte-primary btn-sm" onclick="submitReply({{ comment.id }})">
+                                        Répondre
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    {% if proposal.comments | length > 10 %}
+                    <div class="comments-pagination">
+                        <button class="btn-refonte btn-refonte-outline" onclick="loadMoreComments()">
+                            <i class="fas fa-chevron-down"></i>
+                            Charger plus de commentaires
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Sidebar -->
+            <div class="proposal-sidebar">
+                <!-- Actions -->
+                <div class="sidebar-section card-glass-refonte">
+                    <div class="section-header">
+                        <h4>Actions</h4>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        {% if proposal.allow_endorsements and proposal.state == 'published' %}
+                        <button class="btn-refonte {{ 'btn-refonte-success' if current_user.has_endorsed(proposal) else 'btn-refonte-outline' }} btn-full"
+                                onclick="toggleEndorsement({{ proposal.id }})">
+                            <i class="fas fa-{{ 'heart' if current_user.has_endorsed(proposal) else 'heart' }}"></i>
+                            {{ 'Retirer le soutien' if current_user.has_endorsed(proposal) else 'Soutenir cette proposition' }}
+                        </button>
+                        {% endif %}
+                        
+                        {% if proposal.allow_amendments and proposal.state == 'published' and proposal.author.id != current_user.id %}
+                        <button class="btn-refonte btn-refonte-primary btn-full" onclick="proposeAmendment()">
+                            <i class="fas fa-edit"></i>
+                            Proposer un amendement
+                        </button>
+                        {% endif %}
+                        
+                        <button class="btn-refonte btn-refonte-outline btn-full" onclick="followProposal({{ proposal.id }})">
+                            <i class="fas fa-{{ 'bell' if current_user.is_following_proposal(proposal) else 'bell' }}"></i>
+                            {{ 'Ne plus suivre' if current_user.is_following_proposal(proposal) else 'Suivre les mises à jour' }}
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Stats -->
+                <div class="sidebar-section card-glass-refonte">
+                    <div class="section-header">
+                        <h4>
+                            <i class="fas fa-chart-bar"></i>
+                            Statistiques
+                        </h4>
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-number">{{ proposal.endorsements_count }}</div>
+                            <div class="stat-label">Soutiens</div>
+                        </div>
+                        
+                        <div class="stat-item">
+                            <div class="stat-number">{{ proposal.comments_count }}</div>
+                            <div class="stat-label">Commentaires</div>
+                        </div>
+                        
+                        <div class="stat-item">
+                            <div class="stat-number">{{ proposal.views_count }}</div>
+                            <div class="stat-label">Vues</div>
+                        </div>
+                        
+                        <div class="stat-item">
+                            <div class="stat-number">{{ proposal.amendments | length }}</div>
+                            <div class="stat-label">Amendements</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Traceability -->
+                <div class="sidebar-section card-glass-refonte">
+                    <div class="section-header">
+                        <h4>
+                            <i class="fas fa-shield-alt"></i>
+                            Traçabilité
+                        </h4>
+                    </div>
+                    
+                    <div class="traceability-info">
+                        <div class="trace-item">
+                            <span class="trace-label">Référence :</span>
+                            <code class="trace-value">{{ proposal.reference }}</code>
+                        </div>
+                        
+                        <div class="trace-item">
+                            <span class="trace-label">Hash :</span>
+                            <code class="trace-value" title="{{ proposal.current_hash }}">{{ proposal.current_hash[:16] }}...</code>
+                        </div>
+                        
+                        <div class="trace-item">
+                            <span class="trace-label">Version :</span>
+                            <span class="trace-value">{{ proposal.current_version }}</span>
+                        </div>
+                        
+                        <div class="trace-item">
+                            <span class="trace-label">Signature :</span>
+                            <span class="trace-value {{ 'verified' if proposal.signature_verified else 'pending' }}">
+                                <i class="fas fa-{{ 'check-circle' if proposal.signature_verified else 'clock' }}"></i>
+                                {{ 'Vérifiée' if proposal.signature_verified else 'En attente' }}
+                            </span>
+                        </div>
+                        
+                        <div class="trace-item">
+                            <span class="trace-label">Intégrité :</span>
+                            <div class="integrity-score">
+                                <div class="score-bar">
+                                    <div class="score-fill" style="width: {{ proposal.integrity_score }}%"></div>
+                                </div>
+                                <span class="score-text">{{ proposal.integrity_score }}%</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="trace-actions">
+                        <button class="btn-refonte btn-refonte-outline btn-sm btn-full" onclick="verifyIntegrity()">
+                            <i class="fas fa-search"></i>
+                            Vérifier l'intégrité
+                        </button>
+                        
+                        <a href="{{ url_for('proposals.audit', id=proposal.id) }}" class="btn-refonte btn-refonte-outline btn-sm btn-full">
+                            <i class="fas fa-file-alt"></i>
+                            Rapport d'audit
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Related proposals -->
+                {% if related_proposals %}
+                <div class="sidebar-section card-glass-refonte">
+                    <div class="section-header">
+                        <h4>
+                            <i class="fas fa-link"></i>
+                            Propositions liées
+                        </h4>
+                    </div>
+                    
+                    <div class="related-proposals">
+                        {% for related in related_proposals %}
+                        <div class="related-item">
+                            <div class="related-title">
+                                <a href="{{ url_for('proposals.detail', id=related.id) }}">{{ related.title }}</a>
+                            </div>
+                            <div class="related-meta">
+                                <span class="state-badge state-{{ related.state }}">
+                                    {{ related.state | title }}
+                                </span>
+                                <span class="related-stats">
+                                    {{ related.endorsements_count }} soutiens
+                                </span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Version history -->
+                {% if proposal.versions | length > 1 %}
+                <div class="sidebar-section card-glass-refonte">
+                    <div class="section-header">
+                        <h4>
+                            <i class="fas fa-history"></i>
+                            Historique
+                        </h4>
+                    </div>
+                    
+                    <div class="version-history">
+                        {% for version in proposal.versions[-3:] %}
+                        <div class="version-item {{ 'current' if version.version == proposal.current_version else '' }}">
+                            <div class="version-info">
+                                <span class="version-number">v{{ version.version }}</span>
+                                <span class="version-date">{{ version.created_at.strftime('%d/%m %H:%M') }}</span>
+                            </div>
+                            
+                            {% if version.note %}
+                            <div class="version-note">{{ version.note }}</div>
+                            {% endif %}
+                            
+                            <div class="version-actions">
+                                {% if version.version != proposal.current_version %}
+                                <button class="btn-sm" onclick="compareVersion({{ version.version }})">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                        
+                        {% if proposal.versions | length > 3 %}
+                        <div class="version-more">
+                            <a href="{{ url_for('proposals.history', id=proposal.id) }}">
+                                Voir tout l'historique ({{ proposal.versions | length }} versions)
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Amendment Modal -->
+<div id="amendment-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content modal-lg">
+        <div class="modal-header">
+            <h3>Proposer un amendement</h3>
+            <button class="modal-close" onclick="closeAmendmentModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="modal-body">
+            <form id="amendment-form">
+                <div class="form-group">
+                    <label for="amendment-justification">Justification de l'amendement *</label>
+                    <textarea id="amendment-justification" class="form-control" rows="3" 
+                              placeholder="Expliquez pourquoi vous proposez cet amendement..." required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Modifications proposées *</label>
+                    <div class="amendment-editor">
+                        <div class="editor-original">
+                            <h5>Texte original :</h5>
+                            <div id="original-content" class="content-preview"></div>
+                        </div>
+                        
+                        <div class="editor-modified">
+                            <h5>Votre version :</h5>
+                            <textarea id="amendment-content" class="form-control rich-editor" rows="10"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        
+        <div class="modal-footer">
+            <button class="btn-refonte btn-refonte-secondary" onclick="closeAmendmentModal()">
+                Annuler
+            </button>
+            
+            <button class="btn-refonte btn-refonte-primary" onclick="submitAmendment()">
+                <i class="fas fa-paper-plane"></i>
+                Proposer l'amendement
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Report Modal -->
+<div id="report-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Signaler un contenu</h3>
+            <button class="modal-close" onclick="closeReportModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="modal-body">
+            <form id="report-form">
+                <div class="form-group">
+                    <label>Motif du signalement *</label>
+                    <div class="radio-group">
+                        <label class="radio-label">
+                            <input type="radio" name="report_reason" value="spam" required>
+                            <span class="radio-custom"></span>
+                            Contenu indésirable ou spam
+                        </label>
+                        
+                        <label class="radio-label">
+                            <input type="radio" name="report_reason" value="inappropriate" required>
+                            <span class="radio-custom"></span>
+                            Contenu inapproprié
+                        </label>
+                        
+                        <label class="radio-label">
+                            <input type="radio" name="report_reason" value="harassment" required>
+                            <span class="radio-custom"></span>
+                            Harcèlement ou discrimination
+                        </label>
+                        
+                        <label class="radio-label">
+                            <input type="radio" name="report_reason" value="misinformation" required>
+                            <span class="radio-custom"></span>
+                            Désinformation
+                        </label>
+                        
+                        <label class="radio-label">
+                            <input type="radio" name="report_reason" value="other" required>
+                            <span class="radio-custom"></span>
+                            Autre
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="report-details">Détails (optionnel)</label>
+                    <textarea id="report-details" class="form-control" rows="3" 
+                              placeholder="Ajoutez des détails sur votre signalement..."></textarea>
+                </div>
+            </form>
+        </div>
+        
+        <div class="modal-footer">
+            <button class="btn-refonte btn-refonte-secondary" onclick="closeReportModal()">
+                Annuler
+            </button>
+            
+            <button class="btn-refonte btn-refonte-danger" onclick="submitReport()">
+                <i class="fas fa-flag"></i>
+                Envoyer le signalement
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Proposal detail functionality
+let currentReportTarget = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tooltips and popovers
+    initializeTooltips();
+    
+    // Track page view
+    trackProposalView();
+    
+    // Initialize collaborative features
+    if ({{ 'true' if proposal.collaborative_draft else 'false' }}) {
+        initializeCollaborativeFeatures();
+    }
+});
+
+// Endorsement functionality
+function toggleEndorsement(proposalId) {
+    const button = event.target.closest('button');
+    const isEndorsed = button.classList.contains('btn-refonte-success');
+    
+    button.disabled = true;
+    
+    fetch(`/api/proposals/${proposalId}/endorse`, {
+        method: isEndorsed ? 'DELETE' : 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            if (isEndorsed) {
+                button.classList.remove('btn-refonte-success');
+                button.classList.add('btn-refonte-outline');
+                button.innerHTML = '<i class="fas fa-heart"></i> Soutenir cette proposition';
+            } else {
+                button.classList.remove('btn-refonte-outline');
+                button.classList.add('btn-refonte-success');
+                button.innerHTML = '<i class="fas fa-heart"></i> Retirer le soutien';
+            }
+            
+            // Update stats
+            const statsNumber = document.querySelector('.stat-item .stat-number');
+            if (statsNumber) {
+                statsNumber.textContent = data.endorsements_count;
+            }
+        }
+    })
+    .finally(() => {
+        button.disabled = false;
+    });
+}
+
+// Comments functionality
+function submitComment() {
+    const content = document.getElementById('comment-content').value.trim();
+    const isAnonymous = document.getElementById('comment-anonymous').checked;
+    
+    if (!content) return;
+    
+    const button = event.target;
+    button.disabled = true;
+    
+    fetch(`/api/proposals/{{ proposal.id }}/comments`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({
+            content: content,
+            is_anonymous: isAnonymous
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload(); // Reload to show new comment
+        }
+    })
+    .finally(() => {
+        button.disabled = false;
+    });
+}
+
+function likeComment(commentId) {
+    const button = event.target.closest('button');
+    const icon = button.querySelector('i');
+    const counter = button.querySelector('span');
+    const isLiked = icon.classList.contains('active');
+    
+    fetch(`/api/comments/${commentId}/like`, {
+        method: isLiked ? 'DELETE' : 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            if (isLiked) {
+                icon.classList.remove('active');
+            } else {
+                icon.classList.add('active');
+            }
+            counter.textContent = data.likes_count;
+        }
+    });
+}
+
+function replyToComment(commentId) {
+    const replyForm = document.getElementById(`reply-form-${commentId}`);
+    replyForm.style.display = replyForm.style.display === 'none' ? 'block' : 'none';
+}
+
+function cancelReply(commentId) {
+    document.getElementById(`reply-form-${commentId}`).style.display = 'none';
+}
+
+function submitReply(commentId) {
+    const replyForm = document.getElementById(`reply-form-${commentId}`);
+    const textarea = replyForm.querySelector('textarea');
+    const content = textarea.value.trim();
+    
+    if (!content) return;
+    
+    fetch(`/api/comments/${commentId}/reply`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({
+            content: content
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
+
+function editComment(commentId) {
+    // Implementation for comment editing
+    console.log('Edit comment:', commentId);
+}
+
+function deleteComment(commentId) {
+    if (confirm('Supprimer ce commentaire ?')) {
+        fetch(`/api/comments/${commentId}`, {
+            method: 'DELETE',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.querySelector(`[data-comment-id="${commentId}"]`).remove();
+            }
+        });
+    }
+}
+
+function reportComment(commentId) {
+    currentReportTarget = { type: 'comment', id: commentId };
+    document.getElementById('report-modal').style.display = 'flex';
+}
+
+function moderateComment(commentId, action) {
+    fetch(`/api/comments/${commentId}/moderate`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({ action: action })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
+
+// Amendment functionality
+function proposeAmendment() {
+    document.getElementById('original-content').innerHTML = {{ proposal.content | tojson }};
+    document.getElementById('amendment-content').value = {{ proposal.content | tojson }};
+    document.getElementById('amendment-modal').style.display = 'flex';
+}
+
+function closeAmendmentModal() {
+    document.getElementById('amendment-modal').style.display = 'none';
+}
+
+function submitAmendment() {
+    const justification = document.getElementById('amendment-justification').value.trim();
+    const content = document.getElementById('amendment-content').value.trim();
+    
+    if (!justification || !content) return;
+    
+    fetch(`/api/proposals/{{ proposal.id }}/amendments`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({
+            justification: justification,
+            content: content
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            closeAmendmentModal();
+            location.reload();
+        }
+    });
+}
+
+function acceptAmendment(amendmentId) {
+    if (confirm('Accepter cet amendement ? Les modifications seront intégrées à votre proposition.')) {
+        fetch(`/api/amendments/${amendmentId}/accept`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            }
+        });
+    }
+}
+
+function rejectAmendment(amendmentId) {
+    const reason = prompt('Raison du rejet (optionnel) :');
+    
+    fetch(`/api/amendments/${amendmentId}/reject`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({ reason: reason })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
+
+function toggleAmendmentComments(amendmentId) {
+    const comments = document.getElementById(`amendment-comments-${amendmentId}`);
+    comments.style.display = comments.style.display === 'none' ? 'block' : 'none';
+}
+
+function submitAmendmentComment(amendmentId) {
+    const container = document.getElementById(`amendment-comments-${amendmentId}`);
+    const textarea = container.querySelector('textarea');
+    const content = textarea.value.trim();
+    
+    if (!content) return;
+    
+    fetch(`/api/amendments/${amendmentId}/comments`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({ content: content })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
+
+// Follow functionality
+function followProposal(proposalId) {
+    const button = event.target.closest('button');
+    const isFollowing = button.innerHTML.includes('Ne plus suivre');
+    
+    fetch(`/api/proposals/${proposalId}/follow`, {
+        method: isFollowing ? 'DELETE' : 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            if (isFollowing) {
+                button.innerHTML = '<i class="fas fa-bell"></i> Suivre les mises à jour';
+            } else {
+                button.innerHTML = '<i class="fas fa-bell"></i> Ne plus suivre';
+            }
+        }
+    });
+}
+
+function followAuthor(authorId) {
+    const button = event.target.closest('button');
+    const isFollowing = button.innerHTML.includes('Ne plus suivre');
+    
+    fetch(`/api/users/${authorId}/follow`, {
+        method: isFollowing ? 'DELETE' : 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            if (isFollowing) {
+                button.innerHTML = '<i class="fas fa-user-plus"></i> Suivre';
+            } else {
+                button.innerHTML = '<i class="fas fa-user-plus"></i> Ne plus suivre';
+            }
+        }
+    });
+}
+
+// Moderation functionality
+function moderateProposal(action) {
+    let confirmMessage = '';
+    
+    switch (action) {
+        case 'feature':
+            confirmMessage = 'Mettre cette proposition en avant ?';
+            break;
+        case 'hide':
+            confirmMessage = 'Masquer cette proposition ?';
+            break;
+        case 'archive':
+            confirmMessage = 'Archiver cette proposition ?';
+            break;
+        case 'delete':
+            confirmMessage = 'Supprimer définitivement cette proposition ?';
+            break;
+    }
+    
+    if (confirm(confirmMessage)) {
+        fetch(`/api/proposals/{{ proposal.id }}/moderate`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ action: action })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                if (action === 'delete') {
+                    window.location.href = '{{ url_for("proposals.index", space_id=space.id) }}';
+                } else {
+                    location.reload();
+                }
+            }
+        });
+    }
+}
+
+// Report functionality
+function closeReportModal() {
+    document.getElementById('report-modal').style.display = 'none';
+    currentReportTarget = null;
+}
+
+function submitReport() {
+    const form = document.getElementById('report-form');
+    const formData = new FormData(form);
+    const reason = formData.get('report_reason');
+    const details = document.getElementById('report-details').value;
+    
+    if (!reason) return;
+    
+    fetch(`/api/${currentReportTarget.type}s/${currentReportTarget.id}/report`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({
+            reason: reason,
+            details: details
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            closeReportModal();
+            alert('Votre signalement a été envoyé. Il sera examiné par les modérateurs.');
+        }
+    });
+}
+
+// Utility functions
+function shareProposal() {
+    if (navigator.share) {
+        navigator.share({
+            title: {{ proposal.title | tojson }},
+            text: {{ proposal.summary | tojson }},
+            url: window.location.href
+        });
+    } else {
+        // Fallback: copy to clipboard
+        navigator.clipboard.writeText(window.location.href);
+        alert('Lien copié dans le presse-papiers');
+    }
+}
+
+function printProposal() {
+    window.print();
+}
+
+function verifyIntegrity() {
+    fetch(`/api/proposals/{{ proposal.id }}/verify`, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert(`Vérification de l'intégrité : ${data.verified ? 'SUCCÈS' : 'ÉCHEC'}\nScore : ${data.score}%`);
+    });
+}
+
+function compareVersion(version) {
+    window.open(`{{ url_for('proposals.compare', id=proposal.id) }}?version=${version}`, '_blank');
+}
+
+function sortComments() {
+    const sortBy = document.getElementById('comments-sort').value;
+    
+    fetch(`/api/proposals/{{ proposal.id }}/comments?sort=${sortBy}`, {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('comments-list').innerHTML = data.html;
+        }
+    });
+}
+
+function loadMoreComments() {
+    // Implementation for loading more comments
+    console.log('Load more comments');
+}
+
+function trackProposalView() {
+    fetch(`/api/proposals/{{ proposal.id }}/view`, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    });
+}
+
+function initializeTooltips() {
+    // Initialize tooltips for traceability info
+    const tooltipElements = document.querySelectorAll('[title]');
+    tooltipElements.forEach(element => {
+        // Simple tooltip implementation
+        element.addEventListener('mouseenter', function() {
+            // Show tooltip
+        });
+    });
+}
+
+function initializeCollaborativeFeatures() {
+    // Initialize collaborative editing features if needed
+    console.log('Initializing collaborative features');
+}
+</script>
+{% endblock %}

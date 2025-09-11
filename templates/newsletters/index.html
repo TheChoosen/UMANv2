@@ -1,0 +1,1057 @@
+{% extends "base.html" %}
+
+{% block title %}Newsletters - Bulletins d'information - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="newsletters-layout">
+    <div class="container">
+        <div class="newsletters-container">
+            <!-- En-tête Newsletters -->
+            <div class="newsletters-header">
+                <div class="hero-section">
+                    <div class="hero-content">
+                        <h1>
+                            <i class="fas fa-newspaper"></i>
+                            Newsletters - Bulletins d'information
+                        </h1>
+                        <p class="hero-description">
+                            Restez informé de l'actualité démocratique avec nos bulletins personnalisés. 
+                            Inscription opt-in, modèles ciblés et contenus pertinents selon vos intérêts.
+                        </p>
+                        
+                        <div class="hero-stats">
+                            <div class="stat-item">
+                                <div class="stat-value">{{ total_newsletters }}</div>
+                                <div class="stat-label">Newsletters envoyées</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">{{ total_subscribers }}</div>
+                                <div class="stat-label">Abonnés actifs</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">{{ avg_open_rate }}%</div>
+                                <div class="stat-label">Taux d'ouverture</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="hero-actions">
+                        {% if not user_subscribed %}
+                        <button class="btn-refonte btn-lg" onclick="showSubscriptionModal()">
+                            <i class="fas fa-envelope"></i>
+                            S'abonner maintenant
+                        </button>
+                        {% else %}
+                        <button class="btn-refonte btn-lg" onclick="manageSubscriptions()">
+                            <i class="fas fa-cog"></i>
+                            Gérer mes abonnements
+                        </button>
+                        {% endif %}
+                        
+                        {% if user_can_create_newsletters %}
+                        <button class="btn-refonte btn-secondary" onclick="createNewsletter()">
+                            <i class="fas fa-plus"></i>
+                            Créer newsletter
+                        </button>
+                        {% endif %}
+                        
+                        <button class="btn-refonte btn-secondary" onclick="viewArchives()">
+                            <i class="fas fa-archive"></i>
+                            Archives
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Onglets de navigation -->
+            <div class="newsletters-nav">
+                <div class="nav-tabs">
+                    <button class="nav-tab active" data-tab="subscribe" onclick="switchTab('subscribe')">
+                        <i class="fas fa-envelope-open"></i>
+                        Abonnements
+                    </button>
+                    <button class="nav-tab" data-tab="browse" onclick="switchTab('browse')">
+                        <i class="fas fa-list"></i>
+                        Parcourir
+                    </button>
+                    <button class="nav-tab" data-tab="archives" onclick="switchTab('archives')">
+                        <i class="fas fa-archive"></i>
+                        Archives
+                    </button>
+                    {% if user_can_create_newsletters %}
+                    <button class="nav-tab" data-tab="manage" onclick="switchTab('manage')">
+                        <i class="fas fa-cog"></i>
+                        Gestion
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Onglet: Abonnements -->
+            <div class="tab-content active" id="tab-subscribe">
+                <div class="subscription-section">
+                    <div class="section-header">
+                        <h2>
+                            <i class="fas fa-envelope-open"></i>
+                            Types de newsletters disponibles
+                        </h2>
+                        <p>Choisissez les newsletters qui correspondent à vos centres d'intérêt</p>
+                    </div>
+                    
+                    <div class="subscription-types">
+                        <!-- Newsletter générale -->
+                        <div class="subscription-card">
+                            <div class="subscription-header">
+                                <div class="subscription-icon general">
+                                    <i class="fas fa-newspaper"></i>
+                                </div>
+                                <div class="subscription-info">
+                                    <h3>Actualités générales</h3>
+                                    <p>Panorama hebdomadaire de l'actualité démocratique</p>
+                                    <div class="subscription-meta">
+                                        <span><i class="fas fa-clock"></i> Hebdomadaire - Vendredi</span>
+                                        <span><i class="fas fa-users"></i> {{ general_subscribers }} abonnés</span>
+                                    </div>
+                                </div>
+                                <div class="subscription-toggle">
+                                    <label class="switch">
+                                        <input type="checkbox" {% if user_subscriptions.general %}checked{% endif %} 
+                                               onchange="toggleSubscription('general', this.checked)">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="subscription-content">
+                                <div class="content-preview">
+                                    <h4>Contenu type:</h4>
+                                    <ul>
+                                        <li>Nouvelles propositions importantes</li>
+                                        <li>Résultats de votes et consultations</li>
+                                        <li>Annonces d'événements participatifs</li>
+                                        <li>Actualités des espaces de participation</li>
+                                    </ul>
+                                </div>
+                                
+                                <div class="latest-issue">
+                                    <h4>Dernier numéro:</h4>
+                                    <div class="issue-preview">
+                                        <div class="issue-title">
+                                            "Budget participatif 2025 : 15 projets sélectionnés"
+                                        </div>
+                                        <div class="issue-date">Vendredi 24 janvier 2025</div>
+                                        <button class="issue-link" onclick="viewNewsletter('general-2025-01-24')">
+                                            <i class="fas fa-eye"></i>
+                                            Voir
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Newsletter par espace -->
+                        <div class="subscription-card">
+                            <div class="subscription-header">
+                                <div class="subscription-icon spaces">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                </div>
+                                <div class="subscription-info">
+                                    <h3>Actualités par espace</h3>
+                                    <p>Informations ciblées par espace participatif</p>
+                                    <div class="subscription-meta">
+                                        <span><i class="fas fa-clock"></i> Bimensuel</span>
+                                        <span><i class="fas fa-map"></i> Par zone géographique</span>
+                                    </div>
+                                </div>
+                                <div class="subscription-manage">
+                                    <button class="btn-manage" onclick="manageSpacesSubscriptions()">
+                                        <i class="fas fa-cog"></i>
+                                        Configurer
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="subscription-content">
+                                <div class="spaces-selection">
+                                    <h4>Espaces sélectionnés:</h4>
+                                    <div class="selected-spaces">
+                                        {% for space in user_subscribed_spaces %}
+                                        <div class="space-chip">
+                                            <span>{{ space.title }}</span>
+                                            <button class="chip-remove" onclick="unsubscribeFromSpace({{ space.id }})">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                        {% endfor %}
+                                        
+                                        {% if not user_subscribed_spaces %}
+                                        <div class="no-spaces">
+                                            <i class="fas fa-info-circle"></i>
+                                            Aucun espace sélectionné
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Newsletter thématique -->
+                        <div class="subscription-card">
+                            <div class="subscription-header">
+                                <div class="subscription-icon themes">
+                                    <i class="fas fa-tags"></i>
+                                </div>
+                                <div class="subscription-info">
+                                    <h3>Bulletins thématiques</h3>
+                                    <p>Newsletters spécialisées par domaine d'intérêt</p>
+                                    <div class="subscription-meta">
+                                        <span><i class="fas fa-clock"></i> Mensuel</span>
+                                        <span><i class="fas fa-tags"></i> Par thématique</span>
+                                    </div>
+                                </div>
+                                <div class="subscription-manage">
+                                    <button class="btn-manage" onclick="manageThemesSubscriptions()">
+                                        <i class="fas fa-cog"></i>
+                                        Configurer
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="subscription-content">
+                                <div class="themes-grid">
+                                    <div class="theme-option">
+                                        <label class="theme-checkbox">
+                                            <input type="checkbox" {% if 'environment' in user_themes %}checked{% endif %}
+                                                   onchange="toggleTheme('environment', this.checked)">
+                                            <div class="theme-card">
+                                                <i class="fas fa-leaf"></i>
+                                                <span>Environnement</span>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="theme-option">
+                                        <label class="theme-checkbox">
+                                            <input type="checkbox" {% if 'transport' in user_themes %}checked{% endif %}
+                                                   onchange="toggleTheme('transport', this.checked)">
+                                            <div class="theme-card">
+                                                <i class="fas fa-bus"></i>
+                                                <span>Transport</span>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="theme-option">
+                                        <label class="theme-checkbox">
+                                            <input type="checkbox" {% if 'culture' in user_themes %}checked{% endif %}
+                                                   onchange="toggleTheme('culture', this.checked)">
+                                            <div class="theme-card">
+                                                <i class="fas fa-theater-masks"></i>
+                                                <span>Culture</span>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="theme-option">
+                                        <label class="theme-checkbox">
+                                            <input type="checkbox" {% if 'education' in user_themes %}checked{% endif %}
+                                                   onchange="toggleTheme('education', this.checked)">
+                                            <div class="theme-card">
+                                                <i class="fas fa-graduation-cap"></i>
+                                                <span>Éducation</span>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="theme-option">
+                                        <label class="theme-checkbox">
+                                            <input type="checkbox" {% if 'urban' in user_themes %}checked{% endif %}
+                                                   onchange="toggleTheme('urban', this.checked)">
+                                            <div class="theme-card">
+                                                <i class="fas fa-city"></i>
+                                                <span>Urbanisme</span>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="theme-option">
+                                        <label class="theme-checkbox">
+                                            <input type="checkbox" {% if 'social' in user_themes %}checked{% endif %}
+                                                   onchange="toggleTheme('social', this.checked)">
+                                            <div class="theme-card">
+                                                <i class="fas fa-heart"></i>
+                                                <span>Social</span>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Newsletter événements -->
+                        <div class="subscription-card">
+                            <div class="subscription-header">
+                                <div class="subscription-icon events">
+                                    <i class="fas fa-calendar-alt"></i>
+                                </div>
+                                <div class="subscription-info">
+                                    <h3>Agenda participatif</h3>
+                                    <p>Notifications d'événements et échéances importantes</p>
+                                    <div class="subscription-meta">
+                                        <span><i class="fas fa-clock"></i> Notifications temps réel</span>
+                                        <span><i class="fas fa-bell"></i> Rappels personnalisés</span>
+                                    </div>
+                                </div>
+                                <div class="subscription-toggle">
+                                    <label class="switch">
+                                        <input type="checkbox" {% if user_subscriptions.events %}checked{% endif %} 
+                                               onchange="toggleSubscription('events', this.checked)">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="subscription-content">
+                                <div class="events-config">
+                                    <h4>Types d'événements:</h4>
+                                    <div class="event-types">
+                                        <label class="event-checkbox">
+                                            <input type="checkbox" {% if 'meetings' in user_event_types %}checked{% endif %}
+                                                   onchange="toggleEventType('meetings', this.checked)">
+                                            <span>Réunions publiques</span>
+                                        </label>
+                                        
+                                        <label class="event-checkbox">
+                                            <input type="checkbox" {% if 'consultations' in user_event_types %}checked{% endif %}
+                                                   onchange="toggleEventType('consultations', this.checked)">
+                                            <span>Consultations citoyennes</span>
+                                        </label>
+                                        
+                                        <label class="event-checkbox">
+                                            <input type="checkbox" {% if 'budgets' in user_event_types %}checked{% endif %}
+                                                   onchange="toggleEventType('budgets', this.checked)">
+                                            <span>Budgets participatifs</span>
+                                        </label>
+                                        
+                                        <label class="event-checkbox">
+                                            <input type="checkbox" {% if 'sortitions' in user_event_types %}checked{% endif %}
+                                                   onchange="toggleEventType('sortitions', this.checked)">
+                                            <span>Sortitions</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="notification-timing">
+                                    <h4>Délais de notification:</h4>
+                                    <select class="timing-select" onchange="updateNotificationTiming(this.value)">
+                                        <option value="7" {% if user_notification_timing == 7 %}selected{% endif %}>7 jours avant</option>
+                                        <option value="3" {% if user_notification_timing == 3 %}selected{% endif %}>3 jours avant</option>
+                                        <option value="1" {% if user_notification_timing == 1 %}selected{% endif %}>1 jour avant</option>
+                                        <option value="0" {% if user_notification_timing == 0 %}selected{% endif %}>Le jour même</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Onglet: Parcourir -->
+            <div class="tab-content" id="tab-browse">
+                <div class="browse-section">
+                    <div class="section-header">
+                        <h2>
+                            <i class="fas fa-list"></i>
+                            Newsletters récentes
+                        </h2>
+                        
+                        <div class="browse-filters">
+                            <select class="filter-select" id="type-filter" onchange="filterNewsletters()">
+                                <option value="">Tous les types</option>
+                                <option value="general">Actualités générales</option>
+                                <option value="spaces">Par espace</option>
+                                <option value="themes">Thématiques</option>
+                                <option value="events">Événements</option>
+                            </select>
+                            
+                            <select class="filter-select" id="period-filter" onchange="filterNewsletters()">
+                                <option value="month">Ce mois</option>
+                                <option value="quarter">Ce trimestre</option>
+                                <option value="year">Cette année</option>
+                                <option value="all">Toutes</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="newsletters-grid">
+                        <!-- Newsletter récente 1 -->
+                        <div class="newsletter-card">
+                            <div class="newsletter-header">
+                                <div class="newsletter-badges">
+                                    <span class="type-badge type-general">
+                                        <i class="fas fa-newspaper"></i>
+                                        Général
+                                    </span>
+                                    <span class="status-badge status-sent">
+                                        <i class="fas fa-paper-plane"></i>
+                                        Envoyé
+                                    </span>
+                                </div>
+                                
+                                <div class="newsletter-date">
+                                    24 janvier 2025
+                                </div>
+                            </div>
+                            
+                            <div class="newsletter-content">
+                                <h3 class="newsletter-title">
+                                    Budget participatif 2025 : les projets lauréats
+                                </h3>
+                                <p class="newsletter-summary">
+                                    Découvrez les 15 projets sélectionnés par les citoyens pour le budget 
+                                    participatif 2025, totalisant 1,2 million d'euros d'investissements.
+                                </p>
+                                
+                                <div class="newsletter-highlights">
+                                    <div class="highlight-item">
+                                        <i class="fas fa-coins"></i>
+                                        <span>15 projets financés</span>
+                                    </div>
+                                    <div class="highlight-item">
+                                        <i class="fas fa-users"></i>
+                                        <span>3,247 votants</span>
+                                    </div>
+                                    <div class="highlight-item">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        <span>Tous quartiers</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="newsletter-stats">
+                                <div class="stat-item">
+                                    <div class="stat-value">2,456</div>
+                                    <div class="stat-label">Envoyés</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">78%</div>
+                                    <div class="stat-label">Ouverture</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">12%</div>
+                                    <div class="stat-label">Clics</div>
+                                </div>
+                            </div>
+                            
+                            <div class="newsletter-actions">
+                                <button class="btn-refonte btn-sm" onclick="viewNewsletter('budget-2025-results')">
+                                    <i class="fas fa-eye"></i>
+                                    Lire
+                                </button>
+                                <button class="btn-refonte btn-sm btn-secondary" onclick="shareNewsletter('budget-2025-results')">
+                                    <i class="fas fa-share-alt"></i>
+                                    Partager
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Newsletter récente 2 -->
+                        <div class="newsletter-card">
+                            <div class="newsletter-header">
+                                <div class="newsletter-badges">
+                                    <span class="type-badge type-themes">
+                                        <i class="fas fa-leaf"></i>
+                                        Environnement
+                                    </span>
+                                    <span class="status-badge status-sent">
+                                        <i class="fas fa-paper-plane"></i>
+                                        Envoyé
+                                    </span>
+                                </div>
+                                
+                                <div class="newsletter-date">
+                                    20 janvier 2025
+                                </div>
+                            </div>
+                            
+                            <div class="newsletter-content">
+                                <h3 class="newsletter-title">
+                                    Bulletin Environnement - Janvier 2025
+                                </h3>
+                                <p class="newsletter-summary">
+                                    Nouvelles propositions écologiques, avancement des projets verts 
+                                    et consultation sur la stratégie climat de la commune.
+                                </p>
+                                
+                                <div class="newsletter-highlights">
+                                    <div class="highlight-item">
+                                        <i class="fas fa-seedling"></i>
+                                        <span>7 nouvelles propositions</span>
+                                    </div>
+                                    <div class="highlight-item">
+                                        <i class="fas fa-recycle"></i>
+                                        <span>3 projets en cours</span>
+                                    </div>
+                                    <div class="highlight-item">
+                                        <i class="fas fa-poll"></i>
+                                        <span>1 consultation ouverte</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="newsletter-stats">
+                                <div class="stat-item">
+                                    <div class="stat-value">847</div>
+                                    <div class="stat-label">Envoyés</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">82%</div>
+                                    <div class="stat-label">Ouverture</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">18%</div>
+                                    <div class="stat-label">Clics</div>
+                                </div>
+                            </div>
+                            
+                            <div class="newsletter-actions">
+                                <button class="btn-refonte btn-sm" onclick="viewNewsletter('environment-jan-2025')">
+                                    <i class="fas fa-eye"></i>
+                                    Lire
+                                </button>
+                                <button class="btn-refonte btn-sm btn-secondary" onclick="shareNewsletter('environment-jan-2025')">
+                                    <i class="fas fa-share-alt"></i>
+                                    Partager
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Newsletter récente 3 -->
+                        <div class="newsletter-card">
+                            <div class="newsletter-header">
+                                <div class="newsletter-badges">
+                                    <span class="type-badge type-events">
+                                        <i class="fas fa-calendar-alt"></i>
+                                        Événements
+                                    </span>
+                                    <span class="status-badge status-scheduled">
+                                        <i class="fas fa-clock"></i>
+                                        Programmé
+                                    </span>
+                                </div>
+                                
+                                <div class="newsletter-date">
+                                    27 janvier 2025
+                                </div>
+                            </div>
+                            
+                            <div class="newsletter-content">
+                                <h3 class="newsletter-title">
+                                    Agenda participatif - Semaine du 27 janvier
+                                </h3>
+                                <p class="newsletter-summary">
+                                    Réunions publiques, ateliers citoyens et échéances de votes 
+                                    de la semaine à venir dans votre commune.
+                                </p>
+                                
+                                <div class="newsletter-highlights">
+                                    <div class="highlight-item">
+                                        <i class="fas fa-users"></i>
+                                        <span>3 réunions publiques</span>
+                                    </div>
+                                    <div class="highlight-item">
+                                        <i class="fas fa-vote-yea"></i>
+                                        <span>2 votes ouverts</span>
+                                    </div>
+                                    <div class="highlight-item">
+                                        <i class="fas fa-dice"></i>
+                                        <span>1 sortition programmé</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="newsletter-scheduling">
+                                <div class="scheduled-info">
+                                    <i class="fas fa-clock"></i>
+                                    <span>Envoi prévu lundi 27/01 à 08:00</span>
+                                </div>
+                                <div class="recipient-count">
+                                    <i class="fas fa-users"></i>
+                                    <span>1,834 destinataires</span>
+                                </div>
+                            </div>
+                            
+                            <div class="newsletter-actions">
+                                <button class="btn-refonte btn-sm btn-secondary" onclick="previewNewsletter('events-week-27-01')">
+                                    <i class="fas fa-eye"></i>
+                                    Prévisualiser
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Onglet: Archives -->
+            <div class="tab-content" id="tab-archives">
+                <div class="archives-section">
+                    <div class="section-header">
+                        <h2>
+                            <i class="fas fa-archive"></i>
+                            Archives des newsletters
+                        </h2>
+                        
+                        <div class="archives-search">
+                            <div class="search-box">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="archives-search" placeholder="Rechercher dans les archives..." 
+                                       onkeyup="searchArchives()" autocomplete="off">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="archives-timeline">
+                        <!-- Groupe 2025 -->
+                        <div class="timeline-group">
+                            <div class="timeline-year">
+                                <h3>2025</h3>
+                                <span class="year-count">24 newsletters</span>
+                            </div>
+                            
+                            <div class="timeline-items">
+                                <div class="timeline-month">
+                                    <h4>Janvier</h4>
+                                    <div class="month-newsletters">
+                                        <div class="archive-item">
+                                            <div class="archive-info">
+                                                <span class="archive-title">Budget participatif 2025 : résultats</span>
+                                                <span class="archive-date">24 janvier 2025</span>
+                                                <span class="archive-type">Général</span>
+                                            </div>
+                                            <div class="archive-actions">
+                                                <button class="archive-btn" onclick="viewNewsletter('budget-2025-results')">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button class="archive-btn" onclick="downloadNewsletter('budget-2025-results')">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="archive-item">
+                                            <div class="archive-info">
+                                                <span class="archive-title">Bulletin Environnement - Janvier</span>
+                                                <span class="archive-date">20 janvier 2025</span>
+                                                <span class="archive-type">Thématique</span>
+                                            </div>
+                                            <div class="archive-actions">
+                                                <button class="archive-btn" onclick="viewNewsletter('environment-jan-2025')">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button class="archive-btn" onclick="downloadNewsletter('environment-jan-2025')">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="archive-item">
+                                            <div class="archive-info">
+                                                <span class="archive-title">Actualités Quartier Centre</span>
+                                                <span class="archive-date">15 janvier 2025</span>
+                                                <span class="archive-type">Espace</span>
+                                            </div>
+                                            <div class="archive-actions">
+                                                <button class="archive-btn" onclick="viewNewsletter('centre-jan-2025')">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button class="archive-btn" onclick="downloadNewsletter('centre-jan-2025')">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Groupe 2024 -->
+                        <div class="timeline-group">
+                            <div class="timeline-year">
+                                <h3>2024</h3>
+                                <span class="year-count">156 newsletters</span>
+                            </div>
+                            
+                            <div class="timeline-months-collapsed">
+                                <button class="expand-year" onclick="expandYear(2024)">
+                                    <i class="fas fa-chevron-down"></i>
+                                    Voir toutes les newsletters 2024
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Onglet: Gestion (administrateurs) -->
+            {% if user_can_create_newsletters %}
+            <div class="tab-content" id="tab-manage">
+                <div class="management-section">
+                    <div class="section-header">
+                        <h2>
+                            <i class="fas fa-cog"></i>
+                            Gestion des newsletters
+                        </h2>
+                        
+                        <div class="section-actions">
+                            <button class="btn-refonte" onclick="createNewsletter()">
+                                <i class="fas fa-plus"></i>
+                                Nouvelle newsletter
+                            </button>
+                            <button class="btn-refonte btn-secondary" onclick="manageTemplates()">
+                                <i class="fas fa-file-alt"></i>
+                                Modèles
+                            </button>
+                            <button class="btn-refonte btn-secondary" onclick="viewAnalytics()">
+                                <i class="fas fa-chart-bar"></i>
+                                Statistiques
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="management-grid">
+                        <!-- Statistiques d'envoi -->
+                        <div class="management-card">
+                            <div class="card-header">
+                                <h3>
+                                    <i class="fas fa-chart-line"></i>
+                                    Statistiques d'envoi
+                                </h3>
+                            </div>
+                            <div class="card-content">
+                                <div class="stats-grid">
+                                    <div class="stat-box">
+                                        <div class="stat-value">{{ total_newsletters }}</div>
+                                        <div class="stat-label">Newsletters envoyées</div>
+                                    </div>
+                                    <div class="stat-box">
+                                        <div class="stat-value">{{ total_subscribers }}</div>
+                                        <div class="stat-label">Abonnés totaux</div>
+                                    </div>
+                                    <div class="stat-box">
+                                        <div class="stat-value">{{ avg_open_rate }}%</div>
+                                        <div class="stat-label">Taux d'ouverture moyen</div>
+                                    </div>
+                                    <div class="stat-box">
+                                        <div class="stat-value">{{ avg_click_rate }}%</div>
+                                        <div class="stat-label">Taux de clic moyen</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Newsletters en cours -->
+                        <div class="management-card">
+                            <div class="card-header">
+                                <h3>
+                                    <i class="fas fa-edit"></i>
+                                    Newsletters en cours
+                                </h3>
+                            </div>
+                            <div class="card-content">
+                                <div class="drafts-list">
+                                    {% for draft in draft_newsletters %}
+                                    <div class="draft-item">
+                                        <div class="draft-info">
+                                            <strong>{{ draft.title }}</strong>
+                                            <span>Modifié le {{ draft.updated_at|format_date }}</span>
+                                        </div>
+                                        <div class="draft-actions">
+                                            <button class="draft-btn" onclick="editNewsletter({{ draft.id }})">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="draft-btn" onclick="deleteNewsletter({{ draft.id }})">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                    
+                                    {% if not draft_newsletters %}
+                                    <div class="no-drafts">
+                                        <i class="fas fa-info-circle"></i>
+                                        Aucun brouillon en cours
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Programmation -->
+                        <div class="management-card">
+                            <div class="card-header">
+                                <h3>
+                                    <i class="fas fa-calendar-alt"></i>
+                                    Programmation
+                                </h3>
+                            </div>
+                            <div class="card-content">
+                                <div class="scheduled-list">
+                                    {% for scheduled in scheduled_newsletters %}
+                                    <div class="scheduled-item">
+                                        <div class="scheduled-info">
+                                            <strong>{{ scheduled.title }}</strong>
+                                            <span>Envoi prévu: {{ scheduled.send_date|format_datetime }}</span>
+                                            <span class="recipient-count">{{ scheduled.recipient_count }} destinataires</span>
+                                        </div>
+                                        <div class="scheduled-actions">
+                                            <button class="scheduled-btn" onclick="editSchedule({{ scheduled.id }})">
+                                                <i class="fas fa-clock"></i>
+                                            </button>
+                                            <button class="scheduled-btn" onclick="cancelSend({{ scheduled.id }})">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                    
+                                    {% if not scheduled_newsletters %}
+                                    <div class="no-scheduled">
+                                        <i class="fas fa-info-circle"></i>
+                                        Aucun envoi programmé
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Abonnement newsletters -->
+<div class="modal" id="subscriptionModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-envelope"></i>
+                    S'abonner aux newsletters
+                </h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="subscription-form">
+                    <div class="form-group">
+                        <label for="subscriber-email">Adresse email *</label>
+                        <input type="email" id="subscriber-email" class="form-control" required
+                               placeholder="votre.email@exemple.com">
+                        <div class="form-help">Votre email ne sera utilisé que pour les newsletters</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Types de newsletters</label>
+                        <div class="subscription-options">
+                            <label class="subscription-checkbox">
+                                <input type="checkbox" name="newsletter-types" value="general" checked>
+                                <span>Actualités générales (hebdomadaire)</span>
+                            </label>
+                            
+                            <label class="subscription-checkbox">
+                                <input type="checkbox" name="newsletter-types" value="events">
+                                <span>Agenda participatif (notifications)</span>
+                            </label>
+                            
+                            <label class="subscription-checkbox">
+                                <input type="checkbox" name="newsletter-types" value="themes">
+                                <span>Bulletins thématiques (mensuel)</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="gdpr-checkbox">
+                            <input type="checkbox" id="gdpr-consent" required>
+                            <span>J'accepte de recevoir ces newsletters et reconnais avoir pris connaissance 
+                            de la <a href="/privacy" target="_blank">politique de confidentialité</a></span>
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-refonte btn-secondary" data-dismiss="modal">
+                    Annuler
+                </button>
+                <button type="button" class="btn-refonte" onclick="subscribeToNewsletters()">
+                    <i class="fas fa-envelope"></i>
+                    S'abonner
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Traçabilité UMan API -->
+<div class="traceability-section">
+    <div class="container">
+        <div class="traceability-info">
+            <div class="trace-header">
+                <h4>
+                    <i class="fas fa-shield-alt"></i>
+                    Traçabilité UMan API - Newsletters
+                </h4>
+                <span class="trace-score">Score: 100%</span>
+            </div>
+            
+            <div class="trace-details">
+                <div class="trace-item">
+                    <span class="trace-label">Abonnements opt-in:</span>
+                    <code class="trace-value">{{ total_subscribers }} consentements</code>
+                </div>
+                <div class="trace-item">
+                    <span class="trace-label">Modèles ciblés:</span>
+                    <span class="trace-value verified">
+                        <i class="fas fa-bullseye"></i>
+                        {{ newsletter_templates }} actifs
+                    </span>
+                </div>
+                <div class="trace-item">
+                    <span class="trace-label">Envois journalisés:</span>
+                    <span class="trace-value verified">
+                        <i class="fas fa-paper-plane"></i>
+                        {{ total_sent }} tracés
+                    </span>
+                </div>
+                <div class="trace-item">
+                    <span class="trace-label">RGPD compliance:</span>
+                    <span class="trace-value">Dernière vérification: {{ last_gdpr_check|format_datetime }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Variables globales pour les newsletters
+const newslettersData = {
+    subscriptions: {{ user_subscriptions|tojson }},
+    availableSpaces: {{ spaces|tojson }},
+    availableThemes: {{ themes|tojson }},
+    statistics: {{ newsletter_statistics|tojson }}
+};
+
+// Initialisation
+document.addEventListener('DOMContentLoaded', function() {
+    initializeNewslettersInterface();
+    loadUserSubscriptions();
+    setupNewslettersEventListeners();
+});
+
+// Navigation entre onglets
+function switchTab(tabName) {
+    // Masquer tous les onglets
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    document.querySelectorAll('.nav-tab').forEach(nav => {
+        nav.classList.remove('active');
+    });
+    
+    // Afficher l'onglet sélectionné
+    document.getElementById(`tab-${tabName}`).classList.add('active');
+    document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+}
+
+// Gestion des abonnements
+function showSubscriptionModal() {
+    $('#subscriptionModal').modal('show');
+}
+
+function toggleSubscription(type, checked) {
+    // Basculer un abonnement
+    fetch('/newsletters/subscription/toggle', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            type: type,
+            subscribed: checked
+        })
+    });
+}
+
+function toggleTheme(theme, checked) {
+    // Basculer un thème
+    fetch('/newsletters/themes/toggle', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            theme: theme,
+            subscribed: checked
+        })
+    });
+}
+
+function toggleEventType(eventType, checked) {
+    // Basculer un type d'événement
+    fetch('/newsletters/events/toggle', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            event_type: eventType,
+            subscribed: checked
+        })
+    });
+}
+
+function subscribeToNewsletters() {
+    // Logique d'abonnement
+    const form = document.getElementById('subscription-form');
+    const formData = new FormData(form);
+    
+    fetch('/newsletters/subscribe', {
+        method: 'POST',
+        body: formData
+    }).then(response => {
+        if (response.ok) {
+            $('#subscriptionModal').modal('hide');
+            location.reload();
+        }
+    });
+}
+
+// Fonctions utilitaires
+function manageSubscriptions() {
+    window.location.href = '/newsletters/manage';
+}
+
+function filterNewsletters() {
+    // Filtrer les newsletters dans l'onglet parcourir
+}
+
+function searchArchives() {
+    // Rechercher dans les archives
+}
+
+function viewNewsletter(newsletterId) {
+    window.location.href = `/newsletters/${newsletterId}`;
+}
+
+function shareNewsletter(newsletterId) {
+    // Partager une newsletter
+}
+
+// Sera complété par newsletters.js
+</script>
+{% endblock %}

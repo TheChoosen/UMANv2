@@ -26,6 +26,13 @@
     {% if request.path.startswith('/democratie') %}
     <link rel="stylesheet" href="/static/democratie.css">
     {% endif %}
+    
+    <!-- CSS spécialisé selon le module -->
+    {% if 'proposal' in request.path or 'debate' in request.path %}
+    <link rel="stylesheet" href="/static/proposals.css">
+    {% elif 'meeting' in request.path %}
+    <link rel="stylesheet" href="/static/meetings.css">
+    {% endif %}
 </head>
 
 <body>
@@ -44,9 +51,7 @@
                     <ul class="nav-menu" id="nav-menu">
                         <li><a href="/" class="nav-link">Accueil</a></li>
 
-                        <li><a href="#features" class="nav-link">Fonctionnalités</a></li>
                         <li><a href="#pricing" class="nav-link">Tarifs</a></li>
-                        <li><a href="#faq" class="nav-link">FAQ</a></li>
                         <li><a href="#" class="nav-link" data-toggle="modal"
                                 data-target="#modalContactVente">Contact</a></li>
                         {% if not session.get('user_id') %}
@@ -75,7 +80,7 @@
             {% block content %}{% endblock %}
 
             <!-- FOOTER -->
-            <footer class="footer">
+            <footer class="footer" style="margin-top:0px;">
                 <div class="container">
                     <div class="footer-content">
                         <div class="footer-about">
@@ -1171,6 +1176,25 @@
 
     {% if request.path.startswith('/democratie') %}
     <script src="/static/democratie.js"></script>
+    {% endif %}
+    
+    <!-- JavaScript spécialisé selon le module -->
+    {% if 'proposal' in request.path or 'debate' in request.path %}
+    <script src="/static/proposals.js"></script>
+    {% elif 'meeting' in request.path %}
+    <!-- Flatpickr pour les sélecteurs de date/heure -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/fr.js"></script>
+    
+    <!-- SortableJS pour le drag & drop -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    
+    <!-- CKEditor pour l'édition riche -->
+    <script src="https://cdn.ckeditor.com/4.20.1/standard/ckeditor.js"></script>
+    
+    <!-- JavaScript des meetings -->
+    <script src="/static/meetings.js"></script>
     {% endif %}
 
 

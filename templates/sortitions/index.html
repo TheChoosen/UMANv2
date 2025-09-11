@@ -1,0 +1,797 @@
+{% extends "base.html" %}
+
+{% block title %}Sortitions - Tirages au sort - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="sortitions-layout">
+    <div class="container">
+        <div class="sortitions-container">
+            <!-- En-tête des sortitions -->
+            <div class="sortitions-header">
+                <div class="hero-section">
+                    <div class="hero-content">
+                        <h1>
+                            <i class="fas fa-dice"></i>
+                            Sortitions - Tirages au sort
+                        </h1>
+                        <p class="hero-description">
+                            Tirages au sort transparents et auditables pour sélectionner des propositions, 
+                            des participants ou des éléments de manière équitable et démocratique.
+                        </p>
+                        
+                        <div class="hero-stats">
+                            <div class="stat-item">
+                                <div class="stat-value">{{ total_sortitions }}</div>
+                                <div class="stat-label">Tirages réalisés</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">{{ total_selected_items }}</div>
+                                <div class="stat-label">Éléments sélectionnés</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">100%</div>
+                                <div class="stat-label">Auditabilité</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="hero-actions">
+                        {% if user_can_create_sortitions %}
+                        <button class="btn-refonte" onclick="showCreateSortitionModal()">
+                            <i class="fas fa-plus"></i>
+                            Nouveau tirage
+                        </button>
+                        {% endif %}
+                        <button class="btn-refonte btn-secondary" onclick="showAuditProtocol()">
+                            <i class="fas fa-shield-check"></i>
+                            Protocole d'audit
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtres des sortitions -->
+            <div class="sortitions-filters">
+                <div class="filters-container">
+                    <div class="filter-group">
+                        <label for="status-filter">Statut</label>
+                        <select class="filter-select" id="status-filter" onchange="filterSortitions()">
+                            <option value="">Tous les tirages</option>
+                            <option value="pending">En attente</option>
+                            <option value="in-progress">En cours</option>
+                            <option value="completed">Terminé</option>
+                            <option value="cancelled">Annulé</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="type-filter">Type de tirage</label>
+                        <select class="filter-select" id="type-filter" onchange="filterSortitions()">
+                            <option value="">Tous les types</option>
+                            <option value="proposals">Propositions</option>
+                            <option value="participants">Participants</option>
+                            <option value="projects">Projets budgets</option>
+                            <option value="custom">Éléments personnalisés</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="space-filter">Espace participatif</label>
+                        <select class="filter-select" id="space-filter" onchange="filterSortitions()">
+                            <option value="">Tous les espaces</option>
+                            {% for space in spaces %}
+                            <option value="{{ space.id }}">{{ space.title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="search-group">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="search-input" placeholder="Rechercher un tirage..." 
+                                   onkeyup="searchSortitions()" autocomplete="off">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tirage en cours (si applicable) -->
+            {% if current_sortition %}
+            <div class="current-sortition">
+                <div class="current-sortition-card">
+                    <div class="current-header">
+                        <h2>
+                            <i class="fas fa-play-circle"></i>
+                            Tirage en cours
+                        </h2>
+                        <div class="current-status">
+                            <span class="status-badge status-in-progress">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                En cours d'exécution
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="current-content">
+                        <h3>{{ current_sortition.title }}</h3>
+                        <p>{{ current_sortition.description }}</p>
+                        
+                        <div class="current-progress">
+                            <div class="progress-info">
+                                <span>Progression du tirage</span>
+                                <span>{{ current_sortition.progress_percentage }}%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: {{ current_sortition.progress_percentage }}%;"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="current-details">
+                            <div class="detail-item">
+                                <i class="fas fa-list"></i>
+                                <span>{{ current_sortition.total_candidates }} candidats</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-trophy"></i>
+                                <span>{{ current_sortition.target_selections }} à sélectionner</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-eye"></i>
+                                <span>{{ current_sortition.witnesses_count }} témoins</span>
+                            </div>
+                        </div>
+                        
+                        <div class="current-actions">
+                            <button class="btn-refonte" onclick="watchLiveSortition({{ current_sortition.id }})">
+                                <i class="fas fa-eye"></i>
+                                Suivre en direct
+                            </button>
+                            <button class="btn-refonte btn-secondary" onclick="viewSortitionDetails({{ current_sortition.id }})">
+                                <i class="fas fa-info-circle"></i>
+                                Détails
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Liste des sortitions -->
+            <div class="sortitions-section">
+                <div class="section-header">
+                    <h2>
+                        <i class="fas fa-dice"></i>
+                        Historique des tirages
+                        <span class="sortitions-count">({{ sortitions|length }})</span>
+                    </h2>
+                    
+                    <div class="section-actions">
+                        <select class="sort-select" id="sort-select" onchange="sortSortitions()">
+                            <option value="newest">Plus récents</option>
+                            <option value="oldest">Plus anciens</option>
+                            <option value="largest">Plus d'éléments</option>
+                            <option value="alphabetical">Alphabétique</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="sortitions-grid" id="sortitions-container">
+                    <!-- Sortition 1 - Terminée -->
+                    <div class="sortition-card" data-status="completed" data-type="proposals">
+                        <div class="sortition-header">
+                            <div class="sortition-badges">
+                                <span class="type-badge type-proposals">
+                                    <i class="fas fa-lightbulb"></i>
+                                    Propositions
+                                </span>
+                                <span class="status-badge status-completed">
+                                    <i class="fas fa-check-circle"></i>
+                                    Terminé
+                                </span>
+                            </div>
+                            
+                            <div class="sortition-actions">
+                                <button class="action-btn" title="Audit complet" onclick="showAuditReport(1)">
+                                    <i class="fas fa-shield-check"></i>
+                                </button>
+                                <button class="action-btn" title="Partager" onclick="shareSortition(1)">
+                                    <i class="fas fa-share-alt"></i>
+                                </button>
+                                <button class="action-btn" title="Exporter" onclick="exportSortition(1)">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="sortition-content">
+                            <h3 class="sortition-title">Sélection jury citoyen budget participatif</h3>
+                            <p class="sortition-description">
+                                Tirage au sort pour sélectionner 15 citoyens parmi les candidats 
+                                volontaires pour constituer le jury d'évaluation des projets de budget participatif.
+                            </p>
+                            
+                            <div class="sortition-meta">
+                                <div class="meta-item">
+                                    <i class="fas fa-calendar"></i>
+                                    <span>Réalisé le {{ "2025-01-15 14:30"|format_datetime }}</span>
+                                </div>
+                                <div class="meta-item">
+                                    <i class="fas fa-user-shield"></i>
+                                    <span>Admin Budget Participatif</span>
+                                </div>
+                                <div class="meta-item">
+                                    <i class="fas fa-building"></i>
+                                    <span>Processus Budget 2025</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="sortition-stats">
+                            <div class="stats-grid">
+                                <div class="stat-item">
+                                    <div class="stat-value">167</div>
+                                    <div class="stat-label">Candidats</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">15</div>
+                                    <div class="stat-label">Sélectionnés</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">8</div>
+                                    <div class="stat-label">Témoins</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">100%</div>
+                                    <div class="stat-label">Reproductible</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="sortition-results">
+                            <div class="results-header">
+                                <h4>
+                                    <i class="fas fa-trophy"></i>
+                                    Participants sélectionnés (15)
+                                </h4>
+                                <button class="toggle-results" onclick="toggleResults(1)">
+                                    <i class="fas fa-chevron-down"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="results-list collapsed" id="results-1">
+                                <div class="selected-items-preview">
+                                    <div class="selected-item">
+                                        <div class="item-avatar">
+                                            <span class="avatar-placeholder">MC</span>
+                                        </div>
+                                        <div class="item-info">
+                                            <div class="item-name">Marie Citoyenne</div>
+                                            <div class="item-order">Position #3 - Seed: a1b2c3</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="selected-item">
+                                        <div class="item-avatar">
+                                            <span class="avatar-placeholder">JD</span>
+                                        </div>
+                                        <div class="item-info">
+                                            <div class="item-name">Jean Dupont</div>
+                                            <div class="item-order">Position #7 - Seed: d4e5f6</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="selected-item">
+                                        <div class="item-avatar">
+                                            <span class="avatar-placeholder">SL</span>
+                                        </div>
+                                        <div class="item-info">
+                                            <div class="item-name">Sophie Leblanc</div>
+                                            <div class="item-order">Position #12 - Seed: g7h8i9</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="more-results">
+                                        <span>+ 12 autres sélectionnés</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="sortition-footer">
+                            <div class="audit-indicators">
+                                <div class="audit-item verified">
+                                    <i class="fas fa-certificate"></i>
+                                    <span>Signature vérifiée</span>
+                                </div>
+                                <div class="audit-item verified">
+                                    <i class="fas fa-dice-d6"></i>
+                                    <span>Seed reproductible</span>
+                                </div>
+                                <div class="audit-item verified">
+                                    <i class="fas fa-eye"></i>
+                                    <span>8 témoins présents</span>
+                                </div>
+                            </div>
+                            
+                            <div class="sortition-actions">
+                                <button class="btn-refonte btn-sm" onclick="viewSortitionDetails(1)">
+                                    <i class="fas fa-eye"></i>
+                                    Voir le détail
+                                </button>
+                                <button class="btn-refonte btn-sm btn-secondary" onclick="reproduceDrawing(1)">
+                                    <i class="fas fa-redo"></i>
+                                    Reproduire
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sortition 2 - En attente -->
+                    <div class="sortition-card" data-status="pending" data-type="participants">
+                        <div class="sortition-header">
+                            <div class="sortition-badges">
+                                <span class="type-badge type-participants">
+                                    <i class="fas fa-users"></i>
+                                    Participants
+                                </span>
+                                <span class="status-badge status-pending">
+                                    <i class="fas fa-clock"></i>
+                                    Planifié
+                                </span>
+                            </div>
+                            
+                            <div class="sortition-actions">
+                                <button class="action-btn" title="Modifier" onclick="editSortition(2)">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="action-btn" title="Supprimer" onclick="deleteSortition(2)">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="sortition-content">
+                            <h3 class="sortition-title">Panélistes débat public transport</h3>
+                            <p class="sortition-description">
+                                Sélection de 12 citoyens représentatifs pour participer au débat public 
+                                sur l'avenir du transport dans l'agglomération.
+                            </p>
+                            
+                            <div class="sortition-meta">
+                                <div class="meta-item">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span>Programmé le {{ "2025-02-01 10:00"|format_datetime }}</span>
+                                </div>
+                                <div class="meta-item">
+                                    <i class="fas fa-user-shield"></i>
+                                    <span>Commission Transport</span>
+                                </div>
+                                <div class="meta-item">
+                                    <i class="fas fa-building"></i>
+                                    <span>Assemblée Citoyenne Transport</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="sortition-stats">
+                            <div class="stats-grid">
+                                <div class="stat-item">
+                                    <div class="stat-value">89</div>
+                                    <div class="stat-label">Candidats inscrits</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">12</div>
+                                    <div class="stat-label">À sélectionner</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">5</div>
+                                    <div class="stat-label">Témoins prévus</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">13.5%</div>
+                                    <div class="stat-label">Chance sélection</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="sortition-config">
+                            <div class="config-header">
+                                <h4>
+                                    <i class="fas fa-cog"></i>
+                                    Configuration du tirage
+                                </h4>
+                            </div>
+                            
+                            <div class="config-details">
+                                <div class="config-item">
+                                    <i class="fas fa-balance-scale"></i>
+                                    <span>Critères de représentativité : âge, genre, quartier</span>
+                                </div>
+                                <div class="config-item">
+                                    <i class="fas fa-dice-d20"></i>
+                                    <span>Algorithme : Fisher-Yates avec seed cryptographique</span>
+                                </div>
+                                <div class="config-item">
+                                    <i class="fas fa-shield-alt"></i>
+                                    <span>Témoins : commission + 3 citoyens volontaires</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="sortition-footer">
+                            <div class="countdown-info">
+                                <i class="fas fa-clock"></i>
+                                <span>Début dans {{ days_until_sortition }} jours</span>
+                            </div>
+                            
+                            <div class="sortition-actions">
+                                <button class="btn-refonte btn-sm" onclick="launchSortition(2)">
+                                    <i class="fas fa-play"></i>
+                                    Lancer maintenant
+                                </button>
+                                <button class="btn-refonte btn-sm btn-secondary" onclick="viewSortitionDetails(2)">
+                                    <i class="fas fa-info-circle"></i>
+                                    Configuration
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sortition 3 - Annulée -->
+                    <div class="sortition-card" data-status="cancelled" data-type="projects">
+                        <div class="sortition-header">
+                            <div class="sortition-badges">
+                                <span class="type-badge type-projects">
+                                    <i class="fas fa-project-diagram"></i>
+                                    Projets
+                                </span>
+                                <span class="status-badge status-cancelled">
+                                    <i class="fas fa-times-circle"></i>
+                                    Annulé
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="sortition-content">
+                            <h3 class="sortition-title">Priorisation projets étudiants</h3>
+                            <p class="sortition-description">
+                                Tirage au sort pour prioriser les projets étudiants soumis dans le cadre 
+                                du budget participatif jeunesse.
+                            </p>
+                            
+                            <div class="sortition-meta">
+                                <div class="meta-item">
+                                    <i class="fas fa-ban"></i>
+                                    <span>Annulé le {{ "2025-01-08"|format_date }}</span>
+                                </div>
+                                <div class="meta-item">
+                                    <i class="fas fa-info-circle"></i>
+                                    <span>Raison: Nombre insuffisant de candidats</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="sortition-stats disabled">
+                            <div class="stats-grid">
+                                <div class="stat-item">
+                                    <div class="stat-value">12</div>
+                                    <div class="stat-label">Projets soumis</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">20</div>
+                                    <div class="stat-label">Minimum requis</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">-</div>
+                                    <div class="stat-label">Non réalisé</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="sortition-footer">
+                            <div class="cancel-reason">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <span>Seuil minimum de 20 projets non atteint</span>
+                            </div>
+                            
+                            <div class="sortition-actions">
+                                <button class="btn-refonte btn-sm btn-secondary" onclick="recreateSortition(3)">
+                                    <i class="fas fa-redo"></i>
+                                    Recréer
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section protocole d'audit -->
+            <div class="audit-protocol-section">
+                <div class="section-header">
+                    <h2>
+                        <i class="fas fa-shield-check"></i>
+                        Protocole d'auditabilité
+                    </h2>
+                </div>
+                
+                <div class="protocol-cards">
+                    <div class="protocol-card">
+                        <div class="protocol-icon">
+                            <i class="fas fa-dice-d6"></i>
+                        </div>
+                        <div class="protocol-content">
+                            <h3>Génération de Seed</h3>
+                            <p>Chaque tirage utilise un seed cryptographique généré de manière sécurisée, 
+                            incluant timestamp, hash des candidats et entropie système.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="protocol-card">
+                        <div class="protocol-icon">
+                            <i class="fas fa-eye"></i>
+                        </div>
+                        <div class="protocol-content">
+                            <h3>Présence de témoins</h3>
+                            <p>Des témoins indépendants assistent au tirage en direct ou visionnent 
+                            l'enregistrement pour garantir la transparence du processus.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="protocol-card">
+                        <div class="protocol-icon">
+                            <i class="fas fa-redo"></i>
+                        </div>
+                        <div class="protocol-content">
+                            <h3>Reproductibilité</h3>
+                            <p>Avec le même seed et les mêmes candidats, le tirage produit 
+                            exactement les mêmes résultats, permettant la vérification.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="protocol-card">
+                        <div class="protocol-icon">
+                            <i class="fas fa-file-signature"></i>
+                        </div>
+                        <div class="protocol-content">
+                            <h3>Journal signé</h3>
+                            <p>Toutes les étapes sont enregistrées dans un journal immuable 
+                            signé numériquement et horodaté de manière vérifiable.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Créer une sortition -->
+{% if user_can_create_sortitions %}
+<div class="modal" id="createSortitionModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus"></i>
+                    Créer une nouvelle sortition
+                </h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="create-sortition-form">
+                    <div class="form-group">
+                        <label for="sortition-title">Titre de la sortition *</label>
+                        <input type="text" id="sortition-title" class="form-control" required
+                               placeholder="Ex: Sélection jury citoyen">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="sortition-description">Description</label>
+                        <textarea id="sortition-description" class="form-control" rows="3"
+                                  placeholder="Décrivez l'objectif de ce tirage au sort..."></textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="sortition-type">Type d'éléments à tirer *</label>
+                                <select id="sortition-type" class="form-control" required>
+                                    <option value="">Sélectionnez le type</option>
+                                    <option value="proposals">Propositions</option>
+                                    <option value="participants">Participants/Utilisateurs</option>
+                                    <option value="projects">Projets de budget</option>
+                                    <option value="custom">Éléments personnalisés</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="selections-count">Nombre à sélectionner *</label>
+                                <input type="number" id="selections-count" class="form-control" 
+                                       min="1" max="1000" required placeholder="15">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="source-space">Espace participatif source</label>
+                        <select id="source-space" class="form-control">
+                            <option value="">Sélectionnez un espace</option>
+                            {% for space in spaces %}
+                            <option value="{{ space.id }}">{{ space.title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="scheduled-date">Date de tirage</label>
+                        <input type="datetime-local" id="scheduled-date" class="form-control">
+                        <div class="form-help">Laisser vide pour un tirage immédiat</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="witnesses-count">Nombre de témoins</label>
+                        <input type="number" id="witnesses-count" class="form-control" 
+                               min="0" max="20" value="3" placeholder="3">
+                        <div class="form-help">Témoins indépendants pour garantir la transparence</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="public-live" checked>
+                            <span class="checkmark"></span>
+                            Tirage public en direct
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-refonte btn-secondary" data-dismiss="modal">
+                    Annuler
+                </button>
+                <button type="button" class="btn-refonte" onclick="createSortition()">
+                    <i class="fas fa-plus"></i>
+                    Créer la sortition
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Traçabilité UMan API -->
+<div class="traceability-section">
+    <div class="container">
+        <div class="traceability-info">
+            <div class="trace-header">
+                <h4>
+                    <i class="fas fa-shield-alt"></i>
+                    Traçabilité UMan API - Sortitions
+                </h4>
+                <span class="trace-score">Score: 100%</span>
+            </div>
+            
+            <div class="trace-details">
+                <div class="trace-item">
+                    <span class="trace-label">Tirages enregistrés:</span>
+                    <code class="trace-value">{{ total_sortitions }} journalisés</code>
+                </div>
+                <div class="trace-item">
+                    <span class="trace-label">Seeds cryptographiques:</span>
+                    <span class="trace-value verified">
+                        <i class="fas fa-certificate"></i>
+                        100% reproductibles
+                    </span>
+                </div>
+                <div class="trace-item">
+                    <span class="trace-label">Témoins présents:</span>
+                    <span class="trace-value verified">
+                        <i class="fas fa-eye"></i>
+                        {{ total_witnesses }} attestations
+                    </span>
+                </div>
+                <div class="trace-item">
+                    <span class="trace-label">Audit indépendant:</span>
+                    <span class="trace-value">Dernière vérification: {{ last_audit_date|format_datetime }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Variables globales pour les sortitions
+const sortitionsData = {
+    sortitions: {{ sortitions|tojson }},
+    currentSortition: {{ current_sortition|tojson }},
+    spaces: {{ spaces|tojson }}
+};
+
+// Initialisation
+document.addEventListener('DOMContentLoaded', function() {
+    initializeSortitionsInterface();
+    loadSortitionsData();
+    setupSortitionsEventListeners();
+    
+    // Démarrer les countdowns s'il y a des tirages programmés
+    startSortitionCountdowns();
+});
+
+// Fonctions de gestion des sortitions
+function filterSortitions() {
+    // Logique de filtrage des sortitions
+}
+
+function searchSortitions() {
+    // Logique de recherche
+}
+
+function sortSortitions() {
+    // Logique de tri des sortitions
+}
+
+// Fonctions d'actions
+function showCreateSortitionModal() {
+    $('#createSortitionModal').modal('show');
+}
+
+function createSortition() {
+    // Logique de création de sortition
+}
+
+function launchSortition(sortitionId) {
+    // Lancer immédiatement une sortition programmée
+}
+
+function watchLiveSortition(sortitionId) {
+    // Regarder un tirage en direct
+    window.location.href = `/sortitions/${sortitionId}/live`;
+}
+
+function viewSortitionDetails(sortitionId) {
+    // Voir les détails d'une sortition
+    window.location.href = `/sortitions/${sortitionId}`;
+}
+
+function reproduceDrawing(sortitionId) {
+    // Reproduire un tirage avec le même seed pour vérification
+}
+
+function showAuditReport(sortitionId) {
+    // Afficher le rapport d'audit complet
+    window.location.href = `/sortitions/${sortitionId}/audit`;
+}
+
+function showAuditProtocol() {
+    // Afficher le protocole d'audit général
+    window.location.href = `/sortitions/protocol`;
+}
+
+// Fonctions utilitaires
+function toggleResults(sortitionId) {
+    const results = document.getElementById(`results-${sortitionId}`);
+    const button = results.previousElementSibling.querySelector('.toggle-results i');
+    
+    if (results.classList.contains('collapsed')) {
+        results.classList.remove('collapsed');
+        button.classList.remove('fa-chevron-down');
+        button.classList.add('fa-chevron-up');
+    } else {
+        results.classList.add('collapsed');
+        button.classList.remove('fa-chevron-up');
+        button.classList.add('fa-chevron-down');
+    }
+}
+
+function startSortitionCountdowns() {
+    // Démarrer les compteurs pour les sortitions programmées
+    const countdowns = document.querySelectorAll('.countdown-info');
+    // Logique de countdown
+}
+
+// Sera complété par sortitions.js
+</script>
+{% endblock %}

@@ -1,0 +1,926 @@
+{% extends "base.html" %}
+
+{% block title %}Propositions - {{ space.name }} — {{ organization.name }}{% endblock %}
+
+{% block meta %}
+<link rel="stylesheet" href="{{ url_for('static', filename='refonte.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='spaces.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='proposals.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="proposals-layout">
+    <div class="container">
+        <!-- Header with breadcrumb -->
+        <div class="page-header">
+            <nav class="breadcrumb">
+                <a href="{{ url_for('spaces.index') }}">Espaces participatifs</a>
+                <span class="breadcrumb-separator">/</span>
+                <a href="{{ url_for('spaces.detail', type=space.type, id=space.id) }}">{{ space.name }}</a>
+                <span class="breadcrumb-separator">/</span>
+                <span class="breadcrumb-current">Propositions</span>
+            </nav>
+            
+            <div class="header-content">
+                <h1>
+                    <i class="fas fa-lightbulb"></i>
+                    Propositions
+                </h1>
+                <p>{{ proposals_count }} proposition{{ 's' if proposals_count != 1 else '' }} dans cet espace</p>
+                
+                {% if space.phase_description %}
+                <div class="phase-info">
+                    <div class="phase-badge phase-{{ space.current_phase.slug if space.current_phase else 'active' }}">
+                        <i class="fas fa-calendar-check"></i>
+                        {{ space.current_phase.name if space.current_phase else 'Phase active' }}
+                    </div>
+                    <p>{{ space.phase_description }}</p>
+                </div>
+                {% endif %}
+            </div>
+            
+            {% if can_create_proposal %}
+            <div class="header-actions">
+                <button class="btn-refonte btn-refonte-primary" onclick="createNewProposal()">
+                    <i class="fas fa-plus"></i>
+                    Nouvelle proposition
+                </button>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Proposals statistics -->
+        <div class="proposals-stats">
+            <div class="stats-grid">
+                <div class="stat-card card-glass-refonte">
+                    <div class="stat-icon">
+                        <i class="fas fa-lightbulb"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number">{{ proposals_count }}</div>
+                        <div class="stat-label">Propositions</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card card-glass-refonte">
+                    <div class="stat-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number">{{ total_endorsements }}</div>
+                        <div class="stat-label">Soutiens</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card card-glass-refonte">
+                    <div class="stat-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number">{{ total_comments }}</div>
+                        <div class="stat-label">Commentaires</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card card-glass-refonte">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number">{{ active_participants }}</div>
+                        <div class="stat-label">Participants actifs</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Proposals filters and search -->
+        <div class="proposals-filters card-glass-refonte">
+            <div class="filters-header">
+                <h3>
+                    <i class="fas fa-filter"></i>
+                    Filtrer et rechercher
+                </h3>
+                <button class="filters-toggle" onclick="toggleFilters()">
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+            </div>
+            
+            <div class="filters-content" id="filters-content">
+                <div class="filters-row">
+                    <div class="filter-group">
+                        <label for="proposal-search">Recherche :</label>
+                        <div class="search-input">
+                            <input type="text" id="proposal-search" class="form-control" 
+                                   placeholder="Titre, contenu ou auteur..." onInput="filterProposals()">
+                            <i class="fas fa-search"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="proposal-state">État :</label>
+                        <select id="proposal-state" class="form-control" onchange="filterProposals()">
+                            <option value="">Tous les états</option>
+                            <option value="published">Publié</option>
+                            <option value="draft">Brouillon</option>
+                            <option value="under_review">En révision</option>
+                            <option value="accepted">Accepté</option>
+                            <option value="rejected">Rejeté</option>
+                            <option value="withdrawn">Retiré</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="proposal-category">Catégorie :</label>
+                        <select id="proposal-category" class="form-control" onchange="filterProposals()">
+                            <option value="">Toutes les catégories</option>
+                            {% for category in categories %}
+                            <option value="{{ category.id }}">{{ category.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="proposal-scope">Portée :</label>
+                        <select id="proposal-scope" class="form-control" onchange="filterProposals()">
+                            <option value="">Toutes les portées</option>
+                            {% for scope in scopes %}
+                            <option value="{{ scope.id }}">{{ scope.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="filters-row">
+                    <div class="filter-group">
+                        <label for="proposal-sort">Trier par :</label>
+                        <select id="proposal-sort" class="form-control" onchange="sortProposals()">
+                            <option value="recent">Plus récentes</option>
+                            <option value="endorsed">Plus soutenues</option>
+                            <option value="commented">Plus commentées</option>
+                            <option value="alphabetical">Alphabétique</option>
+                            <option value="random">Aléatoire</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="proposal-date">Période :</label>
+                        <select id="proposal-date" class="form-control" onchange="filterProposals()">
+                            <option value="">Toute la période</option>
+                            <option value="today">Aujourd'hui</option>
+                            <option value="week">Cette semaine</option>
+                            <option value="month">Ce mois</option>
+                            <option value="quarter">Ce trimestre</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>Options :</label>
+                        <div class="filter-checkboxes">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="filter-mine" onchange="filterProposals()">
+                                <span class="checkmark"></span>
+                                Mes propositions
+                            </label>
+                            
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="filter-endorsed" onchange="filterProposals()">
+                                <span class="checkmark"></span>
+                                Que je soutiens
+                            </label>
+                            
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="filter-amendments" onchange="filterProposals()">
+                                <span class="checkmark"></span>
+                                Avec amendements
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="filters-actions">
+                    <button class="btn-refonte btn-refonte-secondary" onclick="clearFilters()">
+                        <i class="fas fa-times"></i>
+                        Effacer les filtres
+                    </button>
+                    
+                    <button class="btn-refonte btn-refonte-outline" onclick="saveFilters()">
+                        <i class="fas fa-bookmark"></i>
+                        Sauvegarder cette recherche
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Proposals list -->
+        <div class="proposals-list">
+            {% if proposals %}
+            <div class="proposals-grid" id="proposals-grid">
+                {% for proposal in proposals %}
+                <article class="proposal-card card-glass-refonte" 
+                         data-proposal-id="{{ proposal.id }}"
+                         data-state="{{ proposal.state }}"
+                         data-category="{{ proposal.category.id if proposal.category else '' }}"
+                         data-scope="{{ proposal.scope.id if proposal.scope else '' }}"
+                         data-title="{{ proposal.title | lower }}"
+                         data-author="{{ proposal.author.full_name | lower }}"
+                         data-endorsements="{{ proposal.endorsements_count }}"
+                         data-comments="{{ proposal.comments_count }}"
+                         data-date="{{ proposal.published_at.timestamp() if proposal.published_at else proposal.created_at.timestamp() }}"
+                         data-mine="{{ 'true' if proposal.author.id == current_user.id else 'false' }}"
+                         data-endorsed="{{ 'true' if current_user in proposal.endorsers else 'false' }}"
+                         data-amendments="{{ 'true' if proposal.amendments else 'false' }}">
+                    
+                    <div class="proposal-header">
+                        <div class="proposal-meta">
+                            <div class="proposal-state">
+                                <span class="state-badge state-{{ proposal.state }}">
+                                    {% if proposal.state == 'published' %}
+                                    <i class="fas fa-eye"></i> Publié
+                                    {% elif proposal.state == 'draft' %}
+                                    <i class="fas fa-edit"></i> Brouillon
+                                    {% elif proposal.state == 'under_review' %}
+                                    <i class="fas fa-search"></i> En révision
+                                    {% elif proposal.state == 'accepted' %}
+                                    <i class="fas fa-check"></i> Accepté
+                                    {% elif proposal.state == 'rejected' %}
+                                    <i class="fas fa-times"></i> Rejeté
+                                    {% elif proposal.state == 'withdrawn' %}
+                                    <i class="fas fa-ban"></i> Retiré
+                                    {% endif %}
+                                </span>
+                            </div>
+                            
+                            {% if proposal.category %}
+                            <div class="proposal-category">
+                                <span class="category-tag" style="background-color: {{ proposal.category.color }};">
+                                    {{ proposal.category.name }}
+                                </span>
+                            </div>
+                            {% endif %}
+                            
+                            {% if proposal.scope %}
+                            <div class="proposal-scope">
+                                <span class="scope-tag">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    {{ proposal.scope.name }}
+                                </span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="proposal-actions-menu">
+                            <button class="btn-menu" onclick="toggleProposalMenu({{ proposal.id }})">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                            
+                            <div class="dropdown-menu" id="proposal-menu-{{ proposal.id }}">
+                                {% if proposal.author.id == current_user.id %}
+                                <a href="{{ url_for('proposals.edit', id=proposal.id) }}">
+                                    <i class="fas fa-edit"></i>
+                                    Modifier
+                                </a>
+                                
+                                {% if proposal.state == 'draft' %}
+                                <a href="#" onclick="publishProposal({{ proposal.id }})">
+                                    <i class="fas fa-paper-plane"></i>
+                                    Publier
+                                </a>
+                                {% endif %}
+                                
+                                <a href="#" onclick="withdrawProposal({{ proposal.id }})">
+                                    <i class="fas fa-ban"></i>
+                                    Retirer
+                                </a>
+                                {% endif %}
+                                
+                                <a href="#" onclick="shareProposal({{ proposal.id }})">
+                                    <i class="fas fa-share"></i>
+                                    Partager
+                                </a>
+                                
+                                <a href="#" onclick="bookmarkProposal({{ proposal.id }})">
+                                    <i class="fas fa-bookmark"></i>
+                                    Sauvegarder
+                                </a>
+                                
+                                <hr class="dropdown-divider">
+                                
+                                <a href="#" onclick="reportProposal({{ proposal.id }})">
+                                    <i class="fas fa-flag"></i>
+                                    Signaler
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="proposal-content">
+                        <h3 class="proposal-title">
+                            <a href="{{ url_for('proposals.detail', id=proposal.id) }}">
+                                {{ proposal.title }}
+                            </a>
+                        </h3>
+                        
+                        <div class="proposal-summary">
+                            {{ proposal.summary | truncate(200) }}
+                        </div>
+                        
+                        {% if proposal.amendments %}
+                        <div class="proposal-amendments">
+                            <span class="amendments-count">
+                                <i class="fas fa-edit"></i>
+                                {{ proposal.amendments | length }} amendement{{ 's' if proposal.amendments | length != 1 else '' }}
+                            </span>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="proposal-author">
+                            <div class="author-avatar">
+                                {% if proposal.author.avatar %}
+                                <img src="{{ proposal.author.avatar }}" alt="{{ proposal.author.full_name }}">
+                                {% else %}
+                                <div class="avatar-placeholder">
+                                    {{ proposal.author.full_name[:2].upper() }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="author-info">
+                                <div class="author-name">{{ proposal.author.full_name }}</div>
+                                <div class="proposal-date">
+                                    {% if proposal.published_at %}
+                                    Publié le {{ proposal.published_at.strftime('%d %B %Y') }}
+                                    {% else %}
+                                    Créé le {{ proposal.created_at.strftime('%d %B %Y') }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="proposal-footer">
+                        <div class="proposal-stats">
+                            <div class="stat">
+                                <i class="fas fa-heart"></i>
+                                <span>{{ proposal.endorsements_count }} soutien{{ 's' if proposal.endorsements_count != 1 else '' }}</span>
+                            </div>
+                            
+                            <div class="stat">
+                                <i class="fas fa-comments"></i>
+                                <span>{{ proposal.comments_count }} commentaire{{ 's' if proposal.comments_count != 1 else '' }}</span>
+                            </div>
+                            
+                            <div class="stat">
+                                <i class="fas fa-eye"></i>
+                                <span>{{ proposal.views_count }} vue{{ 's' if proposal.views_count != 1 else '' }}</span>
+                            </div>
+                            
+                            {% if proposal.versions | length > 1 %}
+                            <div class="stat">
+                                <i class="fas fa-history"></i>
+                                <span>v{{ proposal.current_version }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="proposal-actions">
+                            {% if proposal.state == 'published' and can_endorse %}
+                            <button class="action-btn endorse-btn {{ 'active' if current_user in proposal.endorsers else '' }}" 
+                                    onclick="toggleEndorsement({{ proposal.id }})">
+                                <i class="fas fa-heart"></i>
+                                <span>{{ 'Soutenu' if current_user in proposal.endorsers else 'Soutenir' }}</span>
+                            </button>
+                            {% endif %}
+                            
+                            <a href="{{ url_for('proposals.detail', id=proposal.id) }}" class="action-btn">
+                                <i class="fas fa-eye"></i>
+                                <span>Voir</span>
+                            </a>
+                            
+                            {% if can_comment %}
+                            <a href="{{ url_for('proposals.detail', id=proposal.id) }}#comments" class="action-btn">
+                                <i class="fas fa-comment"></i>
+                                <span>Commenter</span>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Traceability indicator -->
+                    <div class="proposal-traceability">
+                        <div class="traceability-indicator" 
+                             title="Traçabilité : {{ 'Complète' if proposal.traceability_score == 100 else 'Partielle (' + proposal.traceability_score|string + '%)' }}">
+                            <i class="fas fa-shield-alt"></i>
+                            <div class="traceability-bar">
+                                <div class="traceability-fill" style="width: {{ proposal.traceability_score }}%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+            
+            <!-- Load more proposals -->
+            {% if has_more_proposals %}
+            <div class="load-more-section">
+                <button class="btn-refonte btn-refonte-outline" id="load-more-proposals" onclick="loadMoreProposals()">
+                    <i class="fas fa-plus"></i>
+                    Charger plus de propositions
+                </button>
+            </div>
+            {% endif %}
+            
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-lightbulb"></i>
+                <h3>Aucune proposition trouvée</h3>
+                <p>
+                    {% if has_filters %}
+                    Aucune proposition ne correspond aux critères de recherche.
+                    {% else %}
+                    Cet espace n'a pas encore de propositions.
+                    {% endif %}
+                </p>
+                {% if can_create_proposal %}
+                <button class="btn-refonte btn-refonte-primary" onclick="createNewProposal()">
+                    <i class="fas fa-plus"></i>
+                    {{ 'Créer la première proposition' if not has_filters else 'Créer une nouvelle proposition' }}
+                </button>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Report Modal -->
+<div id="report-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Signaler une proposition</h3>
+            <button class="modal-close" onclick="closeReportModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <form id="report-form" method="POST" action="{{ url_for('proposals.report') }}">
+            <input type="hidden" name="proposal_id" id="report-proposal-id">
+            
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="report-reason">Motif du signalement *</label>
+                    <select id="report-reason" name="reason" class="form-control" required>
+                        <option value="">Sélectionnez un motif</option>
+                        <option value="spam">Spam ou contenu répétitif</option>
+                        <option value="inappropriate">Contenu inapproprié</option>
+                        <option value="harassment">Harcèlement</option>
+                        <option value="misinformation">Désinformation</option>
+                        <option value="offtopic">Hors sujet</option>
+                        <option value="copyright">Violation de droits d'auteur</option>
+                        <option value="other">Autre</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="report-details">Détails (optionnel)</label>
+                    <textarea id="report-details" name="details" class="form-control" rows="4"
+                              placeholder="Expliquez pourquoi vous signalez cette proposition..."></textarea>
+                </div>
+                
+                <div class="checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="block_author" id="block-author">
+                        <span class="checkmark"></span>
+                        Bloquer les futures communications de cet auteur
+                    </label>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn-refonte btn-refonte-secondary" onclick="closeReportModal()">
+                    Annuler
+                </button>
+                <button type="submit" class="btn-refonte btn-refonte-danger">
+                    <i class="fas fa-flag"></i>
+                    Signaler la proposition
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Proposals functionality
+let proposalsOffset = {{ proposals | length if proposals else 0 }};
+let totalProposals = {{ total_proposals_count if proposals else 0 }};
+let filtersActive = false;
+
+// Toggle filters visibility
+function toggleFilters() {
+    const content = document.getElementById('filters-content');
+    const toggle = document.querySelector('.filters-toggle i');
+    
+    if (content.style.display === 'none' || !content.style.display) {
+        content.style.display = 'block';
+        toggle.classList.remove('fa-chevron-down');
+        toggle.classList.add('fa-chevron-up');
+    } else {
+        content.style.display = 'none';
+        toggle.classList.remove('fa-chevron-up');
+        toggle.classList.add('fa-chevron-down');
+    }
+}
+
+// Filter and search proposals
+function filterProposals() {
+    const searchTerm = document.getElementById('proposal-search').value.toLowerCase();
+    const stateFilter = document.getElementById('proposal-state').value;
+    const categoryFilter = document.getElementById('proposal-category').value;
+    const scopeFilter = document.getElementById('proposal-scope').value;
+    const dateFilter = document.getElementById('proposal-date').value;
+    const mineFilter = document.getElementById('filter-mine').checked;
+    const endorsedFilter = document.getElementById('filter-endorsed').checked;
+    const amendmentsFilter = document.getElementById('filter-amendments').checked;
+    
+    let hasActiveFilters = searchTerm || stateFilter || categoryFilter || scopeFilter || 
+                          dateFilter || mineFilter || endorsedFilter || amendmentsFilter;
+    
+    document.querySelectorAll('.proposal-card').forEach(card => {
+        const title = card.dataset.title;
+        const author = card.dataset.author;
+        const state = card.dataset.state;
+        const category = card.dataset.category;
+        const scope = card.dataset.scope;
+        const date = parseFloat(card.dataset.date);
+        const isMine = card.dataset.mine === 'true';
+        const isEndorsed = card.dataset.endorsed === 'true';
+        const hasAmendments = card.dataset.amendments === 'true';
+        
+        const matchesSearch = !searchTerm || title.includes(searchTerm) || author.includes(searchTerm);
+        const matchesState = !stateFilter || state === stateFilter;
+        const matchesCategory = !categoryFilter || category === categoryFilter;
+        const matchesScope = !scopeFilter || scope === scopeFilter;
+        const matchesMine = !mineFilter || isMine;
+        const matchesEndorsed = !endorsedFilter || isEndorsed;
+        const matchesAmendments = !amendmentsFilter || hasAmendments;
+        
+        let matchesDate = true;
+        if (dateFilter) {
+            const now = new Date().getTime() / 1000;
+            const dayInSeconds = 24 * 60 * 60;
+            
+            switch (dateFilter) {
+                case 'today':
+                    matchesDate = (now - date) < dayInSeconds;
+                    break;
+                case 'week':
+                    matchesDate = (now - date) < (7 * dayInSeconds);
+                    break;
+                case 'month':
+                    matchesDate = (now - date) < (30 * dayInSeconds);
+                    break;
+                case 'quarter':
+                    matchesDate = (now - date) < (90 * dayInSeconds);
+                    break;
+            }
+        }
+        
+        const shouldShow = matchesSearch && matchesState && matchesCategory && 
+                          matchesScope && matchesDate && matchesMine && 
+                          matchesEndorsed && matchesAmendments;
+        
+        card.style.display = shouldShow ? 'block' : 'none';
+    });
+    
+    filtersActive = hasActiveFilters;
+    updateResultsCount();
+}
+
+// Sort proposals
+function sortProposals() {
+    const sortBy = document.getElementById('proposal-sort').value;
+    const container = document.getElementById('proposals-grid');
+    const cards = Array.from(container.querySelectorAll('.proposal-card'));
+    
+    cards.sort((a, b) => {
+        switch (sortBy) {
+            case 'recent':
+                return parseFloat(b.dataset.date) - parseFloat(a.dataset.date);
+            case 'endorsed':
+                return parseInt(b.dataset.endorsements) - parseInt(a.dataset.endorsements);
+            case 'commented':
+                return parseInt(b.dataset.comments) - parseInt(a.dataset.comments);
+            case 'alphabetical':
+                return a.dataset.title.localeCompare(b.dataset.title);
+            case 'random':
+                return Math.random() - 0.5;
+            default:
+                return 0;
+        }
+    });
+    
+    cards.forEach(card => container.appendChild(card));
+}
+
+// Clear all filters
+function clearFilters() {
+    document.getElementById('proposal-search').value = '';
+    document.getElementById('proposal-state').value = '';
+    document.getElementById('proposal-category').value = '';
+    document.getElementById('proposal-scope').value = '';
+    document.getElementById('proposal-date').value = '';
+    document.getElementById('filter-mine').checked = false;
+    document.getElementById('filter-endorsed').checked = false;
+    document.getElementById('filter-amendments').checked = false;
+    
+    filterProposals();
+}
+
+// Save current filters
+function saveFilters() {
+    const filters = {
+        search: document.getElementById('proposal-search').value,
+        state: document.getElementById('proposal-state').value,
+        category: document.getElementById('proposal-category').value,
+        scope: document.getElementById('proposal-scope').value,
+        date: document.getElementById('proposal-date').value,
+        mine: document.getElementById('filter-mine').checked,
+        endorsed: document.getElementById('filter-endorsed').checked,
+        amendments: document.getElementById('filter-amendments').checked
+    };
+    
+    // Save to localStorage or backend
+    localStorage.setItem('proposalsFilters', JSON.stringify(filters));
+    
+    // Show success message
+    showNotification('Recherche sauvegardée avec succès', 'success');
+}
+
+// Update results count
+function updateResultsCount() {
+    const visibleCards = document.querySelectorAll('.proposal-card[style="display: block"], .proposal-card:not([style*="display: none"])').length;
+    const totalCards = document.querySelectorAll('.proposal-card').length;
+    
+    const headerText = document.querySelector('.header-content p');
+    if (headerText && filtersActive) {
+        headerText.textContent = visibleCards === totalCards ? 
+            `${totalCards} proposition${totalCards !== 1 ? 's' : ''} dans cet espace` :
+            `${visibleCards} proposition${visibleCards !== 1 ? 's' : ''} trouvée${visibleCards !== 1 ? 's' : ''} sur ${totalCards}`;
+    }
+}
+
+// Load more proposals
+function loadMoreProposals() {
+    const button = document.getElementById('load-more-proposals');
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Chargement...';
+    
+    const params = new URLSearchParams({
+        offset: proposalsOffset,
+        limit: 20,
+        space_id: {{ space.id }}
+    });
+    
+    fetch(`/api/proposals?${params}`, {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success && data.proposals.length > 0) {
+            const container = document.getElementById('proposals-grid');
+            
+            data.proposals.forEach(proposal => {
+                const proposalCard = createProposalCard(proposal);
+                container.appendChild(proposalCard);
+            });
+            
+            proposalsOffset += data.proposals.length;
+            
+            if (proposalsOffset >= totalProposals) {
+                button.style.display = 'none';
+            }
+        }
+    })
+    .finally(() => {
+        button.disabled = false;
+        button.innerHTML = '<i class="fas fa-plus"></i> Charger plus de propositions';
+    });
+}
+
+// Proposal actions
+function createNewProposal() {
+    window.location.href = `/spaces/{{ space.id }}/proposals/new`;
+}
+
+function toggleProposalMenu(proposalId) {
+    // Close all other menus
+    document.querySelectorAll('.dropdown-menu').forEach(menu => {
+        if (menu.id !== `proposal-menu-${proposalId}`) {
+            menu.style.display = 'none';
+        }
+    });
+    
+    const menu = document.getElementById(`proposal-menu-${proposalId}`);
+    menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+}
+
+function toggleEndorsement(proposalId) {
+    const button = document.querySelector(`[data-proposal-id="${proposalId}"] .endorse-btn`);
+    const isActive = button.classList.contains('active');
+    
+    fetch(`/api/proposals/${proposalId}/endorse`, {
+        method: isActive ? 'DELETE' : 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const card = document.querySelector(`[data-proposal-id="${proposalId}"]`);
+            const stat = card.querySelector('.stat i.fa-heart').nextElementSibling;
+            const count = parseInt(stat.textContent.match(/\d+/)[0]);
+            
+            if (isActive) {
+                button.classList.remove('active');
+                button.querySelector('span').textContent = 'Soutenir';
+                stat.textContent = `${count - 1} soutien${count - 1 !== 1 ? 's' : ''}`;
+                card.dataset.endorsed = 'false';
+                card.dataset.endorsements = count - 1;
+            } else {
+                button.classList.add('active');
+                button.querySelector('span').textContent = 'Soutenu';
+                stat.textContent = `${count + 1} soutien${count + 1 !== 1 ? 's' : ''}`;
+                card.dataset.endorsed = 'true';
+                card.dataset.endorsements = count + 1;
+            }
+        } else {
+            showNotification(data.message || 'Erreur lors du soutien', 'error');
+        }
+    });
+}
+
+function publishProposal(proposalId) {
+    if (confirm('Publier cette proposition ? Elle sera visible par tous les participants.')) {
+        fetch(`/api/proposals/${proposalId}/publish`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                showNotification(data.message || 'Erreur lors de la publication', 'error');
+            }
+        });
+    }
+}
+
+function withdrawProposal(proposalId) {
+    if (confirm('Retirer cette proposition ? Cette action ne peut pas être annulée.')) {
+        fetch(`/api/proposals/${proposalId}/withdraw`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                showNotification(data.message || 'Erreur lors du retrait', 'error');
+            }
+        });
+    }
+}
+
+function shareProposal(proposalId) {
+    const url = `${window.location.origin}/proposals/${proposalId}`;
+    
+    if (navigator.share) {
+        navigator.share({
+            title: 'Proposition',
+            url: url
+        });
+    } else if (navigator.clipboard) {
+        navigator.clipboard.writeText(url).then(() => {
+            showNotification('Lien copié dans le presse-papiers', 'success');
+        });
+    }
+}
+
+function bookmarkProposal(proposalId) {
+    fetch(`/api/proposals/${proposalId}/bookmark`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification(data.bookmarked ? 'Proposition sauvegardée' : 'Proposition retirée des favoris', 'success');
+        }
+    });
+}
+
+function reportProposal(proposalId) {
+    document.getElementById('report-proposal-id').value = proposalId;
+    document.getElementById('report-modal').style.display = 'flex';
+}
+
+function closeReportModal() {
+    document.getElementById('report-modal').style.display = 'none';
+    document.getElementById('report-form').reset();
+}
+
+// Report form submission
+document.getElementById('report-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    
+    fetch(this.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            closeReportModal();
+            showNotification('Signalement envoyé avec succès', 'success');
+        } else {
+            showNotification(data.message || 'Erreur lors du signalement', 'error');
+        }
+    });
+});
+
+// Helper functions
+function createProposalCard(proposal) {
+    // Implementation would create a DOM element with the proposal card HTML
+    const div = document.createElement('div');
+    div.innerHTML = `<!-- Proposal card HTML would go here -->`;
+    return div.firstElementChild;
+}
+
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'exclamation' : 'info'}-circle"></i>
+        <span>${message}</span>
+        <button onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.remove();
+        }
+    }, 5000);
+}
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.proposal-actions-menu')) {
+        document.querySelectorAll('.dropdown-menu').forEach(menu => {
+            menu.style.display = 'none';
+        });
+    }
+});
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    // Load saved filters if any
+    const savedFilters = localStorage.getItem('proposalsFilters');
+    if (savedFilters) {
+        const filters = JSON.parse(savedFilters);
+        
+        if (filters.search) document.getElementById('proposal-search').value = filters.search;
+        if (filters.state) document.getElementById('proposal-state').value = filters.state;
+        if (filters.category) document.getElementById('proposal-category').value = filters.category;
+        if (filters.scope) document.getElementById('proposal-scope').value = filters.scope;
+        if (filters.date) document.getElementById('proposal-date').value = filters.date;
+        document.getElementById('filter-mine').checked = filters.mine || false;
+        document.getElementById('filter-endorsed').checked = filters.endorsed || false;
+        document.getElementById('filter-amendments').checked = filters.amendments || false;
+        
+        filterProposals();
+    }
+});
+</script>
+{% endblock %}

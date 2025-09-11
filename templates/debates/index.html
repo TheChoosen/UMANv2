@@ -1,0 +1,864 @@
+{% extends "base.html" %}
+
+{% block title %}Débats - {{ space.name }} — {{ organization.name }}{% endblock %}
+
+{% block meta %}
+<link rel="stylesheet" href="{{ url_for('static', filename='refonte.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='proposals.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="debates-layout">
+    <div class="container">
+        <!-- Header with breadcrumb -->
+        <div class="page-header">
+            <nav class="breadcrumb">
+                <a href="{{ url_for('spaces.index') }}">Espaces participatifs</a>
+                <span class="breadcrumb-separator">/</span>
+                <a href="{{ url_for('spaces.detail', type=space.type, id=space.id) }}">{{ space.name }}</a>
+                <span class="breadcrumb-separator">/</span>
+                <span class="breadcrumb-current">Débats</span>
+            </nav>
+            
+            <div class="header-content">
+                <h1>
+                    <i class="fas fa-comments"></i>
+                    Débats participatifs
+                </h1>
+                <p>Participez aux discussions ouvertes et contribuez aux conclusions collectives</p>
+            </div>
+            
+            <div class="header-actions">
+                {% if current_user.can_create_debate(space) %}
+                <a href="{{ url_for('debates.create', space_id=space.id) }}" class="btn-refonte btn-refonte-primary">
+                    <i class="fas fa-plus"></i>
+                    Lancer un débat
+                </a>
+                {% endif %}
+                
+                <div class="view-toggles">
+                    <button class="view-toggle active" data-view="grid" onclick="setDebatesView('grid')">
+                        <i class="fas fa-th-large"></i>
+                    </button>
+                    <button class="view-toggle" data-view="list" onclick="setDebatesView('list')">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Filters and search -->
+        <div class="debates-filters card-glass-refonte">
+            <div class="filters-row">
+                <div class="search-container">
+                    <div class="search-input-container">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="debates-search" class="search-input" 
+                               placeholder="Rechercher dans les débats..." 
+                               onkeyup="filterDebates()">
+                        <button class="search-clear" onclick="clearSearch()" style="display: none;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="filters-container">
+                    <select id="debates-status" onchange="filterDebates()">
+                        <option value="">Tous les statuts</option>
+                        <option value="open">Ouverts</option>
+                        <option value="synthesis">En synthèse</option>
+                        <option value="closed">Fermés</option>
+                    </select>
+                    
+                    <select id="debates-category" onchange="filterDebates()">
+                        <option value="">Toutes les catégories</option>
+                        {% for category in categories %}
+                        <option value="{{ category.id }}">{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+                    
+                    <select id="debates-sort" onchange="filterDebates()">
+                        <option value="recent">Plus récents</option>
+                        <option value="active">Plus actifs</option>
+                        <option value="participants">Plus de participants</option>
+                        <option value="ending_soon">Se terminent bientôt</option>
+                    </select>
+                    
+                    <button class="btn-refonte btn-refonte-outline" onclick="toggleAdvancedFilters()">
+                        <i class="fas fa-sliders-h"></i>
+                        Filtres avancés
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Advanced filters (hidden by default) -->
+            <div id="advanced-filters" class="advanced-filters" style="display: none;">
+                <div class="filters-grid">
+                    <div class="filter-group">
+                        <label>Période de création</label>
+                        <div class="date-range">
+                            <input type="date" id="date-from" onchange="filterDebates()">
+                            <span>à</span>
+                            <input type="date" id="date-to" onchange="filterDebates()">
+                        </div>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>Participation</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="my-debates" onchange="filterDebates()">
+                                <span class="checkmark"></span>
+                                Mes débats
+                            </label>
+                            
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="following-debates" onchange="filterDebates()">
+                                <span class="checkmark"></span>
+                                Débats suivis
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>Options</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="with-conclusions" onchange="filterDebates()">
+                                <span class="checkmark"></span>
+                                Avec conclusions
+                            </label>
+                            
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="moderated-only" onchange="filterDebates()">
+                                <span class="checkmark"></span>
+                                Modérés uniquement
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Debates counter and stats -->
+        <div class="debates-stats">
+            <div class="stats-summary">
+                <span id="debates-count">{{ debates | length }}</span> débat{{ 's' if debates | length != 1 else '' }}
+                <span class="stats-separator">•</span>
+                <span>{{ active_debates_count }} actif{{ 's' if active_debates_count != 1 else '' }}</span>
+                <span class="stats-separator">•</span>
+                <span>{{ total_participants }} participant{{ 's' if total_participants != 1 else '' }}</span>
+            </div>
+            
+            <div class="quick-stats">
+                {% if featured_debate %}
+                <div class="featured-indicator">
+                    <i class="fas fa-star"></i>
+                    Débat mis en avant : <a href="{{ url_for('debates.detail', id=featured_debate.id) }}">{{ featured_debate.title }}</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Debates grid/list -->
+        <div id="debates-container" class="debates-container view-grid">
+            {% for debate in debates %}
+            <div class="debate-card card-glass-refonte" data-debate-id="{{ debate.id }}" 
+                 data-status="{{ debate.status }}" 
+                 data-category="{{ debate.category.id if debate.category else '' }}"
+                 data-created="{{ debate.created_at.isoformat() }}">
+                
+                <!-- Debate header -->
+                <div class="debate-header">
+                    <div class="debate-meta">
+                        <div class="status-info">
+                            <span class="status-badge status-{{ debate.status }}">
+                                {% if debate.status == 'open' %}
+                                <i class="fas fa-comments"></i> Ouvert
+                                {% elif debate.status == 'synthesis' %}
+                                <i class="fas fa-edit"></i> En synthèse
+                                {% elif debate.status == 'closed' %}
+                                <i class="fas fa-check"></i> Fermé
+                                {% endif %}
+                            </span>
+                            
+                            {% if debate.is_featured %}
+                            <span class="featured-badge">
+                                <i class="fas fa-star"></i>
+                                Mis en avant
+                            </span>
+                            {% endif %}
+                            
+                            {% if debate.is_moderated %}
+                            <span class="moderated-badge">
+                                <i class="fas fa-shield-alt"></i>
+                                Modéré
+                            </span>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="debate-timing">
+                            {% if debate.status == 'open' and debate.end_date %}
+                            <div class="time-remaining" data-end-date="{{ debate.end_date.isoformat() }}">
+                                <i class="fas fa-clock"></i>
+                                <span class="countdown">{{ debate.time_remaining }}</span>
+                            </div>
+                            {% endif %}
+                            
+                            {% if debate.category %}
+                            <span class="category-tag" style="background-color: {{ debate.category.color }}20; color: {{ debate.category.color }};">
+                                {{ debate.category.name }}
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="debate-actions">
+                        <button class="action-btn" onclick="followDebate({{ debate.id }})" 
+                                title="{{ 'Ne plus suivre' if current_user.is_following_debate(debate) else 'Suivre ce débat' }}">
+                            <i class="fas fa-{{ 'bell-slash' if current_user.is_following_debate(debate) else 'bell' }}"></i>
+                        </button>
+                        
+                        {% if current_user.can_moderate(space) %}
+                        <div class="dropdown">
+                            <button class="action-btn dropdown-toggle" data-toggle="dropdown">
+                                <i class="fas fa-ellipsis-h"></i>
+                            </button>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="#" onclick="moderateDebate({{ debate.id }}, 'feature')">
+                                    <i class="fas fa-star"></i>
+                                    {{ 'Retirer la mise en avant' if debate.is_featured else 'Mettre en avant' }}
+                                </a>
+                                
+                                {% if debate.status == 'open' %}
+                                <a class="dropdown-item" href="#" onclick="moderateDebate({{ debate.id }}, 'close')">
+                                    <i class="fas fa-lock"></i>
+                                    Fermer le débat
+                                </a>
+                                {% endif %}
+                                
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item text-danger" href="#" onclick="moderateDebate({{ debate.id }}, 'archive')">
+                                    <i class="fas fa-archive"></i>
+                                    Archiver
+                                </a>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Debate content -->
+                <div class="debate-content">
+                    <h3 class="debate-title">
+                        <a href="{{ url_for('debates.detail', id=debate.id) }}">{{ debate.title }}</a>
+                    </h3>
+                    
+                    <p class="debate-description">{{ debate.description }}</p>
+                    
+                    {% if debate.question %}
+                    <div class="debate-question">
+                        <strong>Question posée :</strong>
+                        <p>{{ debate.question }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Debate footer -->
+                <div class="debate-footer">
+                    <div class="debate-author">
+                        <div class="author-avatar">
+                            {% if debate.author.avatar %}
+                            <img src="{{ debate.author.avatar }}" alt="{{ debate.author.full_name }}">
+                            {% else %}
+                            <div class="avatar-placeholder">{{ debate.author.full_name[:2].upper() }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="author-info">
+                            <div class="author-name">{{ debate.author.full_name }}</div>
+                            <div class="debate-date">{{ debate.created_at.strftime('%d %B %Y') }}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="debate-stats">
+                        <div class="stat-item">
+                            <i class="fas fa-users"></i>
+                            <span>{{ debate.participants_count }}</span>
+                        </div>
+                        
+                        <div class="stat-item">
+                            <i class="fas fa-comments"></i>
+                            <span>{{ debate.contributions_count }}</span>
+                        </div>
+                        
+                        {% if debate.has_conclusion %}
+                        <div class="stat-item conclusion-indicator">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Conclusion</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Debate participants preview -->
+                {% if debate.recent_participants %}
+                <div class="participants-preview">
+                    <div class="participants-avatars">
+                        {% for participant in debate.recent_participants[:5] %}
+                        <div class="participant-avatar" title="{{ participant.full_name }}">
+                            {% if participant.avatar %}
+                            <img src="{{ participant.avatar }}" alt="{{ participant.full_name }}">
+                            {% else %}
+                            <div class="avatar-placeholder">{{ participant.full_name[:2].upper() }}</div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                        
+                        {% if debate.participants_count > 5 %}
+                        <div class="more-participants">
+                            +{{ debate.participants_count - 5 }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="participation-cta">
+                        {% if debate.status == 'open' %}
+                        <a href="{{ url_for('debates.detail', id=debate.id) }}" class="btn-refonte btn-refonte-primary btn-sm">
+                            <i class="fas fa-comment"></i>
+                            Participer
+                        </a>
+                        {% else %}
+                        <a href="{{ url_for('debates.detail', id=debate.id) }}" class="btn-refonte btn-refonte-outline btn-sm">
+                            <i class="fas fa-eye"></i>
+                            Voir les conclusions
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Traceability indicator -->
+                <div class="traceability-indicator">
+                    <div class="trace-info">
+                        <i class="fas fa-shield-alt"></i>
+                        <span class="trace-score">{{ debate.integrity_score }}%</span>
+                        <span class="trace-label">Intégrité</span>
+                    </div>
+                    
+                    {% if debate.is_signed %}
+                    <div class="signature-verified">
+                        <i class="fas fa-certificate"></i>
+                        <span>Signé</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Empty state -->
+        {% if not debates %}
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-comments"></i>
+            </div>
+            <h3>Aucun débat en cours</h3>
+            <p>Il n'y a pas encore de débats dans cet espace participatif.</p>
+            
+            {% if current_user.can_create_debate(space) %}
+            <a href="{{ url_for('debates.create', space_id=space.id) }}" class="btn-refonte btn-refonte-primary">
+                <i class="fas fa-plus"></i>
+                Lancer le premier débat
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        <!-- Load more -->
+        {% if debates | length >= 20 %}
+        <div class="load-more-container">
+            <button class="btn-refonte btn-refonte-outline" onclick="loadMoreDebates()">
+                <i class="fas fa-chevron-down"></i>
+                Charger plus de débats
+            </button>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Quick participation modal -->
+<div id="quick-participate-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Participation rapide</h3>
+            <button class="modal-close" onclick="closeQuickModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="modal-body">
+            <div id="quick-debate-info">
+                <!-- Debate info will be loaded here -->
+            </div>
+            
+            <form id="quick-participation-form">
+                <div class="form-group">
+                    <label for="quick-contribution">Votre contribution</label>
+                    <textarea id="quick-contribution" class="form-control" rows="4" 
+                              placeholder="Partagez votre point de vue sur ce débat..." required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="quick-anonymous">
+                            <span class="checkmark"></span>
+                            Participer anonymement
+                        </label>
+                    </div>
+                </div>
+            </form>
+        </div>
+        
+        <div class="modal-footer">
+            <button class="btn-refonte btn-refonte-secondary" onclick="closeQuickModal()">
+                Annuler
+            </button>
+            
+            <button class="btn-refonte btn-refonte-primary" onclick="submitQuickParticipation()">
+                <i class="fas fa-paper-plane"></i>
+                Publier ma contribution
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Debates functionality
+let currentDebatesPage = 1;
+let debatesView = 'grid';
+let filterTimeout;
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize countdowns
+    initializeCountdowns();
+    
+    // Initialize filters from URL parameters
+    initializeFiltersFromURL();
+    
+    // Auto-refresh countdowns
+    setInterval(updateCountdowns, 60000); // Update every minute
+});
+
+// View switching
+function setDebatesView(view) {
+    debatesView = view;
+    
+    const container = document.getElementById('debates-container');
+    const toggles = document.querySelectorAll('.view-toggle');
+    
+    // Update toggles
+    toggles.forEach(toggle => {
+        toggle.classList.toggle('active', toggle.dataset.view === view);
+    });
+    
+    // Update container class
+    container.className = `debates-container view-${view}`;
+    
+    // Save preference
+    localStorage.setItem('debates-view', view);
+}
+
+// Filtering functionality
+function filterDebates() {
+    clearTimeout(filterTimeout);
+    filterTimeout = setTimeout(() => {
+        const searchTerm = document.getElementById('debates-search').value.toLowerCase();
+        const status = document.getElementById('debates-status').value;
+        const category = document.getElementById('debates-category').value;
+        const sortBy = document.getElementById('debates-sort').value;
+        
+        // Advanced filters
+        const dateFrom = document.getElementById('date-from')?.value;
+        const dateTo = document.getElementById('date-to')?.value;
+        const myDebates = document.getElementById('my-debates')?.checked;
+        const followingDebates = document.getElementById('following-debates')?.checked;
+        const withConclusions = document.getElementById('with-conclusions')?.checked;
+        const moderatedOnly = document.getElementById('moderated-only')?.checked;
+        
+        const debates = document.querySelectorAll('.debate-card');
+        let visibleCount = 0;
+        
+        debates.forEach(debate => {
+            let visible = true;
+            
+            // Search filter
+            if (searchTerm) {
+                const title = debate.querySelector('.debate-title').textContent.toLowerCase();
+                const description = debate.querySelector('.debate-description').textContent.toLowerCase();
+                visible = visible && (title.includes(searchTerm) || description.includes(searchTerm));
+            }
+            
+            // Status filter
+            if (status) {
+                visible = visible && debate.dataset.status === status;
+            }
+            
+            // Category filter
+            if (category) {
+                visible = visible && debate.dataset.category === category;
+            }
+            
+            // Date range filter
+            if (dateFrom || dateTo) {
+                const debateDate = new Date(debate.dataset.created);
+                if (dateFrom) {
+                    visible = visible && debateDate >= new Date(dateFrom);
+                }
+                if (dateTo) {
+                    visible = visible && debateDate <= new Date(dateTo);
+                }
+            }
+            
+            // Show/hide debate
+            debate.style.display = visible ? 'block' : 'none';
+            if (visible) visibleCount++;
+        });
+        
+        // Update counter
+        document.getElementById('debates-count').textContent = visibleCount;
+        
+        // Update search clear button
+        const clearButton = document.querySelector('.search-clear');
+        clearButton.style.display = searchTerm ? 'block' : 'none';
+        
+        // Sort visible debates
+        if (sortBy !== 'recent') {
+            sortDebates(sortBy);
+        }
+        
+        // Update URL parameters
+        updateURLParameters();
+        
+    }, 300);
+}
+
+function sortDebates(sortBy) {
+    const container = document.getElementById('debates-container');
+    const debates = Array.from(container.querySelectorAll('.debate-card:not([style*="display: none"])'));
+    
+    debates.sort((a, b) => {
+        switch (sortBy) {
+            case 'active':
+                const aContributions = parseInt(a.querySelector('.stat-item:nth-child(2) span').textContent);
+                const bContributions = parseInt(b.querySelector('.stat-item:nth-child(2) span').textContent);
+                return bContributions - aContributions;
+                
+            case 'participants':
+                const aParticipants = parseInt(a.querySelector('.stat-item:nth-child(1) span').textContent);
+                const bParticipants = parseInt(b.querySelector('.stat-item:nth-child(1) span').textContent);
+                return bParticipants - aParticipants;
+                
+            case 'ending_soon':
+                const aEndDate = a.querySelector('.time-remaining')?.dataset.endDate;
+                const bEndDate = b.querySelector('.time-remaining')?.dataset.endDate;
+                if (!aEndDate && !bEndDate) return 0;
+                if (!aEndDate) return 1;
+                if (!bEndDate) return -1;
+                return new Date(aEndDate) - new Date(bEndDate);
+                
+            default:
+                return new Date(b.dataset.created) - new Date(a.dataset.created);
+        }
+    });
+    
+    // Reorder in DOM
+    debates.forEach(debate => container.appendChild(debate));
+}
+
+function clearSearch() {
+    document.getElementById('debates-search').value = '';
+    filterDebates();
+}
+
+function toggleAdvancedFilters() {
+    const advancedFilters = document.getElementById('advanced-filters');
+    const button = event.target.closest('button');
+    
+    if (advancedFilters.style.display === 'none') {
+        advancedFilters.style.display = 'block';
+        button.innerHTML = '<i class="fas fa-sliders-h"></i> Masquer les filtres';
+    } else {
+        advancedFilters.style.display = 'none';
+        button.innerHTML = '<i class="fas fa-sliders-h"></i> Filtres avancés';
+    }
+}
+
+// Countdown functionality
+function initializeCountdowns() {
+    const countdowns = document.querySelectorAll('.time-remaining');
+    countdowns.forEach(countdown => {
+        updateCountdown(countdown);
+    });
+}
+
+function updateCountdowns() {
+    const countdowns = document.querySelectorAll('.time-remaining');
+    countdowns.forEach(countdown => {
+        updateCountdown(countdown);
+    });
+}
+
+function updateCountdown(element) {
+    const endDate = new Date(element.dataset.endDate);
+    const now = new Date();
+    const diff = endDate - now;
+    
+    if (diff <= 0) {
+        element.querySelector('.countdown').textContent = 'Terminé';
+        element.classList.add('expired');
+        return;
+    }
+    
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    
+    let timeText = '';
+    if (days > 0) {
+        timeText = `${days}j ${hours}h`;
+    } else if (hours > 0) {
+        timeText = `${hours}h ${minutes}m`;
+    } else {
+        timeText = `${minutes}m`;
+    }
+    
+    element.querySelector('.countdown').textContent = timeText;
+    
+    // Add urgency classes
+    if (days === 0 && hours < 2) {
+        element.classList.add('urgent');
+    } else if (days === 0 && hours < 24) {
+        element.classList.add('soon');
+    }
+}
+
+// Follow functionality
+function followDebate(debateId) {
+    const button = event.target.closest('button');
+    const icon = button.querySelector('i');
+    const isFollowing = icon.classList.contains('fa-bell-slash');
+    
+    fetch(`/api/debates/${debateId}/follow`, {
+        method: isFollowing ? 'DELETE' : 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            if (isFollowing) {
+                icon.className = 'fas fa-bell';
+                button.title = 'Suivre ce débat';
+            } else {
+                icon.className = 'fas fa-bell-slash';
+                button.title = 'Ne plus suivre';
+            }
+        }
+    });
+}
+
+// Moderation functionality
+function moderateDebate(debateId, action) {
+    let confirmMessage = '';
+    
+    switch (action) {
+        case 'feature':
+            confirmMessage = 'Mettre ce débat en avant ?';
+            break;
+        case 'close':
+            confirmMessage = 'Fermer ce débat ? Les participants ne pourront plus contribuer.';
+            break;
+        case 'archive':
+            confirmMessage = 'Archiver ce débat ?';
+            break;
+    }
+    
+    if (confirm(confirmMessage)) {
+        fetch(`/api/debates/${debateId}/moderate`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ action: action })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            }
+        });
+    }
+}
+
+// Quick participation
+function openQuickParticipation(debateId) {
+    fetch(`/api/debates/${debateId}/info`, {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('quick-debate-info').innerHTML = `
+                <div class="debate-summary">
+                    <h4>${data.debate.title}</h4>
+                    <p>${data.debate.description}</p>
+                    ${data.debate.question ? `<div class="debate-question"><strong>Question :</strong> ${data.debate.question}</div>` : ''}
+                </div>
+            `;
+            
+            document.getElementById('quick-participate-modal').style.display = 'flex';
+            document.getElementById('quick-participate-modal').dataset.debateId = debateId;
+        }
+    });
+}
+
+function closeQuickModal() {
+    document.getElementById('quick-participate-modal').style.display = 'none';
+}
+
+function submitQuickParticipation() {
+    const modal = document.getElementById('quick-participate-modal');
+    const debateId = modal.dataset.debateId;
+    const contribution = document.getElementById('quick-contribution').value.trim();
+    const isAnonymous = document.getElementById('quick-anonymous').checked;
+    
+    if (!contribution) return;
+    
+    fetch(`/api/debates/${debateId}/contribute`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({
+            content: contribution,
+            is_anonymous: isAnonymous
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            closeQuickModal();
+            // Redirect to debate detail
+            window.location.href = `/debates/${debateId}`;
+        }
+    });
+}
+
+// Load more functionality
+function loadMoreDebates() {
+    currentDebatesPage++;
+    
+    const button = event.target;
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Chargement...';
+    
+    fetch(`/api/debates?page=${currentDebatesPage}&space_id={{ space.id }}`, {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success && data.debates.length > 0) {
+            const container = document.getElementById('debates-container');
+            container.insertAdjacentHTML('beforeend', data.html);
+            
+            // Initialize countdowns for new debates
+            initializeCountdowns();
+            
+            if (data.debates.length < 20) {
+                button.parentElement.style.display = 'none';
+            }
+        } else {
+            button.parentElement.style.display = 'none';
+        }
+    })
+    .finally(() => {
+        button.disabled = false;
+        button.innerHTML = '<i class="fas fa-chevron-down"></i> Charger plus de débats';
+    });
+}
+
+// URL management
+function initializeFiltersFromURL() {
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    const search = urlParams.get('search');
+    const status = urlParams.get('status');
+    const category = urlParams.get('category');
+    const sort = urlParams.get('sort');
+    
+    if (search) document.getElementById('debates-search').value = search;
+    if (status) document.getElementById('debates-status').value = status;
+    if (category) document.getElementById('debates-category').value = category;
+    if (sort) document.getElementById('debates-sort').value = sort;
+    
+    // Apply filters if any are set
+    if (search || status || category || sort) {
+        filterDebates();
+    }
+    
+    // Load saved view preference
+    const savedView = localStorage.getItem('debates-view');
+    if (savedView) {
+        setDebatesView(savedView);
+    }
+}
+
+function updateURLParameters() {
+    const params = new URLSearchParams();
+    
+    const search = document.getElementById('debates-search').value;
+    const status = document.getElementById('debates-status').value;
+    const category = document.getElementById('debates-category').value;
+    const sort = document.getElementById('debates-sort').value;
+    
+    if (search) params.set('search', search);
+    if (status) params.set('status', status);
+    if (category) params.set('category', category);
+    if (sort && sort !== 'recent') params.set('sort', sort);
+    
+    const newURL = `${window.location.pathname}${params.toString() ? '?' + params.toString() : ''}`;
+    window.history.replaceState({}, '', newURL);
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    // Ctrl/Cmd + K for search focus
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        document.getElementById('debates-search').focus();
+    }
+    
+    // Escape to clear search
+    if (e.key === 'Escape' && document.activeElement === document.getElementById('debates-search')) {
+        clearSearch();
+        document.getElementById('debates-search').blur();
+    }
+});
+
+// Search input enhancements
+document.getElementById('debates-search').addEventListener('input', function() {
+    const clearButton = document.querySelector('.search-clear');
+    clearButton.style.display = this.value ? 'block' : 'none';
+});
+</script>
+{% endblock %}

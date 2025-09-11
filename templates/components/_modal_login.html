@@ -1,6 +1,7 @@
 {# Composant modal pour la page de connexion #}
 <!-- Modal Connexion -->
-<div class="modal fade" id="modalConnexion" tabindex="-1" role="dialog" aria-labelledby="modalConnexionLabel" aria-hidden="true">
+<div class="modal fade" id="modalConnexion" tabindex="-1" role="dialog" aria-labelledby="modalConnexionLabel"
+    aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content glass-modal">
             <div class="modal-header">
@@ -11,7 +12,7 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body glass-modal-body">
                 <div class="container-fluid">
                     <div class="row justify-content-center">
                         <div class="col-md-10">
@@ -19,19 +20,33 @@
                                 <div class="card-body">
                                     <!-- Messages flash -->
                                     <div id="loginFlashMessages"></div>
-                                    
+
                                     <form id="modalLoginForm" method="POST" action="/login">
                                         <div class="form-group">
                                             <label for="modalLoginEmail" class="form-label">
                                                 <i class="fas fa-envelope mr-2"></i>Email
                                             </label>
-                                            <input type="email" class="form-control" id="modalLoginEmail" name="email" required>
+                                            <input type="email" class="form-control" id="modalLoginEmail" name="email"
+                                                required>
                                             <div class="form-text">
-                                                Utilisez votre email enregistré. Pour être admin, votre email doit être dans la liste des administrateurs.
+                                                Entrez votre email. Si vous n'avez pas de compte, il sera créé
+                                                automatiquement.
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="modalLoginCode" class="form-label">
+                                                <i class="fas fa-key mr-2"></i>Code de sécurité (5 chiffres)
+                                            </label>
+                                            <input type="text" class="form-control" id="modalLoginCode"
+                                                name="security_code" pattern="[0-9]{5}" maxlength="5"
+                                                placeholder="12345" required>
+                                            <div class="form-text">
+                                                Code de sécurité à 5 chiffres fourni par l'administration.
                                             </div>
                                         </div>
                                         <div class="d-flex justify-content-between align-items-center">
-                                            <button type="submit" class="btn hero-btn hero-btn--primary">
+                                            <button type="submit" class="btn hero-btn hero-btn--primary"
+                                                id="modalLoginBtn">
                                                 <i class="fas fa-sign-in-alt mr-2"></i>Se connecter
                                             </button>
                                             <button type="button" class="btn btn-secondary" data-dismiss="modal">
@@ -48,3 +63,91 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const modalLoginForm = document.getElementById('modalLoginForm');
+        const modalLoginBtn = document.getElementById('modalLoginBtn');
+        const loginFlashMessages = document.getElementById('loginFlashMessages');
+
+        if (modalLoginForm) {
+            modalLoginForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                // Désactiver le bouton pendant la requête
+                modalLoginBtn.disabled = true;
+                modalLoginBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Connexion...';
+
+                // Effacer les messages précédents
+                loginFlashMessages.innerHTML = '';
+
+                const formData = new FormData(modalLoginForm);
+
+                fetch('/login', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Afficher message de succès
+                            loginFlashMessages.innerHTML = `
+                        <div class="alert alert-success" role="alert">
+                            <i class="fas fa-check-circle mr-2"></i>${data.message}
+                        </div>
+                    `;
+
+                            // Rediriger après un court délai
+                            setTimeout(() => {
+                                window.location.href = data.redirect || '/profil';
+                            }, 1500);
+                        } else {
+                            // Afficher message d'erreur
+                            loginFlashMessages.innerHTML = `
+                        <div class="alert alert-danger" role="alert">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>${data.message}
+                        </div>
+                    `;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erreur:', error);
+                        loginFlashMessages.innerHTML = `
+                    <div class="alert alert-danger" role="alert">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>Erreur de connexion. Veuillez réessayer.
+                    </div>
+                `;
+                    })
+                    .finally(() => {
+                        // Réactiver le bouton
+                        modalLoginBtn.disabled = false;
+                        modalLoginBtn.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i>Se connecter';
+                    });
+            });
+
+            // Validation en temps réel du code de sécurité
+            const securityCodeInput = document.getElementById('modalLoginCode');
+            if (securityCodeInput) {
+                securityCodeInput.addEventListener('input', function (e) {
+                    // Ne garder que les chiffres et limiter à 5 caractères
+                    let value = e.target.value.replace(/\D/g, '').substring(0, 5);
+                    e.target.value = value;
+
+                    // Validation visuelle
+                    if (value.length === 5) {
+                        e.target.classList.remove('is-invalid');
+                        e.target.classList.add('is-valid');
+                    } else {
+                        e.target.classList.remove('is-valid');
+                        if (value.length > 0) {
+                            e.target.classList.add('is-invalid');
+                        }
+                    }
+                });
+            }
+        }
+    });
+</script>

@@ -1,0 +1,1145 @@
+{% extends "base.html" %}
+
+{% block title %}Réunions - {{ space.name }} — {{ organization.name }}{% endblock %}
+
+{% block meta %}
+<link rel="stylesheet" href="{{ url_for('static', filename='refonte.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='proposals.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="meetings-layout">
+    <div class="container">
+        <!-- Header with breadcrumb -->
+        <div class="page-header">
+            <nav class="breadcrumb">
+                <a href="{{ url_for('spaces.index') }}">Espaces participatifs</a>
+                <span class="breadcrumb-separator">/</span>
+                <a href="{{ url_for('spaces.detail', type=space.type, id=space.id) }}">{{ space.name }}</a>
+                <span class="breadcrumb-separator">/</span>
+                <span class="breadcrumb-current">Réunions</span>
+            </nav>
+            
+            <div class="header-content">
+                <h1>
+                    <i class="fas fa-calendar-alt"></i>
+                    Réunions participatives
+                </h1>
+                <p>Participez aux réunions officielles et créez vos propres événements de discussion</p>
+            </div>
+            
+            <div class="header-actions">
+                {% if current_user.can_create_meeting(space) %}
+                <a href="{{ url_for('meetings.create', space_id=space.id) }}" class="btn-refonte btn-refonte-primary">
+                    <i class="fas fa-plus"></i>
+                    Organiser une réunion
+                </a>
+                {% endif %}
+                
+                <div class="view-toggles">
+                    <button class="view-toggle active" data-view="calendar" onclick="setMeetingsView('calendar')" title="Vue calendrier">
+                        <i class="fas fa-calendar"></i>
+                    </button>
+                    <button class="view-toggle" data-view="grid" onclick="setMeetingsView('grid')" title="Vue grille">
+                        <i class="fas fa-th-large"></i>
+                    </button>
+                    <button class="view-toggle" data-view="list" onclick="setMeetingsView('list')" title="Vue liste">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
+                
+                <button class="btn-refonte btn-refonte-outline" onclick="exportCalendar()">
+                    <i class="fas fa-download"></i>
+                    Exporter (.ics)
+                </button>
+            </div>
+        </div>
+        
+        <!-- Filters and search -->
+        <div class="meetings-filters card-glass-refonte">
+            <div class="filters-row">
+                <div class="search-container">
+                    <div class="search-input-container">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="meetings-search" class="search-input" 
+                               placeholder="Rechercher dans les réunions..." 
+                               onkeyup="filterMeetings()">
+                        <button class="search-clear" onclick="clearSearch()" style="display: none;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="filters-container">
+                    <select id="meetings-status" onchange="filterMeetings()">
+                        <option value="">Tous les statuts</option>
+                        <option value="upcoming">À venir</option>
+                        <option value="ongoing">En cours</option>
+                        <option value="finished">Terminées</option>
+                        <option value="cancelled">Annulées</option>
+                    </select>
+                    
+                    <select id="meetings-type" onchange="filterMeetings()">
+                        <option value="">Tous les types</option>
+                        <option value="official">Officielles</option>
+                        <option value="participant">Participants</option>
+                        <option value="hybrid">Hybrides</option>
+                        <option value="online">En ligne</option>
+                        <option value="in_person">Présentiel</option>
+                    </select>
+                    
+                    <select id="meetings-category" onchange="filterMeetings()">
+                        <option value="">Toutes les catégories</option>
+                        {% for category in categories %}
+                        <option value="{{ category.id }}">{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+                    
+                    <button class="btn-refonte btn-refonte-outline" onclick="toggleAdvancedFilters()">
+                        <i class="fas fa-sliders-h"></i>
+                        Filtres avancés
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Advanced filters (hidden by default) -->
+            <div id="advanced-filters" class="advanced-filters" style="display: none;">
+                <div class="filters-grid">
+                    <div class="filter-group">
+                        <label>Période</label>
+                        <div class="date-range">
+                            <input type="date" id="date-from" onchange="filterMeetings()">
+                            <span>à</span>
+                            <input type="date" id="date-to" onchange="filterMeetings()">
+                        </div>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>Participation</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="my-meetings" onchange="filterMeetings()">
+                                <span class="checkmark"></span>
+                                Mes réunions
+                            </label>
+                            
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="registered-meetings" onchange="filterMeetings()">
+                                <span class="checkmark"></span>
+                                Inscrit(e)
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>Options</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="with-minutes" onchange="filterMeetings()">
+                                <span class="checkmark"></span>
+                                Avec compte-rendu
+                            </label>
+                            
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="registration-open" onchange="filterMeetings()">
+                                <span class="checkmark"></span>
+                                Inscriptions ouvertes
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Meetings stats -->
+        <div class="meetings-stats">
+            <div class="stats-summary">
+                <span id="meetings-count">{{ meetings | length }}</span> réunion{{ 's' if meetings | length != 1 else '' }}
+                <span class="stats-separator">•</span>
+                <span>{{ upcoming_meetings_count }} à venir</span>
+                <span class="stats-separator">•</span>
+                <span>{{ total_registered }} inscription{{ 's' if total_registered != 1 else '' }}</span>
+            </div>
+            
+            <div class="quick-actions">
+                {% if next_meeting %}
+                <div class="next-meeting-indicator">
+                    <i class="fas fa-clock"></i>
+                    Prochaine réunion : <a href="{{ url_for('meetings.detail', id=next_meeting.id) }}">{{ next_meeting.title }}</a>
+                    <span class="meeting-time">{{ next_meeting.start_time.strftime('%d/%m à %H:%M') }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Calendar view (default) -->
+        <div id="calendar-view" class="calendar-container view-active">
+            <div class="calendar-header">
+                <div class="calendar-navigation">
+                    <button class="nav-btn" onclick="previousMonth()">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <h3 id="calendar-title">{{ current_month.strftime('%B %Y') }}</h3>
+                    <button class="nav-btn" onclick="nextMonth()">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+                
+                <div class="calendar-controls">
+                    <button class="btn-refonte btn-refonte-outline btn-sm" onclick="goToToday()">
+                        Aujourd'hui
+                    </button>
+                </div>
+            </div>
+            
+            <div class="calendar-grid">
+                <div class="calendar-weekdays">
+                    <div class="weekday">Lun</div>
+                    <div class="weekday">Mar</div>
+                    <div class="weekday">Mer</div>
+                    <div class="weekday">Jeu</div>
+                    <div class="weekday">Ven</div>
+                    <div class="weekday">Sam</div>
+                    <div class="weekday">Dim</div>
+                </div>
+                
+                <div class="calendar-days" id="calendar-days">
+                    <!-- Days will be generated by JavaScript -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Grid/List view -->
+        <div id="meetings-container" class="meetings-container view-grid" style="display: none;">
+            {% for meeting in meetings %}
+            <div class="meeting-card card-glass-refonte" data-meeting-id="{{ meeting.id }}" 
+                 data-status="{{ meeting.status }}" 
+                 data-type="{{ meeting.type }}"
+                 data-category="{{ meeting.category.id if meeting.category else '' }}"
+                 data-date="{{ meeting.start_time.isoformat() }}">
+                
+                <!-- Meeting header -->
+                <div class="meeting-header">
+                    <div class="meeting-meta">
+                        <div class="status-info">
+                            <span class="status-badge status-{{ meeting.status }}">
+                                {% if meeting.status == 'upcoming' %}
+                                <i class="fas fa-clock"></i> À venir
+                                {% elif meeting.status == 'ongoing' %}
+                                <i class="fas fa-play"></i> En cours
+                                {% elif meeting.status == 'finished' %}
+                                <i class="fas fa-check"></i> Terminée
+                                {% elif meeting.status == 'cancelled' %}
+                                <i class="fas fa-times"></i> Annulée
+                                {% endif %}
+                            </span>
+                            
+                            <span class="type-badge type-{{ meeting.type }}">
+                                {% if meeting.type == 'official' %}
+                                <i class="fas fa-certificate"></i> Officielle
+                                {% elif meeting.type == 'participant' %}
+                                <i class="fas fa-users"></i> Participants
+                                {% elif meeting.type == 'hybrid' %}
+                                <i class="fas fa-globe"></i> Hybride
+                                {% elif meeting.type == 'online' %}
+                                <i class="fas fa-video"></i> En ligne
+                                {% elif meeting.type == 'in_person' %}
+                                <i class="fas fa-map-marker-alt"></i> Présentiel
+                                {% endif %}
+                            </span>
+                            
+                            {% if meeting.is_private %}
+                            <span class="private-badge">
+                                <i class="fas fa-lock"></i>
+                                Privée
+                            </span>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="meeting-timing">
+                            <div class="meeting-date">
+                                <i class="fas fa-calendar"></i>
+                                {{ meeting.start_time.strftime('%d %B %Y') }}
+                            </div>
+                            
+                            <div class="meeting-time">
+                                <i class="fas fa-clock"></i>
+                                {{ meeting.start_time.strftime('%H:%M') }}
+                                {% if meeting.end_time %}
+                                - {{ meeting.end_time.strftime('%H:%M') }}
+                                {% endif %}
+                                {% if meeting.duration %}
+                                ({{ meeting.duration }}h)
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="meeting-actions">
+                        {% if meeting.registration_enabled and meeting.can_register(current_user) %}
+                        <button class="action-btn register-btn" onclick="toggleRegistration({{ meeting.id }})" 
+                                data-registered="{{ 'true' if current_user.is_registered(meeting) else 'false' }}">
+                            <i class="fas fa-{{ 'user-minus' if current_user.is_registered(meeting) else 'user-plus' }}"></i>
+                        </button>
+                        {% endif %}
+                        
+                        <button class="action-btn" onclick="followMeeting({{ meeting.id }})" 
+                                title="{{ 'Ne plus suivre' if current_user.is_following_meeting(meeting) else 'Suivre cette réunion' }}">
+                            <i class="fas fa-{{ 'bell-slash' if current_user.is_following_meeting(meeting) else 'bell' }}"></i>
+                        </button>
+                        
+                        {% if current_user.can_moderate(space) or meeting.organizer.id == current_user.id %}
+                        <div class="dropdown">
+                            <button class="action-btn dropdown-toggle" data-toggle="dropdown">
+                                <i class="fas fa-ellipsis-h"></i>
+                            </button>
+                            <div class="dropdown-menu">
+                                {% if meeting.organizer.id == current_user.id %}
+                                <a class="dropdown-item" href="{{ url_for('meetings.edit', id=meeting.id) }}">
+                                    <i class="fas fa-edit"></i>
+                                    Modifier
+                                </a>
+                                {% endif %}
+                                
+                                {% if current_user.can_moderate(space) %}
+                                <a class="dropdown-item" href="#" onclick="moderateMeeting({{ meeting.id }}, 'feature')">
+                                    <i class="fas fa-star"></i>
+                                    {{ 'Retirer la mise en avant' if meeting.is_featured else 'Mettre en avant' }}
+                                </a>
+                                
+                                {% if meeting.status == 'upcoming' %}
+                                <a class="dropdown-item" href="#" onclick="moderateMeeting({{ meeting.id }}, 'cancel')">
+                                    <i class="fas fa-ban"></i>
+                                    Annuler
+                                </a>
+                                {% endif %}
+                                {% endif %}
+                                
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="#" onclick="exportAttendees({{ meeting.id }})">
+                                    <i class="fas fa-download"></i>
+                                    Exporter les participants
+                                </a>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Meeting content -->
+                <div class="meeting-content">
+                    <h3 class="meeting-title">
+                        <a href="{{ url_for('meetings.detail', id=meeting.id) }}">{{ meeting.title }}</a>
+                    </h3>
+                    
+                    <p class="meeting-description">{{ meeting.description | truncate(150) }}</p>
+                    
+                    <!-- Location/Online info -->
+                    <div class="meeting-location">
+                        {% if meeting.location %}
+                        <div class="location-info">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>{{ meeting.location }}</span>
+                            {% if meeting.address %}
+                            <small class="address">{{ meeting.address }}</small>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                        
+                        {% if meeting.online_meeting_url %}
+                        <div class="online-info">
+                            <i class="fas fa-video"></i>
+                            <span>Lien de visioconférence disponible</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Registration info -->
+                    {% if meeting.registration_enabled %}
+                    <div class="registration-info">
+                        <div class="registration-stats">
+                            <span class="registered-count">
+                                <i class="fas fa-users"></i>
+                                {{ meeting.registrations_count }}
+                                {% if meeting.registration_limit %}
+                                / {{ meeting.registration_limit }}
+                                {% endif %}
+                                inscrit{{ 's' if meeting.registrations_count != 1 else '' }}
+                            </span>
+                            
+                            {% if meeting.registration_limit %}
+                            <div class="capacity-bar">
+                                <div class="capacity-fill" style="width: {{ (meeting.registrations_count / meeting.registration_limit * 100) | round }}%"></div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        {% if meeting.registration_deadline %}
+                        <div class="registration-deadline">
+                            <i class="fas fa-calendar-times"></i>
+                            Inscriptions jusqu'au {{ meeting.registration_deadline.strftime('%d/%m/%Y à %H:%M') }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Meeting footer -->
+                <div class="meeting-footer">
+                    <div class="meeting-organizer">
+                        <div class="organizer-info">
+                            <div class="organizer-avatar">
+                                {% if meeting.organizer.avatar %}
+                                <img src="{{ meeting.organizer.avatar }}" alt="{{ meeting.organizer.full_name }}">
+                                {% else %}
+                                <div class="avatar-placeholder">{{ meeting.organizer.full_name[:2].upper() }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="organizer-details">
+                                <div class="organizer-name">{{ meeting.organizer.full_name }}</div>
+                                <div class="meeting-created">{{ meeting.created_at.strftime('%d %B %Y') }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="meeting-indicators">
+                        {% if meeting.has_agenda %}
+                        <div class="indicator-item" title="Agenda disponible">
+                            <i class="fas fa-list"></i>
+                        </div>
+                        {% endif %}
+                        
+                        {% if meeting.has_minutes %}
+                        <div class="indicator-item" title="Compte-rendu disponible">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        {% endif %}
+                        
+                        {% if meeting.has_recordings %}
+                        <div class="indicator-item" title="Enregistrement disponible">
+                            <i class="fas fa-play-circle"></i>
+                        </div>
+                        {% endif %}
+                        
+                        {% if meeting.is_verified %}
+                        <div class="indicator-item verified" title="Réunion vérifiée">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Quick actions -->
+                <div class="meeting-quick-actions">
+                    {% if meeting.status == 'upcoming' %}
+                    <a href="{{ url_for('meetings.detail', id=meeting.id) }}" class="btn-refonte btn-refonte-primary btn-sm">
+                        <i class="fas fa-info-circle"></i>
+                        Voir les détails
+                    </a>
+                    
+                    {% if meeting.registration_enabled and meeting.can_register(current_user) %}
+                    <button class="btn-refonte {{ 'btn-refonte-success' if current_user.is_registered(meeting) else 'btn-refonte-outline' }} btn-sm"
+                            onclick="toggleRegistration({{ meeting.id }})">
+                        <i class="fas fa-{{ 'check' if current_user.is_registered(meeting) else 'user-plus' }}"></i>
+                        {{ 'Inscrit(e)' if current_user.is_registered(meeting) else 'S\'inscrire' }}
+                    </button>
+                    {% endif %}
+                    
+                    {% elif meeting.status == 'ongoing' %}
+                    {% if meeting.online_meeting_url and current_user.is_registered(meeting) %}
+                    <a href="{{ meeting.online_meeting_url }}" target="_blank" class="btn-refonte btn-refonte-success btn-sm">
+                        <i class="fas fa-video"></i>
+                        Rejoindre
+                    </a>
+                    {% endif %}
+                    
+                    {% elif meeting.status == 'finished' %}
+                    {% if meeting.has_minutes %}
+                    <a href="{{ url_for('meetings.minutes', id=meeting.id) }}" class="btn-refonte btn-refonte-outline btn-sm">
+                        <i class="fas fa-file-alt"></i>
+                        Compte-rendu
+                    </a>
+                    {% endif %}
+                    {% endif %}
+                    
+                    <button class="btn-refonte btn-refonte-outline btn-sm" onclick="addToCalendar({{ meeting.id }})">
+                        <i class="fas fa-calendar-plus"></i>
+                        Ajouter au calendrier
+                    </button>
+                </div>
+                
+                <!-- Traceability indicator -->
+                <div class="traceability-indicator">
+                    <div class="trace-info">
+                        <i class="fas fa-shield-alt"></i>
+                        <span class="trace-score">{{ meeting.integrity_score }}%</span>
+                        <span class="trace-label">Intégrité</span>
+                    </div>
+                    
+                    {% if meeting.is_signed %}
+                    <div class="signature-verified">
+                        <i class="fas fa-certificate"></i>
+                        <span>Signé</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Empty state -->
+        {% if not meetings %}
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-calendar-alt"></i>
+            </div>
+            <h3>Aucune réunion programmée</h3>
+            <p>Il n'y a pas encore de réunions dans cet espace participatif.</p>
+            
+            {% if current_user.can_create_meeting(space) %}
+            <a href="{{ url_for('meetings.create', space_id=space.id) }}" class="btn-refonte btn-refonte-primary">
+                <i class="fas fa-plus"></i>
+                Organiser la première réunion
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        <!-- Load more -->
+        {% if meetings | length >= 20 %}
+        <div class="load-more-container">
+            <button class="btn-refonte btn-refonte-outline" onclick="loadMoreMeetings()">
+                <i class="fas fa-chevron-down"></i>
+                Charger plus de réunions
+            </button>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Registration Modal -->
+<div id="registration-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="registration-modal-title">Inscription à la réunion</h3>
+            <button class="modal-close" onclick="closeRegistrationModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="modal-body">
+            <div id="registration-meeting-info">
+                <!-- Meeting info will be loaded here -->
+            </div>
+            
+            <form id="registration-form">
+                <div class="form-group">
+                    <label for="registration-notes">Notes ou questions (optionnel)</label>
+                    <textarea id="registration-notes" class="form-control" rows="3" 
+                              placeholder="Partagez vos attentes ou questions pour cette réunion..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="accept-notifications" checked>
+                            <span class="checkmark"></span>
+                            Accepter les notifications (rappels, modifications)
+                        </label>
+                        
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="dietary-requirements">
+                            <span class="checkmark"></span>
+                            J'ai des exigences alimentaires particulières
+                        </label>
+                    </div>
+                </div>
+                
+                <div id="dietary-details" class="form-group" style="display: none;">
+                    <label for="dietary-notes">Détails des exigences alimentaires</label>
+                    <textarea id="dietary-notes" class="form-control" rows="2" 
+                              placeholder="Allergies, régime végétarien, etc."></textarea>
+                </div>
+            </form>
+        </div>
+        
+        <div class="modal-footer">
+            <button class="btn-refonte btn-refonte-secondary" onclick="closeRegistrationModal()">
+                Annuler
+            </button>
+            
+            <button class="btn-refonte btn-refonte-primary" onclick="confirmRegistration()">
+                <i class="fas fa-user-check"></i>
+                Confirmer l'inscription
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Meetings functionality
+let currentView = 'calendar';
+let currentDate = new Date();
+let currentMeetingsPage = 1;
+let filterTimeout;
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize calendar
+    initializeCalendar();
+    
+    // Initialize filters from URL parameters
+    initializeFiltersFromURL();
+    
+    // Initialize dietary requirements toggle
+    document.getElementById('dietary-requirements').addEventListener('change', function() {
+        document.getElementById('dietary-details').style.display = this.checked ? 'block' : 'none';
+    });
+});
+
+// View switching
+function setMeetingsView(view) {
+    currentView = view;
+    
+    const calendarView = document.getElementById('calendar-view');
+    const meetingsContainer = document.getElementById('meetings-container');
+    const toggles = document.querySelectorAll('.view-toggle');
+    
+    // Update toggles
+    toggles.forEach(toggle => {
+        toggle.classList.toggle('active', toggle.dataset.view === view);
+    });
+    
+    // Update views
+    if (view === 'calendar') {
+        calendarView.style.display = 'block';
+        meetingsContainer.style.display = 'none';
+        calendarView.classList.add('view-active');
+    } else {
+        calendarView.style.display = 'none';
+        meetingsContainer.style.display = 'grid';
+        calendarView.classList.remove('view-active');
+        
+        // Update container class
+        meetingsContainer.className = `meetings-container view-${view}`;
+    }
+    
+    // Save preference
+    localStorage.setItem('meetings-view', view);
+}
+
+// Calendar functionality
+function initializeCalendar() {
+    renderCalendar();
+    loadCalendarMeetings();
+}
+
+function renderCalendar() {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    
+    // Update title
+    document.getElementById('calendar-title').textContent = 
+        currentDate.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+    
+    // Get first day of month and number of days
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startDayOfWeek = (firstDay.getDay() + 6) % 7; // Monday = 0
+    
+    // Clear calendar
+    const calendarDays = document.getElementById('calendar-days');
+    calendarDays.innerHTML = '';
+    
+    // Add empty days for previous month
+    for (let i = 0; i < startDayOfWeek; i++) {
+        const emptyDay = document.createElement('div');
+        emptyDay.className = 'calendar-day empty';
+        calendarDays.appendChild(emptyDay);
+    }
+    
+    // Add days of current month
+    for (let day = 1; day <= daysInMonth; day++) {
+        const dayElement = document.createElement('div');
+        dayElement.className = 'calendar-day';
+        dayElement.innerHTML = `
+            <div class="day-number">${day}</div>
+            <div class="day-meetings" id="day-${year}-${month + 1}-${day}"></div>
+        `;
+        
+        // Check if it's today
+        const today = new Date();
+        if (year === today.getFullYear() && month === today.getMonth() && day === today.getDate()) {
+            dayElement.classList.add('today');
+        }
+        
+        calendarDays.appendChild(dayElement);
+    }
+}
+
+function loadCalendarMeetings() {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    
+    fetch(`/api/meetings/calendar?year=${year}&month=${month + 1}&space_id={{ space.id }}`, {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Clear existing meetings
+            document.querySelectorAll('.day-meetings').forEach(container => {
+                container.innerHTML = '';
+            });
+            
+            // Add meetings to calendar
+            data.meetings.forEach(meeting => {
+                const meetingDate = new Date(meeting.start_time);
+                const day = meetingDate.getDate();
+                const dayContainer = document.getElementById(`day-${year}-${month + 1}-${day}`);
+                
+                if (dayContainer) {
+                    const meetingElement = document.createElement('div');
+                    meetingElement.className = `calendar-meeting meeting-${meeting.type}`;
+                    meetingElement.innerHTML = `
+                        <div class="meeting-time">${meetingDate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</div>
+                        <div class="meeting-title">${meeting.title}</div>
+                    `;
+                    meetingElement.onclick = () => {
+                        window.location.href = `/meetings/${meeting.id}`;
+                    };
+                    
+                    dayContainer.appendChild(meetingElement);
+                }
+            });
+        }
+    });
+}
+
+function previousMonth() {
+    currentDate.setMonth(currentDate.getMonth() - 1);
+    renderCalendar();
+    loadCalendarMeetings();
+}
+
+function nextMonth() {
+    currentDate.setMonth(currentDate.getMonth() + 1);
+    renderCalendar();
+    loadCalendarMeetings();
+}
+
+function goToToday() {
+    currentDate = new Date();
+    renderCalendar();
+    loadCalendarMeetings();
+}
+
+// Filtering functionality
+function filterMeetings() {
+    if (currentView === 'calendar') {
+        filterCalendar();
+        return;
+    }
+    
+    clearTimeout(filterTimeout);
+    filterTimeout = setTimeout(() => {
+        const searchTerm = document.getElementById('meetings-search').value.toLowerCase();
+        const status = document.getElementById('meetings-status').value;
+        const type = document.getElementById('meetings-type').value;
+        const category = document.getElementById('meetings-category').value;
+        
+        // Advanced filters
+        const dateFrom = document.getElementById('date-from')?.value;
+        const dateTo = document.getElementById('date-to')?.value;
+        const myMeetings = document.getElementById('my-meetings')?.checked;
+        const registeredMeetings = document.getElementById('registered-meetings')?.checked;
+        const withMinutes = document.getElementById('with-minutes')?.checked;
+        const registrationOpen = document.getElementById('registration-open')?.checked;
+        
+        const meetings = document.querySelectorAll('.meeting-card');
+        let visibleCount = 0;
+        
+        meetings.forEach(meeting => {
+            let visible = true;
+            
+            // Search filter
+            if (searchTerm) {
+                const title = meeting.querySelector('.meeting-title').textContent.toLowerCase();
+                const description = meeting.querySelector('.meeting-description').textContent.toLowerCase();
+                visible = visible && (title.includes(searchTerm) || description.includes(searchTerm));
+            }
+            
+            // Status filter
+            if (status) {
+                visible = visible && meeting.dataset.status === status;
+            }
+            
+            // Type filter
+            if (type) {
+                visible = visible && meeting.dataset.type === type;
+            }
+            
+            // Category filter
+            if (category) {
+                visible = visible && meeting.dataset.category === category;
+            }
+            
+            // Date range filter
+            if (dateFrom || dateTo) {
+                const meetingDate = new Date(meeting.dataset.date);
+                if (dateFrom) {
+                    visible = visible && meetingDate >= new Date(dateFrom);
+                }
+                if (dateTo) {
+                    visible = visible && meetingDate <= new Date(dateTo);
+                }
+            }
+            
+            // Show/hide meeting
+            meeting.style.display = visible ? 'block' : 'none';
+            if (visible) visibleCount++;
+        });
+        
+        // Update counter
+        document.getElementById('meetings-count').textContent = visibleCount;
+        
+        // Update search clear button
+        const clearButton = document.querySelector('.search-clear');
+        clearButton.style.display = searchTerm ? 'block' : 'none';
+        
+        // Update URL parameters
+        updateURLParameters();
+        
+    }, 300);
+}
+
+function filterCalendar() {
+    // Implement calendar filtering
+    loadCalendarMeetings();
+}
+
+function clearSearch() {
+    document.getElementById('meetings-search').value = '';
+    filterMeetings();
+}
+
+function toggleAdvancedFilters() {
+    const advancedFilters = document.getElementById('advanced-filters');
+    const button = event.target.closest('button');
+    
+    if (advancedFilters.style.display === 'none') {
+        advancedFilters.style.display = 'block';
+        button.innerHTML = '<i class="fas fa-sliders-h"></i> Masquer les filtres';
+    } else {
+        advancedFilters.style.display = 'none';
+        button.innerHTML = '<i class="fas fa-sliders-h"></i> Filtres avancés';
+    }
+}
+
+// Registration functionality
+function toggleRegistration(meetingId) {
+    const button = event.target.closest('button');
+    const isRegistered = button.dataset.registered === 'true';
+    
+    if (isRegistered) {
+        // Unregister
+        if (confirm('Vous désinscrire de cette réunion ?')) {
+            unregisterFromMeeting(meetingId);
+        }
+    } else {
+        // Register
+        openRegistrationModal(meetingId);
+    }
+}
+
+function openRegistrationModal(meetingId) {
+    fetch(`/api/meetings/${meetingId}/info`, {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const meeting = data.meeting;
+            
+            document.getElementById('registration-meeting-info').innerHTML = `
+                <div class="meeting-summary">
+                    <h4>${meeting.title}</h4>
+                    <div class="meeting-details">
+                        <div class="detail-item">
+                            <i class="fas fa-calendar"></i>
+                            ${new Date(meeting.start_time).toLocaleDateString('fr-FR', { 
+                                weekday: 'long', 
+                                year: 'numeric', 
+                                month: 'long', 
+                                day: 'numeric' 
+                            })}
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-clock"></i>
+                            ${new Date(meeting.start_time).toLocaleTimeString('fr-FR', { 
+                                hour: '2-digit', 
+                                minute: '2-digit' 
+                            })}
+                            ${meeting.end_time ? ' - ' + new Date(meeting.end_time).toLocaleTimeString('fr-FR', { 
+                                hour: '2-digit', 
+                                minute: '2-digit' 
+                            }) : ''}
+                        </div>
+                        ${meeting.location ? `
+                        <div class="detail-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            ${meeting.location}
+                        </div>
+                        ` : ''}
+                        ${meeting.registrations_count !== undefined ? `
+                        <div class="detail-item">
+                            <i class="fas fa-users"></i>
+                            ${meeting.registrations_count} 
+                            ${meeting.registration_limit ? '/ ' + meeting.registration_limit : ''} 
+                            inscrit${meeting.registrations_count !== 1 ? 's' : ''}
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('registration-modal').style.display = 'flex';
+            document.getElementById('registration-modal').dataset.meetingId = meetingId;
+        }
+    });
+}
+
+function closeRegistrationModal() {
+    document.getElementById('registration-modal').style.display = 'none';
+    document.getElementById('registration-form').reset();
+    document.getElementById('dietary-details').style.display = 'none';
+}
+
+function confirmRegistration() {
+    const modal = document.getElementById('registration-modal');
+    const meetingId = modal.dataset.meetingId;
+    const notes = document.getElementById('registration-notes').value;
+    const acceptNotifications = document.getElementById('accept-notifications').checked;
+    const dietaryRequirements = document.getElementById('dietary-requirements').checked;
+    const dietaryNotes = document.getElementById('dietary-notes').value;
+    
+    const button = event.target;
+    button.disabled = true;
+    
+    fetch(`/api/meetings/${meetingId}/register`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({
+            notes: notes,
+            accept_notifications: acceptNotifications,
+            dietary_requirements: dietaryRequirements,
+            dietary_notes: dietaryNotes
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            closeRegistrationModal();
+            location.reload(); // Refresh to update registration status
+        } else {
+            alert(data.message || 'Erreur lors de l\'inscription');
+        }
+    })
+    .finally(() => {
+        button.disabled = false;
+    });
+}
+
+function unregisterFromMeeting(meetingId) {
+    fetch(`/api/meetings/${meetingId}/unregister`, {
+        method: 'DELETE',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload(); // Refresh to update registration status
+        } else {
+            alert(data.message || 'Erreur lors de la désinscription');
+        }
+    });
+}
+
+// Follow functionality
+function followMeeting(meetingId) {
+    const button = event.target.closest('button');
+    const icon = button.querySelector('i');
+    const isFollowing = icon.classList.contains('fa-bell-slash');
+    
+    fetch(`/api/meetings/${meetingId}/follow`, {
+        method: isFollowing ? 'DELETE' : 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            if (isFollowing) {
+                icon.className = 'fas fa-bell';
+                button.title = 'Suivre cette réunion';
+            } else {
+                icon.className = 'fas fa-bell-slash';
+                button.title = 'Ne plus suivre';
+            }
+        }
+    });
+}
+
+// Moderation functionality
+function moderateMeeting(meetingId, action) {
+    let confirmMessage = '';
+    
+    switch (action) {
+        case 'feature':
+            confirmMessage = 'Mettre cette réunion en avant ?';
+            break;
+        case 'cancel':
+            confirmMessage = 'Annuler cette réunion ? Les participants seront notifiés.';
+            break;
+    }
+    
+    if (confirm(confirmMessage)) {
+        fetch(`/api/meetings/${meetingId}/moderate`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ action: action })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            }
+        });
+    }
+}
+
+// Calendar and export functionality
+function addToCalendar(meetingId) {
+    window.open(`/api/meetings/${meetingId}/calendar.ics`, '_blank');
+}
+
+function exportCalendar() {
+    window.open(`/api/meetings/calendar/export.ics?space_id={{ space.id }}`, '_blank');
+}
+
+function exportAttendees(meetingId) {
+    window.open(`/api/meetings/${meetingId}/attendees/export.csv`, '_blank');
+}
+
+// Load more functionality
+function loadMoreMeetings() {
+    currentMeetingsPage++;
+    
+    const button = event.target;
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Chargement...';
+    
+    fetch(`/api/meetings?page=${currentMeetingsPage}&space_id={{ space.id }}`, {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success && data.meetings.length > 0) {
+            const container = document.getElementById('meetings-container');
+            container.insertAdjacentHTML('beforeend', data.html);
+            
+            if (data.meetings.length < 20) {
+                button.parentElement.style.display = 'none';
+            }
+        } else {
+            button.parentElement.style.display = 'none';
+        }
+    })
+    .finally(() => {
+        button.disabled = false;
+        button.innerHTML = '<i class="fas fa-chevron-down"></i> Charger plus de réunions';
+    });
+}
+
+// URL management
+function initializeFiltersFromURL() {
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    const search = urlParams.get('search');
+    const status = urlParams.get('status');
+    const type = urlParams.get('type');
+    const category = urlParams.get('category');
+    
+    if (search) document.getElementById('meetings-search').value = search;
+    if (status) document.getElementById('meetings-status').value = status;
+    if (type) document.getElementById('meetings-type').value = type;
+    if (category) document.getElementById('meetings-category').value = category;
+    
+    // Apply filters if any are set
+    if (search || status || type || category) {
+        filterMeetings();
+    }
+    
+    // Load saved view preference
+    const savedView = localStorage.getItem('meetings-view');
+    if (savedView) {
+        setMeetingsView(savedView);
+    }
+}
+
+function updateURLParameters() {
+    const params = new URLSearchParams();
+    
+    const search = document.getElementById('meetings-search').value;
+    const status = document.getElementById('meetings-status').value;
+    const type = document.getElementById('meetings-type').value;
+    const category = document.getElementById('meetings-category').value;
+    
+    if (search) params.set('search', search);
+    if (status) params.set('status', status);
+    if (type) params.set('type', type);
+    if (category) params.set('category', category);
+    
+    const newURL = `${window.location.pathname}${params.toString() ? '?' + params.toString() : ''}`;
+    window.history.replaceState({}, '', newURL);
+}
+
+// Search input enhancements
+document.getElementById('meetings-search').addEventListener('input', function() {
+    const clearButton = document.querySelector('.search-clear');
+    clearButton.style.display = this.value ? 'block' : 'none';
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    // Ctrl/Cmd + K for search focus
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        document.getElementById('meetings-search').focus();
+    }
+    
+    // Escape to clear search
+    if (e.key === 'Escape' && document.activeElement === document.getElementById('meetings-search')) {
+        clearSearch();
+        document.getElementById('meetings-search').blur();
+    }
+});
+</script>
+{% endblock %}

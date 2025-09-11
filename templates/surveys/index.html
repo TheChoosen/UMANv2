@@ -1,0 +1,876 @@
+{% extends "base.html" %}
+
+{% block title %}Enquêtes & Questionnaires - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="surveys-layout">
+    <div class="container">
+        <div class="surveys-container">
+            <!-- En-tête des enquêtes -->
+            <div class="surveys-header">
+                <div class="hero-section">
+                    <div class="hero-content">
+                        <h1>
+                            <i class="fas fa-poll"></i>
+                            Enquêtes & Questionnaires
+                        </h1>
+                        <p class="hero-description">
+                            Participez aux enquêtes citoyennes et contribuez à l'amélioration 
+                            de votre territoire par vos réponses et suggestions.
+                        </p>
+                        
+                        <div class="hero-stats">
+                            <div class="stat-item">
+                                <div class="stat-value">{{ active_surveys_count }}</div>
+                                <div class="stat-label">Enquêtes actives</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">{{ total_responses_count|format_number }}</div>
+                                <div class="stat-label">Réponses collectées</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">{{ participants_count|format_number }}</div>
+                                <div class="stat-label">Participants</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="hero-actions">
+                        {% if user_can_create_surveys %}
+                        <button class="btn-refonte" onclick="showCreateSurveyModal()">
+                            <i class="fas fa-plus"></i>
+                            Créer une enquête
+                        </button>
+                        {% endif %}
+                        <button class="btn-refonte btn-secondary" onclick="showMyResponses()">
+                            <i class="fas fa-user-check"></i>
+                            Mes réponses
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtres et recherche -->
+            <div class="surveys-filters">
+                <div class="filters-container">
+                    <div class="filter-group">
+                        <label for="status-filter">Statut</label>
+                        <select class="filter-select" id="status-filter" onchange="filterSurveys()">
+                            <option value="">Toutes les enquêtes</option>
+                            <option value="active">Actives</option>
+                            <option value="draft">Brouillons</option>
+                            <option value="closed">Terminées</option>
+                            <option value="archived">Archivées</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="category-filter">Catégorie</label>
+                        <select class="filter-select" id="category-filter" onchange="filterSurveys()">
+                            <option value="">Toutes les catégories</option>
+                            <option value="urban-planning">Urbanisme</option>
+                            <option value="environment">Environnement</option>
+                            <option value="transport">Transport</option>
+                            <option value="culture">Culture</option>
+                            <option value="social">Social</option>
+                            <option value="economy">Économie</option>
+                            <option value="education">Éducation</option>
+                            <option value="health">Santé</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="target-filter">Public cible</label>
+                        <select class="filter-select" id="target-filter" onchange="filterSurveys()">
+                            <option value="">Tous les publics</option>
+                            <option value="residents">Résidents</option>
+                            <option value="youth">Jeunes</option>
+                            <option value="seniors">Seniors</option>
+                            <option value="businesses">Entreprises</option>
+                            <option value="associations">Associations</option>
+                        </select>
+                    </div>
+                    
+                    <div class="search-group">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="search-input" placeholder="Rechercher une enquête..." 
+                                   onkeyup="searchSurveys()" autocomplete="off">
+                        </div>
+                    </div>
+                    
+                    <div class="view-toggle-group">
+                        <button class="view-toggle active" data-view="cards" onclick="toggleView('cards')">
+                            <i class="fas fa-th"></i>
+                        </button>
+                        <button class="view-toggle" data-view="list" onclick="toggleView('list')">
+                            <i class="fas fa-list"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enquêtes mises en avant -->
+            <div class="featured-surveys">
+                <div class="section-header">
+                    <h2>
+                        <i class="fas fa-star"></i>
+                        Enquêtes mises en avant
+                    </h2>
+                </div>
+                
+                <div class="featured-grid">
+                    <!-- Enquête featured 1 -->
+                    <div class="featured-survey">
+                        <div class="featured-image">
+                            <img src="/static/image/survey-mobility.jpg" alt="Plan de mobilité urbaine">
+                            <div class="featured-overlay">
+                                <div class="featured-badge">
+                                    <i class="fas fa-star"></i>
+                                    En vedette
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="featured-content">
+                            <div class="featured-category">
+                                <span class="category-badge category-transport">
+                                    <i class="fas fa-car"></i>
+                                    Transport
+                                </span>
+                            </div>
+                            
+                            <h3 class="featured-title">Plan de mobilité urbaine 2025</h3>
+                            <p class="featured-description">
+                                Aidez-nous à définir les priorités en matière de transport et de mobilité 
+                                pour les cinq prochaines années dans notre territoire.
+                            </p>
+                            
+                            <div class="featured-stats">
+                                <div class="stat">
+                                    <i class="fas fa-users"></i>
+                                    <span>1,247 réponses</span>
+                                </div>
+                                <div class="stat">
+                                    <i class="fas fa-clock"></i>
+                                    <span>12 jours restants</span>
+                                </div>
+                                <div class="stat">
+                                    <i class="fas fa-chart-bar"></i>
+                                    <span>18 questions</span>
+                                </div>
+                            </div>
+                            
+                            <div class="featured-progress">
+                                <div class="progress-info">
+                                    <span>Objectif: 2,000 réponses</span>
+                                    <span>62%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 62%;"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="featured-actions">
+                                <button class="btn-refonte" onclick="participateToSurvey(1)">
+                                    <i class="fas fa-play"></i>
+                                    Participer maintenant
+                                </button>
+                                <button class="btn-refonte btn-secondary" onclick="viewSurveyDetails(1)">
+                                    <i class="fas fa-info-circle"></i>
+                                    Plus d'infos
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Liste des enquêtes -->
+            <div class="surveys-section">
+                <div class="section-header">
+                    <h2>
+                        <i class="fas fa-poll"></i>
+                        Toutes les enquêtes
+                        <span class="surveys-count">({{ surveys|length }})</span>
+                    </h2>
+                    
+                    <div class="section-actions">
+                        <select class="sort-select" id="sort-select" onchange="sortSurveys()">
+                            <option value="newest">Plus récentes</option>
+                            <option value="oldest">Plus anciennes</option>
+                            <option value="most-responses">Plus de réponses</option>
+                            <option value="ending-soon">Se terminent bientôt</option>
+                            <option value="alphabetical">Alphabétique</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Vue cartes -->
+                <div class="surveys-grid view-cards" id="surveys-container">
+                    <!-- Enquête 1 -->
+                    <div class="survey-card" data-category="environment" data-status="active" data-target="residents">
+                        <div class="survey-header">
+                            <div class="survey-badges">
+                                <span class="category-badge category-environment">
+                                    <i class="fas fa-leaf"></i>
+                                    Environnement
+                                </span>
+                                <span class="status-badge status-active">
+                                    <i class="fas fa-play-circle"></i>
+                                    Active
+                                </span>
+                            </div>
+                            
+                            <div class="survey-actions">
+                                <button class="action-btn" title="Partager" onclick="shareSurvey(2)">
+                                    <i class="fas fa-share-alt"></i>
+                                </button>
+                                <button class="action-btn" title="Signaler" onclick="reportSurvey(2)">
+                                    <i class="fas fa-flag"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="survey-content">
+                            <h3 class="survey-title">Espaces verts et biodiversité</h3>
+                            <p class="survey-description">
+                                Votre avis sur l'état actuel des espaces verts et vos suggestions 
+                                pour améliorer la biodiversité en ville.
+                            </p>
+                            
+                            <div class="survey-meta">
+                                <div class="meta-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span>Durée: ~5 minutes</span>
+                                </div>
+                                <div class="meta-item">
+                                    <i class="fas fa-question-circle"></i>
+                                    <span>12 questions</span>
+                                </div>
+                                <div class="meta-item">
+                                    <i class="fas fa-users"></i>
+                                    <span>Résidents</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="survey-stats">
+                            <div class="stats-row">
+                                <div class="stat-item">
+                                    <span class="stat-value">389</span>
+                                    <span class="stat-label">Réponses</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-value">8</span>
+                                    <span class="stat-label">Jours restants</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-value">78%</span>
+                                    <span class="stat-label">Taux de complétion</span>
+                                </div>
+                            </div>
+                            
+                            <div class="participation-bar">
+                                <div class="participation-fill" style="width: 39%;"></div>
+                                <span class="participation-text">39% de l'objectif (1,000 réponses)</span>
+                            </div>
+                        </div>
+                        
+                        <div class="survey-footer">
+                            <div class="survey-author">
+                                <div class="author-avatar">
+                                    <i class="fas fa-building"></i>
+                                </div>
+                                <div class="author-info">
+                                    <div class="author-name">Service Environnement</div>
+                                    <div class="author-role">Organisateur</div>
+                                </div>
+                            </div>
+                            
+                            <div class="survey-actions">
+                                {% if user_has_responded_to_survey(2) %}
+                                <button class="btn-refonte btn-completed" disabled>
+                                    <i class="fas fa-check"></i>
+                                    Déjà répondu
+                                </button>
+                                {% else %}
+                                <button class="btn-refonte" onclick="participateToSurvey(2)">
+                                    <i class="fas fa-play"></i>
+                                    Participer
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Enquête 2 -->
+                    <div class="survey-card" data-category="culture" data-status="active" data-target="residents">
+                        <div class="survey-header">
+                            <div class="survey-badges">
+                                <span class="category-badge category-culture">
+                                    <i class="fas fa-theater-masks"></i>
+                                    Culture
+                                </span>
+                                <span class="status-badge status-active">
+                                    <i class="fas fa-play-circle"></i>
+                                    Active
+                                </span>
+                            </div>
+                            
+                            <div class="survey-actions">
+                                <button class="action-btn" title="Partager" onclick="shareSurvey(3)">
+                                    <i class="fas fa-share-alt"></i>
+                                </button>
+                                <button class="action-btn" title="Signaler" onclick="reportSurvey(3)">
+                                    <i class="fas fa-flag"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="survey-content">
+                            <h3 class="survey-title">Programmation culturelle 2025</h3>
+                            <p class="survey-description">
+                                Quels types d'événements culturels souhaitez-vous voir organisés 
+                                dans votre commune ? Festivals, spectacles, expositions...
+                            </p>
+                            
+                            <div class="survey-meta">
+                                <div class="meta-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span>Durée: ~8 minutes</span>
+                                </div>
+                                <div class="meta-item">
+                                    <i class="fas fa-question-circle"></i>
+                                    <span>15 questions</span>
+                                </div>
+                                <div class="meta-item">
+                                    <i class="fas fa-users"></i>
+                                    <span>Résidents</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="survey-stats">
+                            <div class="stats-row">
+                                <div class="stat-item">
+                                    <span class="stat-value">156</span>
+                                    <span class="stat-label">Réponses</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-value">15</span>
+                                    <span class="stat-label">Jours restants</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-value">85%</span>
+                                    <span class="stat-label">Taux de complétion</span>
+                                </div>
+                            </div>
+                            
+                            <div class="participation-bar">
+                                <div class="participation-fill" style="width: 21%;"></div>
+                                <span class="participation-text">21% de l'objectif (750 réponses)</span>
+                            </div>
+                        </div>
+                        
+                        <div class="survey-footer">
+                            <div class="survey-author">
+                                <div class="author-avatar">
+                                    <i class="fas fa-building"></i>
+                                </div>
+                                <div class="author-info">
+                                    <div class="author-name">Service Culture</div>
+                                    <div class="author-role">Organisateur</div>
+                                </div>
+                            </div>
+                            
+                            <div class="survey-actions">
+                                <button class="btn-refonte" onclick="participateToSurvey(3)">
+                                    <i class="fas fa-play"></i>
+                                    Participer
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Enquête 3 -->
+                    <div class="survey-card" data-category="social" data-status="closed" data-target="youth">
+                        <div class="survey-header">
+                            <div class="survey-badges">
+                                <span class="category-badge category-social">
+                                    <i class="fas fa-users"></i>
+                                    Social
+                                </span>
+                                <span class="status-badge status-closed">
+                                    <i class="fas fa-stop-circle"></i>
+                                    Terminée
+                                </span>
+                            </div>
+                            
+                            <div class="survey-actions">
+                                <button class="action-btn" title="Partager" onclick="shareSurvey(4)">
+                                    <i class="fas fa-share-alt"></i>
+                                </button>
+                                <button class="action-btn" title="Signaler" onclick="reportSurvey(4)">
+                                    <i class="fas fa-flag"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="survey-content">
+                            <h3 class="survey-title">Besoins des jeunes 16-25 ans</h3>
+                            <p class="survey-description">
+                                Enquête sur les attentes et besoins des jeunes adultes : 
+                                formation, emploi, logement, loisirs, engagement citoyen.
+                            </p>
+                            
+                            <div class="survey-meta">
+                                <div class="meta-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span>Durée: ~10 minutes</span>
+                                </div>
+                                <div class="meta-item">
+                                    <i class="fas fa-question-circle"></i>
+                                    <span>22 questions</span>
+                                </div>
+                                <div class="meta-item">
+                                    <i class="fas fa-users"></i>
+                                    <span>16-25 ans</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="survey-stats">
+                            <div class="stats-row">
+                                <div class="stat-item">
+                                    <span class="stat-value">743</span>
+                                    <span class="stat-label">Réponses</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-value completed">Terminée</span>
+                                    <span class="stat-label">Status</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-value">92%</span>
+                                    <span class="stat-label">Taux de complétion</span>
+                                </div>
+                            </div>
+                            
+                            <div class="participation-bar completed">
+                                <div class="participation-fill" style="width: 100%;"></div>
+                                <span class="participation-text">Objectif atteint (500 réponses)</span>
+                            </div>
+                        </div>
+                        
+                        <div class="survey-footer">
+                            <div class="survey-author">
+                                <div class="author-avatar">
+                                    <i class="fas fa-building"></i>
+                                </div>
+                                <div class="author-info">
+                                    <div class="author-name">Mission Jeunesse</div>
+                                    <div class="author-role">Organisateur</div>
+                                </div>
+                            </div>
+                            
+                            <div class="survey-actions">
+                                <button class="btn-refonte btn-secondary" onclick="viewSurveyResults(4)">
+                                    <i class="fas fa-chart-bar"></i>
+                                    Voir les résultats
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Enquête 4 -->
+                    <div class="survey-card" data-category="urban-planning" data-status="active" data-target="residents">
+                        <div class="survey-header">
+                            <div class="survey-badges">
+                                <span class="category-badge category-urban-planning">
+                                    <i class="fas fa-city"></i>
+                                    Urbanisme
+                                </span>
+                                <span class="status-badge status-active">
+                                    <i class="fas fa-play-circle"></i>
+                                    Active
+                                </span>
+                            </div>
+                            
+                            <div class="survey-actions">
+                                <button class="action-btn" title="Partager" onclick="shareSurvey(5)">
+                                    <i class="fas fa-share-alt"></i>
+                                </button>
+                                <button class="action-btn" title="Signaler" onclick="reportSurvey(5)">
+                                    <i class="fas fa-flag"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="survey-content">
+                            <h3 class="survey-title">Réaménagement du centre-ville</h3>
+                            <p class="survey-description">
+                                Participez à la réflexion sur le futur aménagement du centre-ville : 
+                                piétonisation, espaces verts, commerces, stationnement.
+                            </p>
+                            
+                            <div class="survey-meta">
+                                <div class="meta-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span>Durée: ~12 minutes</span>
+                                </div>
+                                <div class="meta-item">
+                                    <i class="fas fa-question-circle"></i>
+                                    <span>20 questions</span>
+                                </div>
+                                <div class="meta-item">
+                                    <i class="fas fa-users"></i>
+                                    <span>Résidents</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="survey-stats">
+                            <div class="stats-row">
+                                <div class="stat-item">
+                                    <span class="stat-value">892</span>
+                                    <span class="stat-label">Réponses</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-value">3</span>
+                                    <span class="stat-label">Jours restants</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-value">88%</span>
+                                    <span class="stat-label">Taux de complétion</span>
+                                </div>
+                            </div>
+                            
+                            <div class="participation-bar">
+                                <div class="participation-fill" style="width: 89%;"></div>
+                                <span class="participation-text">89% de l'objectif (1,000 réponses)</span>
+                            </div>
+                        </div>
+                        
+                        <div class="survey-footer">
+                            <div class="survey-author">
+                                <div class="author-avatar">
+                                    <i class="fas fa-building"></i>
+                                </div>
+                                <div class="author-info">
+                                    <div class="author-name">Service Urbanisme</div>
+                                    <div class="author-role">Organisateur</div>
+                                </div>
+                            </div>
+                            
+                            <div class="survey-actions">
+                                <button class="btn-refonte urgent" onclick="participateToSurvey(5)">
+                                    <i class="fas fa-play"></i>
+                                    Participer (urgent)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mes réponses -->
+            {% if user_authenticated %}
+            <div class="my-responses-section">
+                <div class="section-header">
+                    <h2>
+                        <i class="fas fa-user-check"></i>
+                        Mes participations récentes
+                    </h2>
+                    
+                    <div class="section-actions">
+                        <button class="btn-refonte btn-secondary" onclick="viewAllMyResponses()">
+                            <i class="fas fa-list"></i>
+                            Voir toutes mes réponses
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="responses-grid">
+                    <!-- Réponse 1 -->
+                    <div class="response-card">
+                        <div class="response-header">
+                            <h4>Plan de mobilité urbaine 2025</h4>
+                            <span class="response-date">Répondu le 23/01/2025</span>
+                        </div>
+                        <div class="response-content">
+                            <div class="response-stats">
+                                <span>18 questions répondues</span>
+                                <span>•</span>
+                                <span>Temps: 8 minutes</span>
+                            </div>
+                            <div class="response-actions">
+                                <button class="btn-refonte btn-sm" onclick="viewMyResponse(1)">
+                                    <i class="fas fa-eye"></i>
+                                    Voir ma réponse
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Réponse 2 -->
+                    <div class="response-card">
+                        <div class="response-header">
+                            <h4>Besoins des jeunes 16-25 ans</h4>
+                            <span class="response-date">Répondu le 15/01/2025</span>
+                        </div>
+                        <div class="response-content">
+                            <div class="response-stats">
+                                <span>22 questions répondues</span>
+                                <span>•</span>
+                                <span>Temps: 12 minutes</span>
+                            </div>
+                            <div class="response-actions">
+                                <button class="btn-refonte btn-sm" onclick="viewMyResponse(4)">
+                                    <i class="fas fa-eye"></i>
+                                    Voir ma réponse
+                                </button>
+                                <button class="btn-refonte btn-sm btn-secondary" onclick="viewSurveyResults(4)">
+                                    <i class="fas fa-chart-bar"></i>
+                                    Résultats
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Newsletter et notifications -->
+            <div class="newsletter-section">
+                <div class="newsletter-card">
+                    <div class="newsletter-content">
+                        <h3>
+                            <i class="fas fa-bell"></i>
+                            Restez informé des nouvelles enquêtes
+                        </h3>
+                        <p>Recevez une notification lorsqu'une nouvelle enquête est publiée dans vos domaines d'intérêt.</p>
+                        
+                        <div class="newsletter-form">
+                            <div class="interests-selection">
+                                <label class="interest-option">
+                                    <input type="checkbox" value="environment">
+                                    <span class="checkmark"></span>
+                                    Environnement
+                                </label>
+                                <label class="interest-option">
+                                    <input type="checkbox" value="transport">
+                                    <span class="checkmark"></span>
+                                    Transport
+                                </label>
+                                <label class="interest-option">
+                                    <input type="checkbox" value="culture">
+                                    <span class="checkmark"></span>
+                                    Culture
+                                </label>
+                                <label class="interest-option">
+                                    <input type="checkbox" value="social">
+                                    <span class="checkmark"></span>
+                                    Social
+                                </label>
+                            </div>
+                            
+                            <button class="btn-refonte" onclick="subscribeToNotifications()">
+                                <i class="fas fa-bell"></i>
+                                S'abonner aux notifications
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Créer une enquête (pour les administrateurs) -->
+{% if user_can_create_surveys %}
+<div class="modal" id="createSurveyModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus"></i>
+                    Créer une nouvelle enquête
+                </h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="create-survey-form">
+                    <div class="form-group">
+                        <label for="survey-title">Titre de l'enquête *</label>
+                        <input type="text" id="survey-title" class="form-control" required
+                               placeholder="Ex: Satisfaction des services municipaux">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="survey-description">Description</label>
+                        <textarea id="survey-description" class="form-control" rows="4"
+                                  placeholder="Décrivez l'objectif de cette enquête..."></textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="survey-category">Catégorie *</label>
+                                <select id="survey-category" class="form-control" required>
+                                    <option value="">Sélectionnez une catégorie</option>
+                                    <option value="urban-planning">Urbanisme</option>
+                                    <option value="environment">Environnement</option>
+                                    <option value="transport">Transport</option>
+                                    <option value="culture">Culture</option>
+                                    <option value="social">Social</option>
+                                    <option value="economy">Économie</option>
+                                    <option value="education">Éducation</option>
+                                    <option value="health">Santé</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="survey-target">Public cible</label>
+                                <select id="survey-target" class="form-control">
+                                    <option value="residents">Résidents</option>
+                                    <option value="youth">Jeunes</option>
+                                    <option value="seniors">Seniors</option>
+                                    <option value="businesses">Entreprises</option>
+                                    <option value="associations">Associations</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="survey-start">Date de début</label>
+                                <input type="date" id="survey-start" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="survey-end">Date de fin</label>
+                                <input type="date" id="survey-end" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="response-goal">Objectif de réponses</label>
+                        <input type="number" id="response-goal" class="form-control" 
+                               min="1" step="1" placeholder="1000">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-refonte btn-secondary" data-dismiss="modal">
+                    Annuler
+                </button>
+                <button type="button" class="btn-refonte" onclick="createSurvey()">
+                    <i class="fas fa-plus"></i>
+                    Créer l'enquête
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Traçabilité UMan API -->
+<div class="traceability-section">
+    <div class="container">
+        <div class="traceability-info">
+            <div class="trace-header">
+                <h4>
+                    <i class="fas fa-shield-alt"></i>
+                    Traçabilité UMan API - Enquêtes
+                </h4>
+                <span class="trace-score">Score: 100%</span>
+            </div>
+            
+            <div class="trace-details">
+                <div class="trace-item">
+                    <span class="trace-label">Réponses enregistrées:</span>
+                    <code class="trace-value">{{ total_responses_count }} hachées</code>
+                </div>
+                <div class="trace-item">
+                    <span class="trace-label">Signatures numériques:</span>
+                    <span class="trace-value verified">
+                        <i class="fas fa-certificate"></i>
+                        100% vérifiées
+                    </span>
+                </div>
+                <div class="trace-item">
+                    <span class="trace-label">Anonymisation:</span>
+                    <span class="trace-value verified">
+                        <i class="fas fa-user-secret"></i>
+                        Conforme RGPD
+                    </span>
+                </div>
+                <div class="trace-item">
+                    <span class="trace-label">Audit trail:</span>
+                    <span class="trace-value">Dernière vérification: {{ last_audit_date|format_datetime }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Variables globales pour les enquêtes
+const surveysData = {
+    surveys: {{ surveys|tojson }},
+    userResponses: {{ user_responses|tojson }},
+    categories: {{ categories|tojson }}
+};
+
+// Initialisation
+document.addEventListener('DOMContentLoaded', function() {
+    initializeSurveysInterface();
+    loadSurveysData();
+    setupSurveysEventListeners();
+});
+
+// Fonctions de filtrage et recherche
+function filterSurveys() {
+    // Logique de filtrage des enquêtes
+}
+
+function searchSurveys() {
+    // Logique de recherche
+}
+
+function sortSurveys() {
+    // Logique de tri des enquêtes
+}
+
+function toggleView(viewType) {
+    // Basculer entre vue cartes et vue liste
+}
+
+// Fonctions de participation
+function participateToSurvey(surveyId) {
+    // Redirection vers le questionnaire
+    window.location.href = `/surveys/${surveyId}/participate`;
+}
+
+function viewSurveyDetails(surveyId) {
+    // Afficher les détails de l'enquête
+    window.location.href = `/surveys/${surveyId}`;
+}
+
+function viewSurveyResults(surveyId) {
+    // Afficher les résultats de l'enquête
+    window.location.href = `/surveys/${surveyId}/results`;
+}
+
+// Sera complété par budgets_surveys.js
+</script>
+{% endblock %}

@@ -1,0 +1,691 @@
+{% extends "base.html" %}
+
+{% block title %}Réunions - {{ assembly.name }} — {{ organization.name }}{% endblock %}
+
+{% block meta %}
+<link rel="stylesheet" href="{{ url_for('static', filename='refonte.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='spaces.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="meetings-layout">
+    <div class="container">
+        <!-- Header with breadcrumb -->
+        <div class="page-header">
+            <nav class="breadcrumb">
+                <a href="{{ url_for('spaces.index') }}">Espaces participatifs</a>
+                <span class="breadcrumb-separator">/</span>
+                <a href="{{ url_for('spaces.assemblies') }}">Assemblées</a>
+                <span class="breadcrumb-separator">/</span>
+                <a href="{{ url_for('spaces.assembly', id=assembly.id) }}">{{ assembly.name }}</a>
+                <span class="breadcrumb-separator">/</span>
+                <span class="breadcrumb-current">Réunions</span>
+            </nav>
+            
+            <div class="header-content">
+                <h1>
+                    <i class="fas fa-calendar-alt"></i>
+                    Réunions de {{ assembly.name }}
+                </h1>
+                <p>Consultez l'agenda des réunions et participez aux événements</p>
+            </div>
+            
+            {% if can_manage_assembly %}
+            <div class="header-actions">
+                <button class="btn-refonte btn-refonte-primary" onclick="openCreateMeetingModal()">
+                    <i class="fas fa-plus"></i>
+                    Programmer une réunion
+                </button>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Meetings filters and view -->
+        <div class="meetings-filters card-glass-refonte">
+            <div class="filters-row">
+                <div class="filter-group">
+                    <label>Vue :</label>
+                    <div class="view-toggle">
+                        <button class="view-btn active" data-view="upcoming" onclick="switchView('upcoming')">
+                            <i class="fas fa-clock"></i>
+                            À venir
+                        </button>
+                        <button class="view-btn" data-view="past" onclick="switchView('past')">
+                            <i class="fas fa-history"></i>
+                            Passées
+                        </button>
+                        <button class="view-btn" data-view="calendar" onclick="switchView('calendar')">
+                            <i class="fas fa-calendar"></i>
+                            Calendrier
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="meeting-type">Type :</label>
+                    <select id="meeting-type" class="form-control" onchange="filterMeetings()">
+                        <option value="">Tous les types</option>
+                        <option value="ordinary">Réunion ordinaire</option>
+                        <option value="extraordinary">Réunion extraordinaire</option>
+                        <option value="public">Séance publique</option>
+                        <option value="working">Groupe de travail</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="meeting-status">Statut :</label>
+                    <select id="meeting-status" class="form-control" onchange="filterMeetings()">
+                        <option value="">Tous les statuts</option>
+                        <option value="scheduled">Programmée</option>
+                        <option value="confirmed">Confirmée</option>
+                        <option value="cancelled">Annulée</option>
+                        <option value="completed">Terminée</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Upcoming meetings view -->
+        <div id="upcoming-view" class="meetings-view">
+            {% if upcoming_meetings %}
+            <div class="meetings-grid">
+                {% for meeting in upcoming_meetings %}
+                <div class="meeting-card card-glass-refonte" data-meeting-id="{{ meeting.id }}">
+                    <div class="meeting-header">
+                        <div class="meeting-date">
+                            <div class="date-day">{{ meeting.date.strftime('%d') }}</div>
+                            <div class="date-month">{{ meeting.date.strftime('%b') }}</div>
+                            <div class="date-year">{{ meeting.date.strftime('%Y') }}</div>
+                        </div>
+                        
+                        <div class="meeting-info">
+                            <h3 class="meeting-title">{{ meeting.title }}</h3>
+                            <div class="meeting-meta">
+                                <span class="meeting-time">
+                                    <i class="fas fa-clock"></i>
+                                    {{ meeting.start_time.strftime('%H:%M') }} - {{ meeting.end_time.strftime('%H:%M') }}
+                                </span>
+                                <span class="meeting-location">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    {{ meeting.location or 'En ligne' }}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="meeting-status">
+                            <span class="status-badge status-{{ meeting.status }}">
+                                {% if meeting.status == 'scheduled' %}Programmée
+                                {% elif meeting.status == 'confirmed' %}Confirmée
+                                {% elif meeting.status == 'cancelled' %}Annulée
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="meeting-body">
+                        {% if meeting.description %}
+                        <p class="meeting-description">{{ meeting.description | truncate(150) }}</p>
+                        {% endif %}
+                        
+                        {% if meeting.agenda_items %}
+                        <div class="meeting-agenda-preview">
+                            <h4>Ordre du jour :</h4>
+                            <ul>
+                                {% for item in meeting.agenda_items[:3] %}
+                                <li>{{ item.title }}</li>
+                                {% endfor %}
+                                {% if meeting.agenda_items | length > 3 %}
+                                <li class="agenda-more">Et {{ meeting.agenda_items | length - 3 }} autres points...</li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="meeting-participants">
+                            <span class="participants-count">
+                                <i class="fas fa-users"></i>
+                                {{ meeting.confirmed_participants | length }} participant{{ 's' if meeting.confirmed_participants | length != 1 else '' }} confirmé{{ 's' if meeting.confirmed_participants | length != 1 else '' }}
+                            </span>
+                            
+                            {% if meeting.max_participants %}
+                            <span class="participants-limit">/ {{ meeting.max_participants }} places</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="meeting-actions">
+                        <a href="{{ url_for('meetings.detail', id=meeting.id) }}" class="btn-refonte btn-refonte-outline">
+                            <i class="fas fa-eye"></i>
+                            Voir les détails
+                        </a>
+                        
+                        {% if current_user in meeting.participants %}
+                        <button class="btn-refonte btn-refonte-danger" onclick="cancelParticipation({{ meeting.id }})">
+                            <i class="fas fa-times"></i>
+                            Se désinscrire
+                        </button>
+                        {% elif not meeting.is_full %}
+                        <button class="btn-refonte btn-refonte-primary" onclick="confirmParticipation({{ meeting.id }})">
+                            <i class="fas fa-check"></i>
+                            Participer
+                        </button>
+                        {% else %}
+                        <button class="btn-refonte btn-refonte-secondary" disabled>
+                            <i class="fas fa-users"></i>
+                            Complet
+                        </button>
+                        {% endif %}
+                        
+                        {% if can_manage_assembly %}
+                        <div class="meeting-admin-actions">
+                            <button class="btn-admin" onclick="editMeeting({{ meeting.id }})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-admin btn-danger" onclick="cancelMeeting({{ meeting.id }})">
+                                <i class="fas fa-ban"></i>
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-calendar-times"></i>
+                <h3>Aucune réunion programmée</h3>
+                <p>Il n'y a actuellement aucune réunion programmée pour cette assemblée.</p>
+                {% if can_manage_assembly %}
+                <button class="btn-refonte btn-refonte-primary" onclick="openCreateMeetingModal()">
+                    <i class="fas fa-plus"></i>
+                    Programmer la première réunion
+                </button>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Past meetings view -->
+        <div id="past-view" class="meetings-view" style="display: none;">
+            {% if past_meetings %}
+            <div class="meetings-timeline">
+                {% for meeting in past_meetings %}
+                <div class="timeline-item">
+                    <div class="timeline-date">
+                        <div class="date-marker"></div>
+                        <span>{{ meeting.date.strftime('%d %B %Y') }}</span>
+                    </div>
+                    
+                    <div class="timeline-content card-glass-refonte">
+                        <div class="meeting-header">
+                            <h3>{{ meeting.title }}</h3>
+                            <span class="meeting-time">
+                                {{ meeting.start_time.strftime('%H:%M') }} - {{ meeting.end_time.strftime('%H:%M') }}
+                            </span>
+                        </div>
+                        
+                        {% if meeting.summary %}
+                        <div class="meeting-summary">
+                            <p>{{ meeting.summary | truncate(200) }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="meeting-resources">
+                            {% if meeting.minutes %}
+                            <a href="{{ url_for('meetings.minutes', id=meeting.id) }}" class="resource-link">
+                                <i class="fas fa-file-text"></i>
+                                Compte-rendu
+                            </a>
+                            {% endif %}
+                            
+                            {% if meeting.documents %}
+                            <a href="{{ url_for('meetings.documents', id=meeting.id) }}" class="resource-link">
+                                <i class="fas fa-folder"></i>
+                                Documents ({{ meeting.documents | length }})
+                            </a>
+                            {% endif %}
+                            
+                            {% if meeting.recording_url %}
+                            <a href="{{ meeting.recording_url }}" class="resource-link" target="_blank">
+                                <i class="fas fa-video"></i>
+                                Enregistrement
+                            </a>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="meeting-stats">
+                            <span class="stat">
+                                <i class="fas fa-users"></i>
+                                {{ meeting.actual_participants | length }} participants
+                            </span>
+                            
+                            {% if meeting.decisions_count %}
+                            <span class="stat">
+                                <i class="fas fa-gavel"></i>
+                                {{ meeting.decisions_count }} décisions
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-history"></i>
+                <h3>Aucune réunion passée</h3>
+                <p>Cette assemblée n'a pas encore organisé de réunions.</p>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Calendar view -->
+        <div id="calendar-view" class="meetings-view" style="display: none;">
+            <div class="calendar-container card-glass-refonte">
+                <div class="calendar-header">
+                    <button class="calendar-nav" onclick="previousMonth()">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    
+                    <h3 id="calendar-title">{{ current_month }}</h3>
+                    
+                    <button class="calendar-nav" onclick="nextMonth()">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+                
+                <div class="calendar-grid" id="calendar-grid">
+                    <!-- Calendar will be rendered by JavaScript -->
+                </div>
+                
+                <div class="calendar-legend">
+                    <div class="legend-item">
+                        <span class="legend-color scheduled"></span>
+                        <span>Programmée</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color confirmed"></span>
+                        <span>Confirmée</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color completed"></span>
+                        <span>Terminée</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create/Edit Meeting Modal -->
+{% if can_manage_assembly %}
+<div id="meeting-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content modal-lg">
+        <div class="modal-header">
+            <h3 id="meeting-modal-title">Programmer une réunion</h3>
+            <button class="modal-close" onclick="closeMeetingModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <form id="meeting-form" method="POST" action="{{ url_for('meetings.create') }}">
+            <input type="hidden" name="assembly_id" value="{{ assembly.id }}">
+            <input type="hidden" id="meeting-id" name="meeting_id" value="">
+            
+            <div class="modal-body">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="meeting-title">Titre de la réunion *</label>
+                        <input type="text" id="meeting-title" name="title" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="meeting-type-select">Type de réunion *</label>
+                        <select id="meeting-type-select" name="meeting_type" class="form-control" required>
+                            <option value="ordinary">Réunion ordinaire</option>
+                            <option value="extraordinary">Réunion extraordinaire</option>
+                            <option value="public">Séance publique</option>
+                            <option value="working">Groupe de travail</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="meeting-date">Date *</label>
+                            <input type="date" id="meeting-date" name="date" class="form-control" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="meeting-start-time">Heure de début *</label>
+                            <input type="time" id="meeting-start-time" name="start_time" class="form-control" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="meeting-end-time">Heure de fin *</label>
+                            <input type="time" id="meeting-end-time" name="end_time" class="form-control" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="meeting-location">Lieu</label>
+                        <input type="text" id="meeting-location" name="location" class="form-control" 
+                               placeholder="Adresse physique ou lien de visioconférence">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="meeting-description">Description</label>
+                        <textarea id="meeting-description" name="description" class="form-control" rows="4"
+                                  placeholder="Décrivez brièvement l'objet de cette réunion..."></textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="max-participants">Nombre maximum de participants</label>
+                            <input type="number" id="max-participants" name="max_participants" class="form-control" min="1">
+                            <small class="form-help">Laissez vide pour aucune limite</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="requires_registration" id="requires-registration">
+                                    <span class="checkmark"></span>
+                                    Inscription obligatoire
+                                </label>
+                                
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="is_public" id="is-public">
+                                    <span class="checkmark"></span>
+                                    Réunion publique
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn-refonte btn-refonte-secondary" onclick="closeMeetingModal()">
+                    Annuler
+                </button>
+                <button type="submit" class="btn-refonte btn-refonte-primary">
+                    <i class="fas fa-save"></i>
+                    <span id="meeting-submit-text">Programmer la réunion</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+<script>
+// Meetings functionality
+let currentView = 'upcoming';
+let currentDate = new Date();
+
+// Switch between views
+function switchView(view) {
+    // Update active button
+    document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelector(`[data-view="${view}"]`).classList.add('active');
+    
+    // Hide all views
+    document.querySelectorAll('.meetings-view').forEach(v => v.style.display = 'none');
+    
+    // Show selected view
+    document.getElementById(`${view}-view`).style.display = 'block';
+    
+    currentView = view;
+    
+    // Load calendar if needed
+    if (view === 'calendar') {
+        renderCalendar();
+    }
+}
+
+// Filter meetings
+function filterMeetings() {
+    const type = document.getElementById('meeting-type').value;
+    const status = document.getElementById('meeting-status').value;
+    
+    document.querySelectorAll('.meeting-card').forEach(card => {
+        const meetingType = card.dataset.meetingType || '';
+        const meetingStatus = card.dataset.meetingStatus || '';
+        
+        const typeMatch = !type || meetingType === type;
+        const statusMatch = !status || meetingStatus === status;
+        
+        card.style.display = (typeMatch && statusMatch) ? 'block' : 'none';
+    });
+}
+
+// Participation management
+function confirmParticipation(meetingId) {
+    if (confirm('Confirmer votre participation à cette réunion ?')) {
+        fetch(`/api/meetings/${meetingId}/participate`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(data.message || 'Erreur lors de l\'inscription');
+            }
+        });
+    }
+}
+
+function cancelParticipation(meetingId) {
+    if (confirm('Annuler votre participation à cette réunion ?')) {
+        fetch(`/api/meetings/${meetingId}/participate`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(data.message || 'Erreur lors de l\'annulation');
+            }
+        });
+    }
+}
+
+// Meeting management
+{% if can_manage_assembly %}
+function openCreateMeetingModal() {
+    document.getElementById('meeting-modal-title').textContent = 'Programmer une réunion';
+    document.getElementById('meeting-submit-text').textContent = 'Programmer la réunion';
+    document.getElementById('meeting-form').reset();
+    document.getElementById('meeting-id').value = '';
+    document.getElementById('meeting-modal').style.display = 'flex';
+}
+
+function editMeeting(meetingId) {
+    // Load meeting data and open modal
+    fetch(`/api/meetings/${meetingId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const meeting = data.meeting;
+                document.getElementById('meeting-modal-title').textContent = 'Modifier la réunion';
+                document.getElementById('meeting-submit-text').textContent = 'Enregistrer les modifications';
+                document.getElementById('meeting-id').value = meetingId;
+                
+                // Fill form with meeting data
+                document.getElementById('meeting-title').value = meeting.title;
+                document.getElementById('meeting-type-select').value = meeting.meeting_type;
+                document.getElementById('meeting-date').value = meeting.date;
+                document.getElementById('meeting-start-time').value = meeting.start_time;
+                document.getElementById('meeting-end-time').value = meeting.end_time;
+                document.getElementById('meeting-location').value = meeting.location || '';
+                document.getElementById('meeting-description').value = meeting.description || '';
+                document.getElementById('max-participants').value = meeting.max_participants || '';
+                document.getElementById('requires-registration').checked = meeting.requires_registration;
+                document.getElementById('is-public').checked = meeting.is_public;
+                
+                document.getElementById('meeting-modal').style.display = 'flex';
+            }
+        });
+}
+
+function cancelMeeting(meetingId) {
+    if (confirm('Êtes-vous sûr de vouloir annuler cette réunion ? Les participants seront automatiquement notifiés.')) {
+        fetch(`/api/meetings/${meetingId}/cancel`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(data.message || 'Erreur lors de l\'annulation');
+            }
+        });
+    }
+}
+
+function closeMeetingModal() {
+    document.getElementById('meeting-modal').style.display = 'none';
+}
+
+// Form submission
+document.getElementById('meeting-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const meetingId = document.getElementById('meeting-id').value;
+    const url = meetingId ? `/api/meetings/${meetingId}` : '/api/meetings';
+    const method = meetingId ? 'PUT' : 'POST';
+    
+    fetch(url, {
+        method: method,
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            closeMeetingModal();
+            location.reload();
+        } else {
+            alert(data.message || 'Erreur lors de l\'enregistrement');
+        }
+    });
+});
+{% endif %}
+
+// Calendar functionality
+function renderCalendar() {
+    const calendar = document.getElementById('calendar-grid');
+    const title = document.getElementById('calendar-title');
+    
+    if (!calendar) return;
+    
+    // Get current month info
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startingDay = firstDay.getDay();
+    
+    // Update title
+    title.textContent = currentDate.toLocaleDateString('fr-FR', { 
+        month: 'long', 
+        year: 'numeric' 
+    });
+    
+    // Clear calendar
+    calendar.innerHTML = '';
+    
+    // Add day headers
+    const dayHeaders = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+    dayHeaders.forEach(day => {
+        const dayHeader = document.createElement('div');
+        dayHeader.className = 'calendar-day-header';
+        dayHeader.textContent = day;
+        calendar.appendChild(dayHeader);
+    });
+    
+    // Add empty cells for days before month starts
+    for (let i = 0; i < startingDay; i++) {
+        const emptyDay = document.createElement('div');
+        emptyDay.className = 'calendar-day empty';
+        calendar.appendChild(emptyDay);
+    }
+    
+    // Add days of the month
+    for (let day = 1; day <= daysInMonth; day++) {
+        const dayElement = document.createElement('div');
+        dayElement.className = 'calendar-day';
+        dayElement.textContent = day;
+        
+        // Check if there are meetings on this day
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const dayMeetings = getMeetingsForDate(dateStr);
+        
+        if (dayMeetings.length > 0) {
+            dayElement.classList.add('has-meetings');
+            
+            // Add meeting indicators
+            dayMeetings.forEach(meeting => {
+                const indicator = document.createElement('div');
+                indicator.className = `meeting-indicator ${meeting.status}`;
+                indicator.title = meeting.title;
+                dayElement.appendChild(indicator);
+            });
+        }
+        
+        // Highlight today
+        const today = new Date();
+        if (year === today.getFullYear() && 
+            month === today.getMonth() && 
+            day === today.getDate()) {
+            dayElement.classList.add('today');
+        }
+        
+        calendar.appendChild(dayElement);
+    }
+}
+
+function getMeetingsForDate(dateStr) {
+    // This would normally fetch from the meetings data
+    // For now, return empty array
+    return [];
+}
+
+function previousMonth() {
+    currentDate.setMonth(currentDate.getMonth() - 1);
+    renderCalendar();
+}
+
+function nextMonth() {
+    currentDate.setMonth(currentDate.getMonth() + 1);
+    renderCalendar();
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    // Load current view
+    if (currentView === 'calendar') {
+        renderCalendar();
+    }
+});
+</script>
+{% endblock %}

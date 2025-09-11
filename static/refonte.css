@@ -1,0 +1,371 @@
+/* ==========================================================================
+   REFONTE UMAN API - DESIGN SYSTEM
+   Lead Designer & Front-end Architect
+   Version: 1.0
+   ========================================================================== */
+
+/* -------------------------------------------------------------------------- */
+/* 1. DESIGN TOKENS (VARIABLES CSS) */
+/* -------------------------------------------------------------------------- */
+:root {
+    /* Couleurs */
+    --color-dark-bg: #0D0F18;
+    --color-dark-bg-gradient: radial-gradient(ellipse 80% 80% at 50% -20%, rgba(120, 119, 198, 0.3), rgba(255, 255, 255, 0));
+    --color-primary: #00E6C3; /* Turquoise vif */
+    --color-secondary: #7877C6; /* Violet doux */
+    --color-text-primary: #E4E4E7;
+    --color-text-secondary: #A0A0A9;
+    --color-border: rgba(255, 255, 255, 0.1);
+
+    /* Glassmorphism */
+    --glass-bg: rgba(16, 18, 27, 0.4);
+    --glass-blur: 12px;
+    --glass-border-color: rgba(255, 255, 255, 0.08);
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+
+    /* Typographie */
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+
+    /* Tailles de police fluides (Mobile -> Desktop) */
+    --font-size-xs: clamp(0.75rem, 0.5vw + 0.65rem, 0.875rem);
+    --font-size-sm: clamp(0.875rem, 0.5vw + 0.775rem, 1rem);
+    --font-size-base: clamp(1rem, 1vw + 0.75rem, 1.125rem);
+    --font-size-lg: clamp(1.125rem, 1.5vw + 0.75rem, 1.5rem);
+    --font-size-xl: clamp(1.5rem, 2.5vw + 0.75rem, 2.25rem);
+    --font-size-xxl: clamp(2rem, 5vw + 0.5rem, 4rem);
+
+    /* Espacements */
+    --space-xs: clamp(0.5rem, 1vw + 0.25rem, 0.75rem);
+    --space-sm: clamp(0.75rem, 1.5vw + 0.25rem, 1rem);
+    --space-md: clamp(1rem, 2vw + 0.5rem, 1.5rem);
+    --space-lg: clamp(1.5rem, 3vw + 0.75rem, 2.5rem);
+    --space-xl: clamp(2.5rem, 5vw + 1rem, 4rem);
+    --space-xxl: clamp(4rem, 8vw + 1.5rem, 7rem);
+
+    /* Layout */
+    --container-width: 1200px;
+    --container-padding: var(--space-md);
+
+    /* Effets */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 16px;
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+
+    /* Transitions */
+    --transition-fast: 200ms cubic-bezier(0.25, 0.8, 0.25, 1);
+    --transition-medium: 400ms cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* -------------------------------------------------------------------------- */
+/* 2. STYLES GLOBAUX & RESET */
+/* -------------------------------------------------------------------------- */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    font-family: var(--font-sans);
+    font-size: var(--font-size-base);
+    line-height: 1.6;
+    color: var(--color-text-primary);
+    background-color: var(--color-dark-bg);
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Fond avec bruit et halo */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-image: var(--color-dark-bg-gradient), url('data:image/svg+xml,...'); /* Placeholder for noise SVG */
+    background-repeat: no-repeat, repeat;
+    background-position: center top, center center;
+    z-index: -2;
+    opacity: 0.8;
+    animation: halo-animation 15s ease-in-out infinite;
+}
+
+body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 250 250' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    z-index: -1;
+    opacity: 0.05;
+    pointer-events: none;
+}
+
+@keyframes halo-animation {
+    0% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.5); opacity: 0.5; }
+    100% { transform: scale(1); opacity: 0.8; }
+}
+
+/* Accessibilité : respect du mouvement réduit */
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+    *, *::before, *::after {
+        animation-duration: 1ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 1ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* -------------------------------------------------------------------------- */
+/* 3. CLASSES UTILITAIRES */
+/* -------------------------------------------------------------------------- */
+.container {
+    width: 100%;
+    max-width: var(--container-width);
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: var(--container-padding);
+    padding-right: var(--container-padding);
+}
+
+.text-gradient {
+    background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-fill-color: transparent;
+}
+
+/* Pour l'accessibilité, cacher visuellement mais garder pour les lecteurs d'écran */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+/* -------------------------------------------------------------------------- */
+/* 4. COMPOSANTS DE BASE */
+/* -------------------------------------------------------------------------- */
+
+/* Boutons */
+.btn-refonte {
+    display: inline-block;
+    font-weight: 600;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    user-select: none;
+    border: 1px solid transparent;
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--font-size-sm);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+    text-decoration: none;
+}
+
+.btn-refonte-primary {
+    color: var(--color-dark-bg);
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 20px rgba(0, 230, 195, 0.3);
+}
+
+.btn-refonte-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 30px rgba(0, 230, 195, 0.5);
+}
+
+.btn-refonte-secondary {
+    color: var(--color-primary);
+    background-color: transparent;
+    border-color: var(--color-primary);
+}
+
+.btn-refonte-secondary:hover {
+    background-color: rgba(0, 230, 195, 0.1);
+    transform: translateY(-2px);
+}
+
+/* Cartes Glassmorphism */
+.card-glass-refonte {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    box-shadow: var(--glass-shadow);
+    transition: transform var(--transition-medium), box-shadow var(--transition-medium);
+}
+
+.card-glass-refonte:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+}
+
+/* -------------------------------------------------------------------------- */
+/* 5. SECTIONS SPÉCIFIQUES (REFONTE) */
+/* -------------------------------------------------------------------------- */
+
+/* Hero Section */
+.hero-refonte {
+    padding: var(--space-xxl) 0;
+    text-align: center;
+}
+
+.hero-content {
+    max-width: 800px;
+    margin: 0 auto var(--space-xl);
+}
+
+.hero-title-refonte {
+    font-size: var(--font-size-xxl);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: var(--space-md);
+}
+
+.hero-subtitle-refonte {
+    font-size: var(--font-size-lg);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-lg);
+}
+
+.hero-actions-refonte {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+}
+
+.hero-actions-refonte .btn-refonte {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.value-bullets-refonte {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--space-md);
+    margin-top: var(--space-xl);
+    max-width: 1000px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.value-item-refonte {
+    background: var(--glass-bg);
+    padding: var(--space-md);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--glass-border-color);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    transition: background var(--transition-fast);
+}
+
+.value-item-refonte:hover {
+    background: rgba(16, 18, 27, 0.6);
+}
+
+.value-item-refonte i {
+    color: var(--color-primary);
+    font-size: 1.2em;
+}
+
+/* Section Produit (refonte) */
+.produit-refonte {
+    /* Hérite des styles de section génériques */
+}
+
+/* Sections génériques */
+.section-padding {
+    padding: var(--space-xl) 0;
+}
+
+.section-title-refonte {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-md);
+}
+
+.section-subtitle-refonte {
+    font-size: var(--font-size-lg);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-lg);
+}
+
+.section-action {
+    margin-top: var(--space-lg);
+}
+
+/* Grille "Pourquoi UMan" */
+.why-uman-refonte .why-uman-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-xl);
+    align-items: center;
+}
+
+.why-uman-refonte .why-uman-content {
+    /* Contenu à gauche */
+}
+
+.why-uman-refonte .why-uman-cta {
+    text-align: center;
+}
+
+.why-uman-refonte .why-uman-cta h3 {
+    font-size: var(--font-size-lg);
+    margin-bottom: var(--space-md);
+    color: var(--color-primary);
+}
+
+.why-uman-refonte .why-uman-cta p {
+    margin-bottom: var(--space-lg);
+    color: var(--color-text-secondary);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .why-uman-refonte .why-uman-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-lg);
+    }
+    
+    .value-bullets-refonte {
+        grid-template-columns: 1fr;
+    }
+    
+    .hero-actions-refonte {
+        flex-direction: column;
+        align-items: center;
+    }
+}

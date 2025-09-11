@@ -1,9 +1,10 @@
 {# Composant modal pour la page de profil #}
 <!-- Modal Profil -->
-<div class="modal fade" id="modalProfil" tabindex="-1" role="dialog" aria-labelledby="modalProfilLabel" aria-hidden="true">
+<div class="modal fade" id="modalProfil" tabindex="-1" role="dialog" aria-labelledby="modalProfilLabel"
+    aria-hidden="true">
     <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content glass-modal">
-            <div class="modal-header">
+            <div class="modal-header glass-modal-header">
                 <h5 class="modal-title" id="modalProfilLabel">
                     <i class="fas fa-user-circle mr-2"></i>Mon Profil UMan
                 </h5>
@@ -11,7 +12,7 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body glass-modal-body">
                 <div class="container-fluid">
                     <div class="glass glass--lite p-4" style="max-width:760px;margin:auto;">
                         <h2 class="mb-3">
@@ -19,19 +20,22 @@
                         </h2>
                         <p class="mb-3" style="color:var(--uman-light);">
                             <i class="fas fa-shield-alt mr-2 text-success"></i>
-                            Nos profils n'utilisent pas de mot de passe. Après l'inscription vous recevrez un code aléatoire par courriel que vous devrez confirmer pour activer votre profil.
+                            Nos profils n'utilisent pas de mot de passe. Après l'inscription vous recevrez un code
+                            aléatoire par courriel que vous devrez confirmer pour activer votre profil.
                         </p>
 
                         <!-- Flash messages container -->
                         <div id="profilFlashMessages"></div>
 
-                        <form id="modalRegisterForm" action="/register" method="post" class="needs-validation" novalidate>
+                        <form id="modalRegisterForm" action="/register" method="post" class="needs-validation"
+                            novalidate>
                             <div class="form-row">
                                 <div class="form-group col-md-6">
                                     <label for="modalProfilPrenom">
                                         <i class="fas fa-user mr-2"></i>Prénom
                                     </label>
-                                    <input type="text" class="form-control" id="modalProfilPrenom" name="prenom" required>
+                                    <input type="text" class="form-control" id="modalProfilPrenom" name="prenom"
+                                        required>
                                     <div class="invalid-feedback">Veuillez entrer votre prénom.</div>
                                 </div>
                                 <div class="form-group col-md-6">
@@ -55,7 +59,8 @@
                                 <label for="modalProfilOrganisation">
                                     <i class="fas fa-building mr-2"></i>Organisation (facultatif)
                                 </label>
-                                <input type="text" class="form-control" id="modalProfilOrganisation" name="organisation">
+                                <input type="text" class="form-control" id="modalProfilOrganisation"
+                                    name="organisation">
                             </div>
 
                             <div class="form-group">
@@ -68,7 +73,8 @@
                             <div class="form-group">
                                 <small class="text-muted">
                                     <i class="fas fa-info-circle mr-2"></i>
-                                    En soumettant ce formulaire nous enverrons un code de confirmation à l'adresse fournie. Saisissez ce code pour activer votre profil.
+                                    En soumettant ce formulaire nous enverrons un code de confirmation à l'adresse
+                                    fournie. Saisissez ce code pour activer votre profil.
                                 </small>
                             </div>
 
@@ -77,7 +83,8 @@
                                     <span id="modalBtnText">
                                         <i class="fas fa-envelope mr-2"></i>Recevoir le code par courriel
                                     </span>
-                                    <span id="modalBtnSpinner" class="spinner-border spinner-border-sm ml-2" role="status" aria-hidden="true" style="display:none;"></span>
+                                    <span id="modalBtnSpinner" class="spinner-border spinner-border-sm ml-2"
+                                        role="status" aria-hidden="true" style="display:none;"></span>
                                 </button>
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">
                                     <i class="fas fa-times mr-2"></i>Annuler
@@ -92,10 +99,11 @@
 </div>
 
 <!-- Modal de confirmation de code -->
-<div class="modal fade" id="modalRegisterConfirm" tabindex="-1" role="dialog" aria-labelledby="modalRegisterConfirmLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+<div class="modal fade" id="modalRegisterConfirm" tabindex="-1" role="dialog"
+    aria-labelledby="modalRegisterConfirmLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content glass-modal">
-            <div class="modal-header">
+            <div class="modal-header glass-modal-header">
                 <h5 class="modal-title" id="modalRegisterConfirmLabel">
                     <i class="fas fa-key mr-2"></i>Confirmation d'inscription
                 </h5>
@@ -103,12 +111,12 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body glass-modal-body">
                 <p class="mb-3">
                     <i class="fas fa-envelope-open mr-2 text-primary"></i>
                     Veuillez saisir le code de confirmation reçu par courriel :
                 </p>
-                
+
                 <form id="confirmForm">
                     <div class="form-group">
                         <label for="confirmEmail">Email</label>
@@ -116,7 +124,8 @@
                     </div>
                     <div class="form-group">
                         <label for="confirmCode">Code de confirmation</label>
-                        <input type="text" class="form-control" id="confirmCode" name="code" required placeholder="Entrez votre code">
+                        <input type="text" class="form-control" id="confirmCode" name="code" required
+                            placeholder="Entrez votre code">
                     </div>
                     <div id="confirmFeedback"></div>
                     <div class="d-flex justify-content-between">
@@ -128,6 +137,567 @@
                         </button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmation de code -->
+<div class="modal fade" id="modalfonctionnalites" tabindex="-1" role="dialog"
+    aria-labelledby="modalfonctionnalitesLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content glass-modal">
+            <div class="modal-header glass-modal-header">
+                <h5 class="modal-title" id="modalfonctionnalitesLabel">
+                    <i class="fas fa-key mr-2"></i>Fonctionnalités
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fermer">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body glass-modal-body">
+                <!-- CE QUE VOUS OBTENEZ SECTION -->
+                <section class="what-you-get">
+                    <div class="container">
+
+                        <div class="benefits-grid grid grid-cols-2">
+                            <div class="card glass reveal">
+                                <div class="card-icon"><i class="fas fa-file-alt"></i></div>
+                                <h4 class="text-white">Propositions et amendements versionnés</h4>
+                                <p class="text-white">Suivi complet des évolutions avec horodatage et traçabilité</p>
+                            </div>
+                            <div class="card glass reveal">
+                                <div class="card-icon"><i class="fas fa-comments"></i></div>
+                                <h4 class="text-white">Débats cadrés, modération motivée</h4>
+                                <p class="text-white">Espaces de délibération structurés avec règles claires</p>
+                            </div>
+                            <div class="card glass reveal">
+                                <div class="card-icon"><i class="fas fa-vote-yea"></i></div>
+                                <h4 class="text-white">Scrutins (oui/non, préférentiel, quorum)</h4>
+                                <p class="text-white">Processus de vote sécurisé et vérifiable</p>
+                            </div>
+                            <div class="card glass reveal">
+                                <div class="card-icon"><i class="fas fa-clipboard-check"></i></div>
+                                <h4 class="text-white">Résultats signés + plan d'action + preuves d'exécution</h4>
+                                <p class="text-white">Suivi complet de la mise en œuvre des décisions</p>
+                            </div>
+                            <div class="card glass reveal">
+                                <div class="card-icon"><i class="fas fa-download"></i></div>
+                                <h4 class="text-white">Exports scellés (PDF/ZIP), KPI de transparence</h4>
+                                <p class="text-white">Documentation complète et vérifiable pour audit</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Solutions -->
+<div class="modal fade" id="solutionsModal" tabindex="-1" role="dialog" aria-labelledby="solutionsModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content glass-modal">
+            <div class="modal-header glass-modal-header">
+                <h5 class="modal-title" id="solutionsModalLabel">
+                    <i class="fas fa-lightbulb text-primary"></i>
+                    Solutions Cyberdémocratie
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body glass-modal-body">
+                <div class="row">
+                    <!-- Municipalités -->
+                    <div class="col-md-4 mb-4">
+                        <div class="card glassmorphism h-100">
+                            <div class="card-body text-center">
+                                <div class="icon-wrapper mb-3">
+                                    <i class="fas fa-building text-primary" style="font-size: 3rem;"></i>
+                                </div>
+                                <h5 class="card-title text-primary">Municipalités</h5>
+                                <p class="card-text">
+                                    Plateforme de participation citoyenne pour les décisions municipales.
+                                    Budgets participatifs, consultations publiques, assemblées virtuelles.
+                                </p>
+                                <div class="features-list text-left mt-3">
+                                    <small>
+                                        <i class="fas fa-check text-success"></i> Budgets participatifs<br>
+                                        <i class="fas fa-check text-success"></i> Consultations publiques<br>
+                                        <i class="fas fa-check text-success"></i> Assemblées virtuelles<br>
+                                        <i class="fas fa-check text-success"></i> Transparence budgétaire
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- OBNL & Coopératives -->
+                    <div class="col-md-4 mb-4">
+                        <div class="card glassmorphism h-100">
+                            <div class="card-body text-center">
+                                <div class="icon-wrapper mb-3">
+                                    <i class="fas fa-users text-primary" style="font-size: 3rem;"></i>
+                                </div>
+                                <h5 class="card-title text-primary">OBNL & Coopératives</h5>
+                                <p class="card-text">
+                                    Gouvernance démocratique pour organisations à but non lucratif et coopératives.
+                                    Votes électroniques, assemblées générales virtuelles.
+                                </p>
+                                <div class="features-list text-left mt-3">
+                                    <small>
+                                        <i class="fas fa-check text-success"></i> Votes électroniques<br>
+                                        <i class="fas fa-check text-success"></i> Assemblées virtuelles<br>
+                                        <i class="fas fa-check text-success"></i> Gestion des membres<br>
+                                        <i class="fas fa-check text-success"></i> Transparence financière
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Entreprises -->
+                    <div class="col-md-4 mb-4">
+                        <div class="card glassmorphism h-100">
+                            <div class="card-body text-center">
+                                <div class="icon-wrapper mb-3">
+                                    <i class="fas fa-industry text-primary" style="font-size: 3rem;"></i>
+                                </div>
+                                <h5 class="card-title text-primary">Entreprises</h5>
+                                <p class="card-text">
+                                    Démocratie d'entreprise pour une gouvernance participative.
+                                    Actionnariat salarié, conseils d'administration virtuels.
+                                </p>
+                                <div class="features-list text-left mt-3">
+                                    <small>
+                                        <i class="fas fa-check text-success"></i> Actionnariat salarié<br>
+                                        <i class="fas fa-check text-success"></i> Conseils virtuels<br>
+                                        <i class="fas fa-check text-success"></i> Votes stratégiques<br>
+                                        <i class="fas fa-check text-success"></i> Transparence corporative
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                <a href="/cyberdemocratie/user-stories" class="btn btn-primary">
+                    <i class="fas fa-external-link-alt"></i> Voir les cas d'usage
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal FAQ -->
+<div class="modal fade" id="faqModal" tabindex="-1" role="dialog" aria-labelledby="faqModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content glass-modal">
+            <div class="modal-header glass-modal-header">
+                <h5 class="modal-title" id="produitModalLabel">
+                    <i class="fas fa-cogs text-primary"></i>
+                    UMan Manager & Modules
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body glass-modal-body">
+                <!-- MODALS -->
+                <!-- FAQ SECTION -->
+                <section id="faq" class="faq">
+                    <div class="container">
+                        <div class="section-header text-center reveal">
+                            <h2>Questions Fréquentes</h2>
+                            <p>Trouvez rapidement les réponses à vos questions les plus courantes</p>
+                        </div>
+                        <div class="faq-container">
+                            <details class="faq-item glass reveal">
+                                <summary>La plateforme garantit-elle le secret du vote ?</summary>
+                                <p>Oui. Séparation identité/bulletins, chiffrement, mixnet/threshold, audits et reçus
+                                    non-dévoilants
+                                    pour assurer une transparence totale tout en préservant l'anonymat.</p>
+                                <button class="btn btn-primary btn-sm mt-3 shadow-sm" data-toggle="modal"
+                                    data-target="#modalCyberdemocratie">
+                                    <i class="fas fa-shield-check mr-2"></i>En savoir plus sur la sécurité
+                                </button>
+                            </details>
+
+                            <details class="faq-item glass reveal">
+                                <summary>Sommes-nous conformes à la Loi 25 / RGPD ?</summary>
+                                <p>Oui, via minimisation, registres, DPIA, droits d'accès et d'effacement, sécurité
+                                    renforcée. UMan API
+                                    respecte toutes les exigences de protection des données personnelles.</p>
+                                <button class="btn btn-success btn-sm mt-3 shadow-sm" data-toggle="modal"
+                                    data-target="#modalContactVente">
+                                    <i class="fas fa-balance-scale mr-2"></i>Demander la documentation RGPD
+                                </button>
+                            </details>
+
+                            <details class="faq-item glass reveal">
+                                <summary>Peut-on démarrer petit ?</summary>
+                                <p>Oui, avec un pilote 90 jours (comité ou budget participatif). Nos gabarits prêts à
+                                    l'emploi
+                                    permettent un déploiement rapide et efficace.</p>
+                                <button class="btn btn-info btn-sm mt-3 shadow-sm" data-toggle="modal"
+                                    data-target="#modalContactVente">
+                                    <i class="fas fa-play-circle mr-2"></i>Lancer un pilote
+                                </button>
+                            </details>
+
+                            <details class="faq-item glass reveal">
+                                <summary>Peut-on intégrer nos outils existants ?</summary>
+                                <p>Oui, SSO/AD, API REST, webhooks et exports standards. UMan API s'intègre facilement
+                                    dans votre
+                                    écosystème technologique existant.</p>
+                                <button class="btn btn-warning btn-sm mt-3 shadow-sm" data-toggle="modal"
+                                    data-target="#modalModulesSurMesure">
+                                    <i class="fas fa-plug mr-2"></i>Voir les intégrations
+                                </button>
+                            </details>
+
+                            <details class="faq-item glass reveal">
+                                <summary>Où sont hébergées les données ?</summary>
+                                <p>Environnement au choix (Base/Premium/Cyber), réversibilité SQL. Vos données restent
+                                    sous votre
+                                    contrôle avec une souveraineté numérique complète.</p>
+                                <button class="btn btn-danger btn-sm mt-3 shadow-sm" data-toggle="modal"
+                                    data-target="#modalFaqHebergement">
+                                    <i class="fas fa-server mr-2"></i>Options d'hébergement
+                                </button>
+                            </details>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                <a href="#" class="btn btn-primary" data-toggle="modal" data-target="#modalContactVente">
+                    <i class="fas fa-play mr-2"></i>Tester les modules en démo
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Produit -->
+<div class="modal fade" id="produitModal" tabindex="-1" role="dialog" aria-labelledby="produitModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content glass-modal">
+            <div class="modal-header glass-modal-header">
+                <h5 class="modal-title" id="produitModalLabel">
+                    <i class="fas fa-cogs text-primary"></i>
+                    UMan Manager & Modules
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body glass-modal-body">
+                <!-- UMan Manager -->
+                <div class="section-header text-center mb-4">
+                    <h3>UMan Manager : La console qui pilote vos décisions collectives</h3>
+                    <p>Configurez vos espaces, vos rôles et vos règles. Suivez l'engagement et publiez des décisions
+                        traçables.</p>
+                </div>
+
+                <div class="manager-features mb-5">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="manager-card glass p-4">
+                                <h4>Fonctions clés</h4>
+                                <ul class="feature-list">
+                                    <li><i class="fas fa-sitemap text-primary mr-2"></i>Organisations, unités, rôles et
+                                        mandats</li>
+                                    <li><i class="fas fa-project-diagram text-success mr-2"></i>Processus complet :
+                                        consultation → délibération → vote → exécution</li>
+                                    <li><i class="fas fa-chart-pie text-info mr-2"></i>Tableaux de bord et KPI
+                                        d'engagement</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="manager-card glass p-4">
+                                <h4>Hébergement & intégrations</h4>
+                                <div class="hosting-options mb-3">
+                                    <span class="badge badge-primary mr-2">Base</span>
+                                    <span class="badge badge-warning mr-2">Premium</span>
+                                    <span class="badge badge-danger">Cyber</span>
+                                </div>
+                                <ul class="feature-list">
+                                    <li><i class="fas fa-sign-in-alt text-primary mr-2"></i>Connexion sécurisée (Google,
+                                        Microsoft, AD)</li>
+                                    <li><i class="fas fa-code text-success mr-2"></i>API, webhooks, exports CSV/JSON/PDF
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modules -->
+                <div class="modules-section">
+                    <div class="section-header text-center mb-4">
+                        <h4>Des modules qui s'adaptent à vos besoins</h4>
+                        <p>Modules interopérables pour proposer, débattre, voter et exécuter</p>
+                    </div>
+
+                    <div class="modules-grid grid grid-cols-3">
+                        <!-- Module Propositions -->
+                        <div class="card glass module-card mb-3">
+                            <div class="module-icon">
+                                <i class="fas fa-file-signature"></i>
+                            </div>
+                            <h5>Propositions</h5>
+                            <p>Rédaction guidée, versions horodatées, gestion des conflits d'intérêts</p>
+                            <button class="btn btn-outline-primary btn-sm mt-3" data-toggle="modal"
+                                data-target="#modalPropositions">
+                                <i class="fas fa-info-circle"></i> En savoir plus
+                            </button>
+                        </div>
+
+                        <!-- Module Comités -->
+                        <div class="card glass module-card mb-3">
+                            <div class="module-icon">
+                                <i class="fas fa-users-cog"></i>
+                            </div>
+                            <h5>Comités</h5>
+                            <p>Ordres du jour, quorum, décisions signées</p>
+                            <button class="btn btn-outline-primary btn-sm mt-3" data-toggle="modal"
+                                data-target="#modalComite">
+                                <i class="fas fa-info-circle"></i> En savoir plus
+                            </button>
+                        </div>
+
+                        <!-- Module Études -->
+                        <div class="card glass module-card mb-3">
+                            <div class="module-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <h5>Études</h5>
+                            <p>Sondages, rapports et boucles d'amélioration continue</p>
+                            <button class="btn btn-outline-primary btn-sm mt-3" data-toggle="modal"
+                                data-target="#modalEtude">
+                                <i class="fas fa-info-circle"></i> En savoir plus
+                            </button>
+                        </div>
+
+                        <!-- Module Humain -->
+                        <div class="card glass module-card mb-3">
+                            <div class="module-icon">
+                                <i class="fas fa-user-friends"></i>
+                            </div>
+                            <h5>Humain</h5>
+                            <p>Profils, délégations, reconnaissance des contributions</p>
+                            <button class="btn btn-outline-primary btn-sm mt-3" data-toggle="modal"
+                                data-target="#modalHumain">
+                                <i class="fas fa-info-circle"></i> En savoir plus
+                            </button>
+                        </div>
+
+                        <!-- Module Médiathèque -->
+                        <div class="card glass module-card mb-3">
+                            <div class="module-icon">
+                                <i class="fas fa-book-open"></i>
+                            </div>
+                            <h5>Médiathèque</h5>
+                            <p>Documents, PV, recherche et exports scellés</p>
+                            <button class="btn btn-outline-primary btn-sm mt-3" data-toggle="modal"
+                                data-target="#modalMediatheque">
+                                <i class="fas fa-info-circle"></i> En savoir plus
+                            </button>
+                        </div>
+
+                        <!-- Module Sur-mesure -->
+                        <div class="card glass module-card mb-3">
+                            <div class="module-icon">
+                                <i class="fas fa-puzzle-piece"></i>
+                            </div>
+                            <h5>Sur-mesure</h5>
+                            <p>Modules personnalisés selon vos besoins spécifiques</p>
+                            <button class="btn btn-outline-primary btn-sm mt-3" data-toggle="modal"
+                                data-target="#modalModulesSurMesure">
+                                <i class="fas fa-info-circle"></i> En savoir plus
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                <a href="#" class="btn btn-primary" data-toggle="modal" data-target="#modalContactVente">
+                    <i class="fas fa-play mr-2"></i>Tester les modules en démo
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Ressources -->
+<div class="modal fade" id="ressourcesModal" tabindex="-1" role="dialog" aria-labelledby="ressourcesModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content glass-modal">
+            <div class="modal-header glass-modal-header">
+                <h5 class="modal-title" id="ressourcesModalLabel">
+                    <i class="fas fa-lightbulb text-primary"></i>
+                    Ressources et apprentissage
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body glass-modal-body">
+                <!-- RESSOURCES SECTION -->
+                    <div class="container">
+                        <div class="section-header text-center reveal">
+                            <p>Tout ce dont vous avez besoin pour réussir votre transformation numérique</p>
+                        </div>
+
+                        <div class="resources-grid">
+                            <!-- Documentation -->
+                            <div class="resource-category reveal">
+                                <div class="category-header">
+                                    <div class="category-icon">
+                                        <i class="fas fa-book"></i>
+                                    </div>
+                                    <h4>Documentation</h4>
+                                </div>
+                                <div class="resource-links">
+                                    <a href="#" class="resource-link" data-toggle="modal"
+                                        data-target="#modalGuideImplementation">
+                                        <i class="fas fa-file-alt mr-2"></i>Guide d'implémentation
+                                    </a>
+                                    <a href="#" class="resource-link" data-toggle="modal" data-target="#modalAPIDoc">
+                                        <i class="fas fa-code mr-2"></i>Documentation API
+                                    </a>
+                                    <a href="#" class="resource-link" data-toggle="modal"
+                                        data-target="#modalFAQComplete">
+                                        <i class="fas fa-question-circle mr-2"></i>FAQ complète
+                                    </a>
+                                    <a href="#" class="resource-link" data-toggle="modal"
+                                        data-target="#modalMeilleuresPratiques">
+                                        <i class="fas fa-star mr-2"></i>Meilleures pratiques
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Formation -->
+                            <div class="resource-category reveal">
+                                <div class="category-header">
+                                    <div class="category-icon">
+                                        <i class="fas fa-graduation-cap"></i>
+                                    </div>
+                                    <h4>Formation</h4>
+                                </div>
+                                <div class="resource-links">
+                                    <a href="#" class="resource-link" data-toggle="modal"
+                                        data-target="#modalFormationEnLigne">
+                                        <i class="fas fa-play-circle mr-2"></i>Formation en ligne
+                                    </a>
+                                    <a href="#" class="resource-link" data-toggle="modal"
+                                        data-target="#modalWebinaires">
+                                        <i class="fas fa-video mr-2"></i>Webinaires mensuels
+                                    </a>
+                                    <a href="#" class="resource-link" data-toggle="modal"
+                                        data-target="#modalCertification">
+                                        <i class="fas fa-certificate mr-2"></i>Certification UMan
+                                    </a>
+                                    <a href="#" class="resource-link" data-toggle="modal"
+                                        data-target="#modalFormationSurSite">
+                                        <i class="fas fa-users mr-2"></i>Formation sur site
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Support -->
+                            <div class="resource-category reveal">
+                                <div class="category-header">
+                                    <div class="category-icon">
+                                        <i class="fas fa-life-ring"></i>
+                                    </div>
+                                    <h4>Support</h4>
+                                </div>
+                                <div class="resource-links">
+                                    <a href="#" class="resource-link" data-toggle="modal"
+                                        data-target="#modalTicketSupport">
+                                        <i class="fas fa-ticket-alt mr-2"></i>Créer un ticket
+                                    </a>
+                                    <a href="#" class="resource-link" data-toggle="modal"
+                                        data-target="#modalCommunaute">
+                                        <i class="fas fa-comments mr-2"></i>Communauté
+                                    </a>
+                                    <a href="#" class="resource-link" data-toggle="modal"
+                                        data-target="#modalStatutService">
+                                        <i class="fas fa-chart-line mr-2"></i>Statut du service
+                                    </a>
+                                    <a href="#" class="resource-link" data-toggle="modal"
+                                        data-target="#modalContactSupport">
+                                        <i class="fas fa-phone mr-2"></i>Contact direct
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Outils -->
+                            <div class="resource-category reveal">
+                                <div class="category-header">
+                                    <div class="category-icon">
+                                        <i class="fas fa-tools"></i>
+                                    </div>
+                                    <h4>Outils</h4>
+                                </div>
+                                <div class="resource-links">
+                                    <a href="#" class="resource-link" data-toggle="modal"
+                                        data-target="#modalCalculateurROI">
+                                        <i class="fas fa-calculator mr-2"></i>Calculateur ROI
+                                    </a>
+                                    <a href="#" class="resource-link" data-toggle="modal"
+                                        data-target="#modalChecklistImplementation">
+                                        <i class="fas fa-tasks mr-2"></i>Checklist d'implémentation
+                                    </a>
+                                    <a href="#" class="resource-link" data-toggle="modal"
+                                        data-target="#modalModelesDocuments">
+                                        <i class="fas fa-file-download mr-2"></i>Modèles de documents
+                                    </a>
+                                    <a href="#" class="resource-link" data-toggle="modal"
+                                        data-target="#modalIntegrationKit">
+                                        <i class="fas fa-plug mr-2"></i>Kit d'intégration
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Newsletter et CTA -->
+                        <div class="newsletter-section text-center mt-5 reveal">
+                            <div class="newsletter-content glass p-5">
+                                <h5>Restez informé des nouveautés</h5>
+                                <p>Recevez nos actualités, guides et bonnes pratiques directement dans votre boîte mail
+                                </p>
+                                <div class="newsletter-form">
+                                    <div class="input-group">
+                                        <input type="email" class="form-control" placeholder="Votre adresse email">
+                                        <div class="input-group-append">
+                                            <button class="btn btn-primary" type="button">
+                                                <i class="fas fa-paper-plane mr-1"></i>S'abonner
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <small class="text-muted mt-2 d-block">Aucun spam. Désinscription en un clic.</small>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
             </div>
         </div>
     </div>

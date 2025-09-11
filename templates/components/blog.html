@@ -1,0 +1,804 @@
+{% extends "base.html" %}
+
+{% block title %}{{ blog_post.title if blog_post else 'Articles' }} — {{ organization.name }}{% endblock %}
+
+{% block meta %}
+<link rel="stylesheet" href="{{ url_for('static', filename='refonte.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='spaces.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='blog.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="blog-layout">
+    <div class="container">
+        {% if blog_post %}
+        <!-- Single blog post view -->
+        <article class="blog-post-single">
+            <div class="post-header">
+                <nav class="breadcrumb">
+                    {% if space %}
+                    <a href="{{ url_for('spaces.index') }}">Espaces participatifs</a>
+                    <span class="breadcrumb-separator">/</span>
+                    <a href="{{ url_for('spaces.detail', type=space.type, id=space.id) }}">{{ space.name }}</a>
+                    <span class="breadcrumb-separator">/</span>
+                    <a href="{{ url_for('blog.index', space_id=space.id) }}">Articles</a>
+                    <span class="breadcrumb-separator">/</span>
+                    <span class="breadcrumb-current">{{ blog_post.title | truncate(50) }}</span>
+                    {% else %}
+                    <a href="{{ url_for('blog.index') }}">Articles</a>
+                    <span class="breadcrumb-separator">/</span>
+                    <span class="breadcrumb-current">{{ blog_post.title | truncate(50) }}</span>
+                    {% endif %}
+                </nav>
+                
+                <div class="post-meta">
+                    <div class="post-category">
+                        <span class="category-tag category-{{ blog_post.category }}">
+                            {{ blog_post.category_display }}
+                        </span>
+                    </div>
+                    
+                    <div class="post-date">
+                        <i class="fas fa-calendar"></i>
+                        Publié le {{ blog_post.published_at.strftime('%d %B %Y') }}
+                    </div>
+                    
+                    {% if blog_post.updated_at > blog_post.published_at %}
+                    <div class="post-updated">
+                        <i class="fas fa-edit"></i>
+                        Modifié le {{ blog_post.updated_at.strftime('%d %B %Y') }}
+                    </div>
+                    {% endif %}
+                    
+                    <div class="post-reading-time">
+                        <i class="fas fa-clock"></i>
+                        {{ blog_post.reading_time or 5 }} min de lecture
+                    </div>
+                </div>
+                
+                <h1 class="post-title">{{ blog_post.title }}</h1>
+                
+                {% if blog_post.excerpt %}
+                <div class="post-excerpt">
+                    {{ blog_post.excerpt }}
+                </div>
+                {% endif %}
+                
+                <div class="post-author">
+                    <div class="author-avatar">
+                        {% if blog_post.author.avatar %}
+                        <img src="{{ blog_post.author.avatar }}" alt="{{ blog_post.author.full_name }}">
+                        {% else %}
+                        <div class="avatar-placeholder">
+                            {{ blog_post.author.full_name[:2].upper() }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="author-info">
+                        <div class="author-name">{{ blog_post.author.full_name }}</div>
+                        {% if blog_post.author.title %}
+                        <div class="author-title">{{ blog_post.author.title }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="post-actions">
+                        {% if can_edit_post %}
+                        <button class="btn-refonte btn-refonte-outline btn-sm" onclick="editPost({{ blog_post.id }})">
+                            <i class="fas fa-edit"></i>
+                            Modifier
+                        </button>
+                        {% endif %}
+                        
+                        <button class="btn-refonte btn-refonte-outline btn-sm" onclick="sharePost()">
+                            <i class="fas fa-share"></i>
+                            Partager
+                        </button>
+                        
+                        <button class="btn-refonte btn-refonte-outline btn-sm" onclick="toggleBookmark()">
+                            <i class="fas fa-bookmark"></i>
+                            {{ 'Enlever' if is_bookmarked else 'Sauvegarder' }}
+                        </button>
+                    </div>
+                </div>
+                
+                {% if blog_post.featured_image %}
+                <div class="post-featured-image">
+                    <img src="{{ blog_post.featured_image }}" alt="{{ blog_post.title }}">
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="post-content">{{ blog_post.content | safe }}</div>
+            
+            {% if blog_post.tags %}
+            <div class="post-tags">
+                <h4>Tags :</h4>
+                <div class="tags-list">
+                    {% for tag in blog_post.tags %}
+                    <a href="{{ url_for('blog.index', tag=tag.slug) }}" class="tag-link">
+                        #{{ tag.name }}
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <div class="post-footer">
+                <div class="post-stats">
+                    <div class="stat">
+                        <i class="fas fa-eye"></i>
+                        {{ blog_post.views_count }} vues
+                    </div>
+                    
+                    <div class="stat">
+                        <i class="fas fa-heart"></i>
+                        {{ blog_post.likes_count }} j'aime
+                    </div>
+                    
+                    <div class="stat">
+                        <i class="fas fa-comments"></i>
+                        {{ blog_post.comments_count }} commentaires
+                    </div>
+                    
+                    <div class="stat">
+                        <i class="fas fa-share"></i>
+                        {{ blog_post.shares_count }} partages
+                    </div>
+                </div>
+                
+                <div class="post-social-actions">
+                    <button class="social-action {{ 'active' if user_has_liked else '' }}" 
+                            onclick="toggleLike({{ blog_post.id }})">
+                        <i class="fas fa-heart"></i>
+                        <span>{{ blog_post.likes_count }}</span>
+                    </button>
+                    
+                    <button class="social-action" onclick="scrollToComments()">
+                        <i class="fas fa-comment"></i>
+                        <span>{{ blog_post.comments_count }}</span>
+                    </button>
+                    
+                    <button class="social-action" onclick="sharePost()">
+                        <i class="fas fa-share"></i>
+                        <span>Partager</span>
+                    </button>
+                </div>
+            </div>
+        </article>
+        
+        <!-- Related posts -->
+        {% if related_posts %}
+        <section class="related-posts card-glass-refonte">
+            <h3>Articles similaires</h3>
+            <div class="related-posts-grid">
+                {% for post in related_posts %}
+                <article class="related-post">
+                    {% if post.featured_image %}
+                    <div class="related-post-image">
+                        <img src="{{ post.featured_image }}" alt="{{ post.title }}">
+                    </div>
+                    {% endif %}
+                    
+                    <div class="related-post-content">
+                        <h4><a href="{{ url_for('blog.post', id=post.id) }}">{{ post.title }}</a></h4>
+                        <p>{{ post.excerpt | truncate(100) }}</p>
+                        
+                        <div class="related-post-meta">
+                            <span class="post-date">{{ post.published_at.strftime('%d %B %Y') }}</span>
+                            <span class="post-category">{{ post.category_display }}</span>
+                        </div>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+        
+        <!-- Comments section -->
+        <section class="post-comments" id="comments-section">
+            {% include 'components/comments.html' %}
+        </section>
+        
+        {% else %}
+        <!-- Blog index view -->
+        <div class="blog-header">
+            <div class="header-content">
+                <h1>
+                    <i class="fas fa-newspaper"></i>
+                    {% if space %}
+                    Articles de {{ space.name }}
+                    {% else %}
+                    Articles et actualités
+                    {% endif %}
+                </h1>
+                <p>
+                    {% if space %}
+                    Découvrez les dernières actualités et réflexions liées à {{ space.name }}
+                    {% else %}
+                    Restez informé des dernières actualités et analyses de la plateforme
+                    {% endif %}
+                </p>
+            </div>
+            
+            {% if can_create_post %}
+            <div class="header-actions">
+                <button class="btn-refonte btn-refonte-primary" onclick="createNewPost()">
+                    <i class="fas fa-plus"></i>
+                    Nouveau article
+                </button>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Blog filters -->
+        <div class="blog-filters card-glass-refonte">
+            <div class="filters-row">
+                <div class="filter-group">
+                    <label for="blog-search">Recherche :</label>
+                    <div class="search-input">
+                        <input type="text" id="blog-search" class="form-control" 
+                               placeholder="Titre, contenu ou auteur..." onInput="filterPosts()">
+                        <i class="fas fa-search"></i>
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="blog-category">Catégorie :</label>
+                    <select id="blog-category" class="form-control" onchange="filterPosts()">
+                        <option value="">Toutes les catégories</option>
+                        <option value="news">Actualités</option>
+                        <option value="analysis">Analyses</option>
+                        <option value="tutorial">Tutoriels</option>
+                        <option value="announcement">Annonces</option>
+                        <option value="opinion">Opinions</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="blog-tag">Tag :</label>
+                    <select id="blog-tag" class="form-control" onchange="filterPosts()">
+                        <option value="">Tous les tags</option>
+                        {% for tag in popular_tags %}
+                        <option value="{{ tag.slug }}" {{ 'selected' if request.args.get('tag') == tag.slug else '' }}>
+                            {{ tag.name }} ({{ tag.posts_count }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="blog-sort">Trier par :</label>
+                    <select id="blog-sort" class="form-control" onchange="sortPosts()">
+                        <option value="recent">Plus récents</option>
+                        <option value="popular">Plus populaires</option>
+                        <option value="views">Plus vus</option>
+                        <option value="comments">Plus commentés</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Featured posts -->
+        {% if featured_posts %}
+        <section class="featured-posts">
+            <h2>Articles à la une</h2>
+            <div class="featured-posts-grid">
+                {% for post in featured_posts %}
+                <article class="featured-post card-glass-refonte">
+                    {% if post.featured_image %}
+                    <div class="featured-post-image">
+                        <img src="{{ post.featured_image }}" alt="{{ post.title }}">
+                        <div class="image-overlay">
+                            <span class="category-tag category-{{ post.category }}">
+                                {{ post.category_display }}
+                            </span>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="featured-post-content">
+                        <h3><a href="{{ url_for('blog.post', id=post.id) }}">{{ post.title }}</a></h3>
+                        <p>{{ post.excerpt | truncate(150) }}</p>
+                        
+                        <div class="featured-post-meta">
+                            <div class="post-author-mini">
+                                <div class="author-avatar-mini">
+                                    {% if post.author.avatar %}
+                                    <img src="{{ post.author.avatar }}" alt="{{ post.author.full_name }}">
+                                    {% else %}
+                                    <div class="avatar-placeholder-mini">
+                                        {{ post.author.full_name[:2].upper() }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <span>{{ post.author.full_name }}</span>
+                            </div>
+                            
+                            <div class="post-stats-mini">
+                                <span><i class="fas fa-eye"></i> {{ post.views_count }}</span>
+                                <span><i class="fas fa-heart"></i> {{ post.likes_count }}</span>
+                                <span><i class="fas fa-comments"></i> {{ post.comments_count }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="featured-post-date">
+                            {{ post.published_at.strftime('%d %B %Y') }}
+                        </div>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+        
+        <!-- Regular posts -->
+        <section class="blog-posts">
+            {% if posts %}
+            <div class="posts-grid" id="posts-grid">
+                {% for post in posts %}
+                <article class="blog-post-card card-glass-refonte" 
+                         data-category="{{ post.category }}" 
+                         data-tags="{{ post.tags | map(attribute='slug') | join(',') }}"
+                         data-title="{{ post.title | lower }}"
+                         data-author="{{ post.author.full_name | lower }}"
+                         data-views="{{ post.views_count }}"
+                         data-likes="{{ post.likes_count }}"
+                         data-comments="{{ post.comments_count }}"
+                         data-date="{{ post.published_at.timestamp() }}">
+                    
+                    {% if post.featured_image %}
+                    <div class="post-card-image">
+                        <img src="{{ post.featured_image }}" alt="{{ post.title }}">
+                        <div class="image-overlay">
+                            <span class="category-tag category-{{ post.category }}">
+                                {{ post.category_display }}
+                            </span>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="post-card-content">
+                        <h3 class="post-card-title">
+                            <a href="{{ url_for('blog.post', id=post.id) }}">{{ post.title }}</a>
+                        </h3>
+                        
+                        <p class="post-card-excerpt">{{ post.excerpt | truncate(120) }}</p>
+                        
+                        <div class="post-card-meta">
+                            <div class="post-author-info">
+                                <div class="author-avatar-small">
+                                    {% if post.author.avatar %}
+                                    <img src="{{ post.author.avatar }}" alt="{{ post.author.full_name }}">
+                                    {% else %}
+                                    <div class="avatar-placeholder-small">
+                                        {{ post.author.full_name[:2].upper() }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="author-details">
+                                    <div class="author-name">{{ post.author.full_name }}</div>
+                                    <div class="post-date">{{ post.published_at.strftime('%d %B %Y') }}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="post-stats">
+                                <span class="stat">
+                                    <i class="fas fa-eye"></i>
+                                    {{ post.views_count }}
+                                </span>
+                                <span class="stat">
+                                    <i class="fas fa-heart"></i>
+                                    {{ post.likes_count }}
+                                </span>
+                                <span class="stat">
+                                    <i class="fas fa-comments"></i>
+                                    {{ post.comments_count }}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        {% if post.tags %}
+                        <div class="post-card-tags">
+                            {% for tag in post.tags[:3] %}
+                            <span class="tag-mini">#{{ tag.name }}</span>
+                            {% endfor %}
+                            {% if post.tags | length > 3 %}
+                            <span class="tag-more">+{{ post.tags | length - 3 }}</span>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                        
+                        <div class="post-card-actions">
+                            <a href="{{ url_for('blog.post', id=post.id) }}" class="read-more-btn">
+                                Lire la suite
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                            
+                            <div class="post-quick-actions">
+                                <button class="quick-action" onclick="toggleQuickLike({{ post.id }})">
+                                    <i class="fas fa-heart"></i>
+                                </button>
+                                
+                                <button class="quick-action" onclick="sharePost({{ post.id }})">
+                                    <i class="fas fa-share"></i>
+                                </button>
+                                
+                                <button class="quick-action" onclick="toggleQuickBookmark({{ post.id }})">
+                                    <i class="fas fa-bookmark"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+            
+            <!-- Load more posts -->
+            {% if has_more_posts %}
+            <div class="load-more-section">
+                <button class="btn-refonte btn-refonte-outline" id="load-more-posts" onclick="loadMorePosts()">
+                    <i class="fas fa-plus"></i>
+                    Charger plus d'articles
+                </button>
+            </div>
+            {% endif %}
+            
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-newspaper"></i>
+                <h3>Aucun article trouvé</h3>
+                <p>
+                    {% if space %}
+                    Cette section n'a pas encore d'articles publiés.
+                    {% else %}
+                    Aucun article ne correspond aux critères de recherche.
+                    {% endif %}
+                </p>
+                {% if can_create_post %}
+                <button class="btn-refonte btn-refonte-primary" onclick="createNewPost()">
+                    <i class="fas fa-plus"></i>
+                    Créer le premier article
+                </button>
+                {% endif %}
+            </div>
+            {% endif %}
+        </section>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Share Modal -->
+<div id="share-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Partager cet article</h3>
+            <button class="modal-close" onclick="closeShareModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="modal-body">
+            <div class="share-options">
+                <button class="share-option" onclick="shareOn('twitter')">
+                    <i class="fab fa-twitter"></i>
+                    Twitter
+                </button>
+                
+                <button class="share-option" onclick="shareOn('facebook')">
+                    <i class="fab fa-facebook"></i>
+                    Facebook
+                </button>
+                
+                <button class="share-option" onclick="shareOn('linkedin')">
+                    <i class="fab fa-linkedin"></i>
+                    LinkedIn
+                </button>
+                
+                <button class="share-option" onclick="shareOn('email')">
+                    <i class="fas fa-envelope"></i>
+                    Email
+                </button>
+            </div>
+            
+            <div class="share-link">
+                <label>Lien direct :</label>
+                <div class="link-input">
+                    <input type="text" id="share-url" readonly>
+                    <button class="btn-refonte btn-refonte-outline btn-sm" onclick="copyShareLink()">
+                        <i class="fas fa-copy"></i>
+                        Copier
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Blog functionality
+let postsOffset = {{ posts | length if posts else 0 }};
+let totalPosts = {{ total_posts_count if posts else 0 }};
+
+// Filter and search posts
+function filterPosts() {
+    const searchTerm = document.getElementById('blog-search').value.toLowerCase();
+    const categoryFilter = document.getElementById('blog-category').value;
+    const tagFilter = document.getElementById('blog-tag').value;
+    
+    document.querySelectorAll('.blog-post-card').forEach(card => {
+        const title = card.dataset.title;
+        const author = card.dataset.author;
+        const category = card.dataset.category;
+        const tags = card.dataset.tags.split(',');
+        
+        const matchesSearch = !searchTerm || 
+            title.includes(searchTerm) || 
+            author.includes(searchTerm);
+        const matchesCategory = !categoryFilter || category === categoryFilter;
+        const matchesTag = !tagFilter || tags.includes(tagFilter);
+        
+        card.style.display = (matchesSearch && matchesCategory && matchesTag) ? 'block' : 'none';
+    });
+}
+
+// Sort posts
+function sortPosts() {
+    const sortBy = document.getElementById('blog-sort').value;
+    const container = document.getElementById('posts-grid');
+    const cards = Array.from(container.querySelectorAll('.blog-post-card'));
+    
+    cards.sort((a, b) => {
+        switch (sortBy) {
+            case 'recent':
+                return parseFloat(b.dataset.date) - parseFloat(a.dataset.date);
+            case 'popular':
+                return parseInt(b.dataset.likes) - parseInt(a.dataset.likes);
+            case 'views':
+                return parseInt(b.dataset.views) - parseInt(a.dataset.views);
+            case 'comments':
+                return parseInt(b.dataset.comments) - parseInt(a.dataset.comments);
+            default:
+                return 0;
+        }
+    });
+    
+    cards.forEach(card => container.appendChild(card));
+}
+
+// Load more posts
+function loadMorePosts() {
+    const button = document.getElementById('load-more-posts');
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Chargement...';
+    
+    const params = new URLSearchParams({
+        offset: postsOffset,
+        limit: 12
+    });
+    
+    {% if space %}
+    params.append('space_id', {{ space.id }});
+    {% endif %}
+    
+    fetch(`/api/blog/posts?${params}`, {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success && data.posts.length > 0) {
+            const container = document.getElementById('posts-grid');
+            
+            data.posts.forEach(post => {
+                const postCard = createPostCard(post);
+                container.appendChild(postCard);
+            });
+            
+            postsOffset += data.posts.length;
+            
+            if (postsOffset >= totalPosts) {
+                button.style.display = 'none';
+            }
+        }
+    })
+    .finally(() => {
+        button.disabled = false;
+        button.innerHTML = '<i class="fas fa-plus"></i> Charger plus d\'articles';
+    });
+}
+
+// Social actions
+{% if blog_post %}
+function toggleLike(postId) {
+    fetch(`/api/blog/posts/${postId}/like`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const button = document.querySelector('.social-action');
+            const count = button.querySelector('span');
+            
+            if (data.liked) {
+                button.classList.add('active');
+                count.textContent = parseInt(count.textContent) + 1;
+            } else {
+                button.classList.remove('active');
+                count.textContent = parseInt(count.textContent) - 1;
+            }
+        }
+    });
+}
+
+function toggleBookmark() {
+    fetch(`/api/blog/posts/{{ blog_post.id }}/bookmark`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const button = document.querySelector('[onclick="toggleBookmark()"]');
+            const icon = button.querySelector('i');
+            const text = button.querySelector('i').nextSibling;
+            
+            if (data.bookmarked) {
+                text.textContent = ' Enlever';
+                icon.classList.add('fas');
+                icon.classList.remove('far');
+            } else {
+                text.textContent = ' Sauvegarder';
+                icon.classList.add('far');
+                icon.classList.remove('fas');
+            }
+        }
+    });
+}
+
+function scrollToComments() {
+    document.getElementById('comments-section').scrollIntoView({ behavior: 'smooth' });
+}
+{% endif %}
+
+// Quick actions for post cards
+function toggleQuickLike(postId) {
+    fetch(`/api/blog/posts/${postId}/like`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update UI
+            location.reload(); // Simple approach, could be optimized
+        }
+    });
+}
+
+function toggleQuickBookmark(postId) {
+    fetch(`/api/blog/posts/${postId}/bookmark`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update bookmark icon
+            const button = event.target.closest('.quick-action');
+            const icon = button.querySelector('i');
+            
+            if (data.bookmarked) {
+                icon.classList.add('fas');
+                icon.classList.remove('far');
+            } else {
+                icon.classList.add('far');
+                icon.classList.remove('fas');
+            }
+        }
+    });
+}
+
+// Share functionality
+function sharePost(postId = null) {
+    const url = postId ? 
+        `${window.location.origin}/blog/posts/${postId}` : 
+        window.location.href;
+    
+    document.getElementById('share-url').value = url;
+    document.getElementById('share-modal').style.display = 'flex';
+}
+
+function closeShareModal() {
+    document.getElementById('share-modal').style.display = 'none';
+}
+
+function shareOn(platform) {
+    const url = document.getElementById('share-url').value;
+    const title = document.querySelector('h1, .post-card-title a').textContent;
+    
+    let shareUrl;
+    
+    switch (platform) {
+        case 'twitter':
+            shareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`;
+            break;
+        case 'facebook':
+            shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+            break;
+        case 'linkedin':
+            shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
+            break;
+        case 'email':
+            shareUrl = `mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(url)}`;
+            break;
+    }
+    
+    if (shareUrl) {
+        window.open(shareUrl, '_blank', 'width=600,height=400');
+    }
+}
+
+function copyShareLink() {
+    const input = document.getElementById('share-url');
+    input.select();
+    document.execCommand('copy');
+    
+    const button = event.target.closest('button');
+    const originalText = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-check"></i> Copié !';
+    
+    setTimeout(() => {
+        button.innerHTML = originalText;
+    }, 2000);
+}
+
+// Post management
+{% if can_create_post %}
+function createNewPost() {
+    window.location.href = '/blog/create{% if space %}?space_id={{ space.id }}{% endif %}';
+}
+{% endif %}
+
+{% if can_edit_post %}
+function editPost(postId) {
+    window.location.href = `/blog/posts/${postId}/edit`;
+}
+{% endif %}
+
+// Helper function to create post card HTML
+function createPostCard(post) {
+    const div = document.createElement('div');
+    div.innerHTML = `<!-- Post card HTML would go here -->`;
+    return div.firstElementChild;
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    // Track post view if on single post page
+    {% if blog_post %}
+    fetch(`/api/blog/posts/{{ blog_post.id }}/view`, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    });
+    {% endif %}
+});
+</script>
+{% endblock %}

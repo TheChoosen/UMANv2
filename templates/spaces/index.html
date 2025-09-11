@@ -1,0 +1,301 @@
+{% extends "base.html" %}
+
+{% block title %}Espaces participatifs — {{ organization.name }}{% endblock %}
+
+{% block meta %}
+<link rel="stylesheet" href="{{ url_for('static', filename='refonte.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='spaces.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- Spaces Header -->
+<section class="spaces-hero">
+    <div class="container">
+        <div class="spaces-hero-content">
+            <h1>Espaces participatifs</h1>
+            <p>Découvrez tous les moyens de participer à la vie de {{ organization.name }}</p>
+            
+            <div class="spaces-filters">
+                <div class="filter-tabs">
+                    <button class="filter-tab active" data-filter="all">
+                        <i class="fas fa-th-large"></i>
+                        Tous les espaces
+                    </button>
+                    <button class="filter-tab" data-filter="processes">
+                        <i class="fas fa-project-diagram"></i>
+                        Processus
+                    </button>
+                    <button class="filter-tab" data-filter="assemblies">
+                        <i class="fas fa-users"></i>
+                        Assemblées
+                    </button>
+                    <button class="filter-tab" data-filter="conferences">
+                        <i class="fas fa-calendar-alt"></i>
+                        Conférences
+                    </button>
+                </div>
+                
+                <div class="filter-search">
+                    <input type="text" id="spaces-search" placeholder="Rechercher un espace..." 
+                           class="form-control">
+                    <i class="fas fa-search"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Spaces -->
+<section class="featured-spaces">
+    <div class="container">
+        <h2>Espaces à la une</h2>
+        <div class="featured-spaces-grid">
+            {% for space in featured_spaces %}
+            <div class="featured-space-card card-glass-refonte">
+                <div class="featured-space-image">
+                    {% if space.hero_image %}
+                    <img src="{{ space.hero_image }}" alt="{{ space.title }}">
+                    {% else %}
+                    <div class="featured-space-placeholder">
+                        <i class="fas fa-{{ space.icon or 'star' }}"></i>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="featured-space-badge">
+                        <span class="badge-{{ space.type }}">
+                            {% if space.type == 'process' %}Processus
+                            {% elif space.type == 'assembly' %}Assemblée
+                            {% elif space.type == 'conference' %}Conférence
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="featured-space-content">
+                    <h3>{{ space.title }}</h3>
+                    <p>{{ space.short_description }}</p>
+                    
+                    <div class="featured-space-meta">
+                        <div class="space-stats">
+                            <span class="stat">
+                                <i class="fas fa-users"></i>
+                                {{ space.participants_count or 0 }}
+                            </span>
+                            {% if space.type == 'process' %}
+                            <span class="stat">
+                                <i class="fas fa-lightbulb"></i>
+                                {{ space.proposals_count or 0 }}
+                            </span>
+                            {% endif %}
+                            <span class="stat">
+                                <i class="fas fa-comments"></i>
+                                {{ space.comments_count or 0 }}
+                            </span>
+                        </div>
+                        
+                        {% if space.type == 'process' and space.current_phase %}
+                        <div class="current-phase">
+                            <span class="phase-indicator {{ space.current_phase.status }}">
+                                {{ space.current_phase.title }}
+                            </span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="featured-space-actions">
+                        <a href="{{ url_for('spaces.detail', space_type=space.type, slug=space.slug) }}" 
+                           class="btn-refonte btn-refonte-primary">
+                            Participer
+                        </a>
+                        {% if space.follows_enabled %}
+                        <button class="btn-refonte btn-refonte-secondary follow-btn" 
+                                data-space-id="{{ space.id }}" 
+                                data-following="{{ 'true' if space.is_following else 'false' }}">
+                            <i class="fas fa-{{ 'heart' if space.is_following else 'heart-o' }}"></i>
+                            {{ 'Suivi' if space.is_following else 'Suivre' }}
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- All Spaces Grid -->
+<section class="all-spaces">
+    <div class="container">
+        <div class="spaces-controls">
+            <div class="spaces-view-toggle">
+                <button class="view-toggle active" data-view="grid">
+                    <i class="fas fa-th"></i>
+                </button>
+                <button class="view-toggle" data-view="list">
+                    <i class="fas fa-list"></i>
+                </button>
+            </div>
+            
+            <div class="spaces-sort">
+                <select id="spaces-sort" class="form-control">
+                    <option value="recent">Plus récents</option>
+                    <option value="popular">Plus populaires</option>
+                    <option value="alphabetical">Alphabétique</option>
+                    <option value="ending_soon">Se termine bientôt</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="spaces-grid" id="spaces-container">
+            {% for space in spaces %}
+            <div class="space-card card-glass-refonte" data-type="{{ space.type }}" data-status="{{ space.status }}">
+                <div class="space-card-header">
+                    <div class="space-type-badge">
+                        <i class="fas fa-{{ space.icon }}"></i>
+                        <span>
+                            {% if space.type == 'process' %}Processus participatif
+                            {% elif space.type == 'assembly' %}Assemblée
+                            {% elif space.type == 'conference' %}Conférence
+                            {% endif %}
+                        </span>
+                    </div>
+                    
+                    {% if space.status %}
+                    <div class="space-status-badge {{ space.status }}">
+                        {% if space.status == 'active' %}Actif
+                        {% elif space.status == 'upcoming' %}À venir
+                        {% elif space.status == 'finished' %}Terminé
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="space-card-body">
+                    <h3>{{ space.title }}</h3>
+                    <p>{{ space.short_description }}</p>
+                    
+                    {% if space.type == 'process' and space.phases %}
+                    <div class="process-timeline">
+                        {% for phase in space.phases[:3] %}
+                        <div class="timeline-phase {{ 'active' if phase.is_current else 'completed' if phase.is_completed else 'upcoming' }}">
+                            <div class="timeline-phase-dot"></div>
+                            <div class="timeline-phase-content">
+                                <strong>{{ phase.title }}</strong>
+                                <span>{{ phase.start_date.strftime('%d/%m') if phase.start_date else '' }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% if space.phases|length > 3 %}
+                        <div class="timeline-more">+{{ space.phases|length - 3 }}</div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    
+                    {% if space.type == 'assembly' %}
+                    <div class="assembly-info">
+                        <div class="assembly-members">
+                            <i class="fas fa-users"></i>
+                            <span>{{ space.members_count or 0 }} membre(s)</span>
+                        </div>
+                        {% if space.next_meeting %}
+                        <div class="next-meeting">
+                            <i class="fas fa-calendar"></i>
+                            <span>Prochaine réunion : {{ space.next_meeting.strftime('%d/%m/%Y') }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    
+                    {% if space.type == 'conference' %}
+                    <div class="conference-info">
+                        {% if space.start_date and space.end_date %}
+                        <div class="conference-dates">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>{{ space.start_date.strftime('%d/%m/%Y') }} - {{ space.end_date.strftime('%d/%m/%Y') }}</span>
+                        </div>
+                        {% endif %}
+                        {% if space.location %}
+                        <div class="conference-location">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>{{ space.location }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="space-card-footer">
+                    <div class="space-stats">
+                        <span class="stat">
+                            <i class="fas fa-users"></i>
+                            {{ space.participants_count or 0 }}
+                        </span>
+                        {% if space.proposals_count is defined %}
+                        <span class="stat">
+                            <i class="fas fa-lightbulb"></i>
+                            {{ space.proposals_count }}
+                        </span>
+                        {% endif %}
+                        <span class="stat">
+                            <i class="fas fa-comments"></i>
+                            {{ space.comments_count or 0 }}
+                        </span>
+                    </div>
+                    
+                    <div class="space-actions">
+                        <a href="{{ url_for('spaces.detail', space_type=space.type, slug=space.slug) }}" 
+                           class="btn-refonte btn-refonte-primary btn-sm">
+                            Voir
+                        </a>
+                        {% if space.can_participate %}
+                        <button class="btn-refonte btn-refonte-secondary btn-sm follow-btn" 
+                                data-space-id="{{ space.id }}" 
+                                data-following="{{ 'true' if space.is_following else 'false' }}">
+                            <i class="fas fa-{{ 'heart' if space.is_following else 'heart-o' }}"></i>
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="empty-spaces">
+                <i class="fas fa-inbox"></i>
+                <h3>Aucun espace participatif</h3>
+                <p>Il n'y a pas encore d'espaces participatifs configurés.</p>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Load More -->
+        {% if has_more_spaces %}
+        <div class="load-more-container">
+            <button class="btn-refonte btn-refonte-secondary" id="load-more-spaces">
+                Voir plus d'espaces
+            </button>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Quick Actions FAB -->
+{% if current_user.is_authenticated and current_user.can_create_spaces %}
+<div class="fab-container">
+    <button class="fab-main" onclick="toggleFAB()">
+        <i class="fas fa-plus"></i>
+    </button>
+    <div class="fab-menu" id="fab-menu">
+        <a href="{{ url_for('admin.create_process') }}" class="fab-item" title="Créer un processus">
+            <i class="fas fa-project-diagram"></i>
+        </a>
+        <a href="{{ url_for('admin.create_assembly') }}" class="fab-item" title="Créer une assemblée">
+            <i class="fas fa-users"></i>
+        </a>
+        <a href="{{ url_for('admin.create_conference') }}" class="fab-item" title="Créer une conférence">
+            <i class="fas fa-calendar-alt"></i>
+        </a>
+    </div>
+</div>
+{% endif %}
+
+<script src="{{ url_for('static', filename='spaces/index.js') }}"></script>
+{% endblock %}

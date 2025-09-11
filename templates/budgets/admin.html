@@ -1,0 +1,1076 @@
+{% extends "base.html" %}
+
+{% block title %}Administration - Budgets Participatifs - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="admin-budgets-layout">
+    <div class="container">
+        <div class="admin-budgets-container">
+            <!-- En-tête administration -->
+            <div class="admin-header">
+                <div class="admin-title-section">
+                    <h1>
+                        <i class="fas fa-cogs"></i>
+                        Administration des Budgets Participatifs
+                    </h1>
+                    <p class="admin-subtitle">Gestion complète des budgets, projets et processus de vote</p>
+                </div>
+                
+                <div class="admin-actions">
+                    <button class="btn-refonte btn-secondary" onclick="exportAllData()">
+                        <i class="fas fa-download"></i>
+                        Export général
+                    </button>
+                    <button class="btn-refonte" onclick="showCreateBudgetModal()">
+                        <i class="fas fa-plus"></i>
+                        Nouveau budget
+                    </button>
+                </div>
+            </div>
+
+            <!-- Statistiques d'administration -->
+            <div class="admin-stats">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value">12</div>
+                            <div class="stat-label">Budgets actifs</div>
+                            <div class="stat-change positive">+2 ce mois</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-project-diagram"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value">89</div>
+                            <div class="stat-label">Projets soumis</div>
+                            <div class="stat-change positive">+15 cette semaine</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value">2,847</div>
+                            <div class="stat-label">Votes totaux</div>
+                            <div class="stat-change positive">+342 aujourd'hui</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value">1.2M €</div>
+                            <div class="stat-label">Budget total géré</div>
+                            <div class="stat-change">68% alloué</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation administration -->
+            <div class="admin-navigation">
+                <nav class="admin-tabs">
+                    <button class="tab-btn active" onclick="showAdminTab('budgets')">
+                        <i class="fas fa-wallet"></i>
+                        Gestion des budgets
+                    </button>
+                    <button class="tab-btn" onclick="showAdminTab('projects')">
+                        <i class="fas fa-project-diagram"></i>
+                        Projets
+                    </button>
+                    <button class="tab-btn" onclick="showAdminTab('votes')">
+                        <i class="fas fa-vote-yea"></i>
+                        Votes & Résultats
+                    </button>
+                    <button class="tab-btn" onclick="showAdminTab('users')">
+                        <i class="fas fa-users"></i>
+                        Participants
+                    </button>
+                    <button class="tab-btn" onclick="showAdminTab('settings')">
+                        <i class="fas fa-cog"></i>
+                        Configuration
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Contenu des onglets d'administration -->
+            <div class="admin-content">
+                <!-- Onglet: Gestion des budgets -->
+                <div id="budgets-admin-tab" class="admin-tab-content active">
+                    <div class="budgets-management">
+                        <div class="section-header">
+                            <h2>
+                                <i class="fas fa-wallet"></i>
+                                Budgets participatifs
+                            </h2>
+                            
+                            <div class="management-filters">
+                                <select class="filter-select">
+                                    <option value="">Tous les statuts</option>
+                                    <option value="draft">Brouillon</option>
+                                    <option value="open">Ouvert aux projets</option>
+                                    <option value="voting">Vote en cours</option>
+                                    <option value="results">Résultats publiés</option>
+                                    <option value="implementation">Mise en œuvre</option>
+                                    <option value="completed">Terminé</option>
+                                </select>
+                                
+                                <select class="filter-select">
+                                    <option value="">Toutes les années</option>
+                                    <option value="2025">2025</option>
+                                    <option value="2024">2024</option>
+                                    <option value="2023">2023</option>
+                                </select>
+                                
+                                <div class="search-box">
+                                    <i class="fas fa-search"></i>
+                                    <input type="text" placeholder="Rechercher un budget...">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Tableau de gestion des budgets -->
+                        <div class="budgets-table-container">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th class="sortable" data-sort="title">
+                                            <span>Budget</span>
+                                            <i class="fas fa-sort"></i>
+                                        </th>
+                                        <th class="sortable" data-sort="status">
+                                            <span>Statut</span>
+                                            <i class="fas fa-sort"></i>
+                                        </th>
+                                        <th class="sortable" data-sort="amount">
+                                            <span>Montant</span>
+                                            <i class="fas fa-sort"></i>
+                                        </th>
+                                        <th class="sortable" data-sort="projects">
+                                            <span>Projets</span>
+                                            <i class="fas fa-sort"></i>
+                                        </th>
+                                        <th class="sortable" data-sort="votes">
+                                            <span>Votes</span>
+                                            <i class="fas fa-sort"></i>
+                                        </th>
+                                        <th class="sortable" data-sort="dates">
+                                            <span>Période</span>
+                                            <i class="fas fa-sort"></i>
+                                        </th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Budget 1 -->
+                                    <tr class="budget-row">
+                                        <td class="budget-info-cell">
+                                            <div class="budget-info">
+                                                <h4>Budget Quartier Centre 2025</h4>
+                                                <span class="budget-scope">
+                                                    <i class="fas fa-map-marker-alt"></i>
+                                                    Périmètre: Centre-ville
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td class="status-cell">
+                                            <select class="status-select" onchange="updateBudgetStatus(1, this.value)">
+                                                <option value="draft">Brouillon</option>
+                                                <option value="open">Ouvert aux projets</option>
+                                                <option value="voting" selected>Vote en cours</option>
+                                                <option value="results">Résultats publiés</option>
+                                                <option value="implementation">Mise en œuvre</option>
+                                                <option value="completed">Terminé</option>
+                                            </select>
+                                        </td>
+                                        <td class="amount-cell">
+                                            <div class="amount-info">
+                                                <strong>300 000 €</strong>
+                                                <span class="amount-used">162 000 € alloués</span>
+                                                <div class="amount-bar">
+                                                    <div class="amount-fill" style="width: 54%;"></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="projects-cell">
+                                            <div class="projects-info">
+                                                <strong>15</strong> soumis
+                                                <span>3 lauréats</span>
+                                            </div>
+                                        </td>
+                                        <td class="votes-cell">
+                                            <div class="votes-info">
+                                                <strong>1,247</strong> votes
+                                                <span>78% participation</span>
+                                            </div>
+                                        </td>
+                                        <td class="dates-cell">
+                                            <div class="dates-info">
+                                                <div>Vote: 15/01 - 15/02</div>
+                                                <div class="remaining-time">
+                                                    <i class="fas fa-clock"></i>
+                                                    5 jours restants
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="actions-cell">
+                                            <div class="action-buttons">
+                                                <button class="action-btn" title="Modifier" onclick="editBudget(1)">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="action-btn" title="Voir" onclick="viewBudget(1)">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button class="action-btn" title="Statistiques" onclick="showBudgetStats(1)">
+                                                    <i class="fas fa-chart-bar"></i>
+                                                </button>
+                                                <div class="dropdown">
+                                                    <button class="action-btn dropdown-toggle" data-toggle="dropdown">
+                                                        <i class="fas fa-ellipsis-v"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu">
+                                                        <a href="#" onclick="duplicateBudget(1)">
+                                                            <i class="fas fa-copy"></i>
+                                                            Dupliquer
+                                                        </a>
+                                                        <a href="#" onclick="exportBudget(1)">
+                                                            <i class="fas fa-download"></i>
+                                                            Exporter
+                                                        </a>
+                                                        <div class="dropdown-divider"></div>
+                                                        <a href="#" class="text-danger" onclick="archiveBudget(1)">
+                                                            <i class="fas fa-archive"></i>
+                                                            Archiver
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    
+                                    <!-- Budget 2 -->
+                                    <tr class="budget-row">
+                                        <td class="budget-info-cell">
+                                            <div class="budget-info">
+                                                <h4>Budget Jeunesse & Sport</h4>
+                                                <span class="budget-scope">
+                                                    <i class="fas fa-users"></i>
+                                                    Périmètre: Ville entière
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td class="status-cell">
+                                            <select class="status-select" onchange="updateBudgetStatus(2, this.value)">
+                                                <option value="results" selected>Résultats publiés</option>
+                                                <option value="implementation">Mise en œuvre</option>
+                                                <option value="completed">Terminé</option>
+                                            </select>
+                                        </td>
+                                        <td class="amount-cell">
+                                            <div class="amount-info">
+                                                <strong>150 000 €</strong>
+                                                <span class="amount-used">145 000 € alloués</span>
+                                                <div class="amount-bar">
+                                                    <div class="amount-fill" style="width: 97%;"></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="projects-cell">
+                                            <div class="projects-info">
+                                                <strong>8</strong> soumis
+                                                <span>5 lauréats</span>
+                                            </div>
+                                        </td>
+                                        <td class="votes-cell">
+                                            <div class="votes-info">
+                                                <strong>892</strong> votes
+                                                <span>65% participation</span>
+                                            </div>
+                                        </td>
+                                        <td class="dates-cell">
+                                            <div class="dates-info">
+                                                <div>Vote: 01/12 - 31/12</div>
+                                                <div class="completed-status">
+                                                    <i class="fas fa-check"></i>
+                                                    Terminé
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="actions-cell">
+                                            <div class="action-buttons">
+                                                <button class="action-btn" title="Modifier" onclick="editBudget(2)">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="action-btn" title="Voir" onclick="viewBudget(2)">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button class="action-btn" title="Suivi" onclick="showImplementationTracking(2)">
+                                                    <i class="fas fa-tasks"></i>
+                                                </button>
+                                                <div class="dropdown">
+                                                    <button class="action-btn dropdown-toggle" data-toggle="dropdown">
+                                                        <i class="fas fa-ellipsis-v"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu">
+                                                        <a href="#" onclick="duplicateBudget(2)">
+                                                            <i class="fas fa-copy"></i>
+                                                            Dupliquer
+                                                        </a>
+                                                        <a href="#" onclick="exportBudget(2)">
+                                                            <i class="fas fa-download"></i>
+                                                            Exporter
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Onglet: Projets -->
+                <div id="projects-admin-tab" class="admin-tab-content">
+                    <div class="projects-management">
+                        <div class="section-header">
+                            <h2>
+                                <i class="fas fa-project-diagram"></i>
+                                Gestion des projets
+                            </h2>
+                            
+                            <div class="management-actions">
+                                <button class="btn-refonte btn-secondary" onclick="exportProjects()">
+                                    <i class="fas fa-download"></i>
+                                    Export CSV
+                                </button>
+                                <button class="btn-refonte" onclick="showBulkActionsModal()">
+                                    <i class="fas fa-tasks"></i>
+                                    Actions groupées
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Filtres projets -->
+                        <div class="projects-filters">
+                            <select class="filter-select" id="budget-filter">
+                                <option value="">Tous les budgets</option>
+                                <option value="1">Budget Quartier Centre 2025</option>
+                                <option value="2">Budget Jeunesse & Sport</option>
+                            </select>
+                            
+                            <select class="filter-select" id="status-filter">
+                                <option value="">Tous les statuts</option>
+                                <option value="draft">Brouillon</option>
+                                <option value="submitted">Soumis</option>
+                                <option value="review">En évaluation</option>
+                                <option value="approved">Approuvé</option>
+                                <option value="rejected">Rejeté</option>
+                                <option value="winner">Lauréat</option>
+                            </select>
+                            
+                            <select class="filter-select" id="category-filter">
+                                <option value="">Toutes les catégories</option>
+                                <option value="infrastructure">Infrastructure</option>
+                                <option value="environment">Environnement</option>
+                                <option value="mobility">Mobilité</option>
+                                <option value="culture">Culture</option>
+                                <option value="social">Social</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Tableau des projets -->
+                        <div class="projects-table-container">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            <input type="checkbox" id="select-all-projects">
+                                        </th>
+                                        <th class="sortable" data-sort="title">
+                                            <span>Projet</span>
+                                            <i class="fas fa-sort"></i>
+                                        </th>
+                                        <th>Budget</th>
+                                        <th>Statut</th>
+                                        <th>Catégorie</th>
+                                        <th class="sortable" data-sort="cost">
+                                            <span>Coût</span>
+                                            <i class="fas fa-sort"></i>
+                                        </th>
+                                        <th class="sortable" data-sort="votes">
+                                            <span>Votes</span>
+                                            <i class="fas fa-sort"></i>
+                                        </th>
+                                        <th>Proposant</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Projet 1 -->
+                                    <tr class="project-row">
+                                        <td>
+                                            <input type="checkbox" class="project-checkbox" value="1">
+                                        </td>
+                                        <td class="project-info-cell">
+                                            <div class="project-info">
+                                                <div class="project-image-small">
+                                                    <img src="/static/image/project-playground.jpg" alt="">
+                                                </div>
+                                                <div class="project-details">
+                                                    <h4>Aire de jeux inclusive</h4>
+                                                    <span>Parc des Tilleuls</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>Budget Quartier Centre 2025</td>
+                                        <td>
+                                            <select class="status-select" onchange="updateProjectStatus(1, this.value)">
+                                                <option value="approved">Approuvé</option>
+                                                <option value="winner" selected>Lauréat</option>
+                                                <option value="rejected">Rejeté</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <span class="category-badge category-infrastructure">
+                                                <i class="fas fa-hard-hat"></i>
+                                                Infrastructure
+                                            </span>
+                                        </td>
+                                        <td class="cost-cell">45 000 €</td>
+                                        <td class="votes-cell">
+                                            <strong>342</strong>
+                                            <span class="vote-percentage">28.5%</span>
+                                        </td>
+                                        <td class="proposer-cell">
+                                            <div class="proposer-info">
+                                                <span class="proposer-name">Association Parents</span>
+                                                <span class="proposer-type">Association</span>
+                                            </div>
+                                        </td>
+                                        <td class="actions-cell">
+                                            <div class="action-buttons">
+                                                <button class="action-btn" title="Détails" onclick="viewProjectDetails(1)">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button class="action-btn" title="Modifier" onclick="editProject(1)">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="action-btn" title="Commentaires" onclick="showProjectComments(1)">
+                                                    <i class="fas fa-comments"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    
+                                    <!-- Plus de projets... -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Onglet: Votes & Résultats -->
+                <div id="votes-admin-tab" class="admin-tab-content">
+                    <div class="votes-management">
+                        <div class="section-header">
+                            <h2>
+                                <i class="fas fa-vote-yea"></i>
+                                Votes et résultats
+                            </h2>
+                        </div>
+                        
+                        <!-- Vérification de l'intégrité -->
+                        <div class="integrity-check">
+                            <h3>
+                                <i class="fas fa-shield-check"></i>
+                                Vérification d'intégrité UMan API
+                            </h3>
+                            
+                            <div class="integrity-results">
+                                <div class="integrity-item">
+                                    <div class="integrity-icon success">
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
+                                    <div class="integrity-content">
+                                        <h4>Signatures numériques</h4>
+                                        <p>2,847 votes vérifiés et signés numériquement</p>
+                                        <span class="integrity-status success">100% validés</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="integrity-item">
+                                    <div class="integrity-icon success">
+                                        <i class="fas fa-link"></i>
+                                    </div>
+                                    <div class="integrity-content">
+                                        <h4>Chaîne de hachage</h4>
+                                        <p>Intégrité de la blockchain des votes</p>
+                                        <span class="integrity-status success">Chaîne intacte</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="integrity-item">
+                                    <div class="integrity-icon success">
+                                        <i class="fas fa-user-check"></i>
+                                    </div>
+                                    <div class="integrity-content">
+                                        <h4>Unicité des votes</h4>
+                                        <p>Vérification anti-doublon</p>
+                                        <span class="integrity-status success">Aucun doublon détecté</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="integrity-item">
+                                    <div class="integrity-icon warning">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                    </div>
+                                    <div class="integrity-content">
+                                        <h4>Audit externe</h4>
+                                        <p>Validation par organisme indépendant</p>
+                                        <span class="integrity-status warning">En cours</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Statistiques de vote -->
+                        <div class="vote-statistics">
+                            <h3>Statistiques de participation</h3>
+                            
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <h4>Participation par âge</h4>
+                                    <div class="age-chart">
+                                        <div class="age-bar">
+                                            <span class="age-label">18-25 ans</span>
+                                            <div class="bar">
+                                                <div class="bar-fill" style="width: 65%;"></div>
+                                                <span class="bar-value">65%</span>
+                                            </div>
+                                        </div>
+                                        <div class="age-bar">
+                                            <span class="age-label">26-35 ans</span>
+                                            <div class="bar">
+                                                <div class="bar-fill" style="width: 78%;"></div>
+                                                <span class="bar-value">78%</span>
+                                            </div>
+                                        </div>
+                                        <div class="age-bar">
+                                            <span class="age-label">36-50 ans</span>
+                                            <div class="bar">
+                                                <div class="bar-fill" style="width: 82%;"></div>
+                                                <span class="bar-value">82%</span>
+                                            </div>
+                                        </div>
+                                        <div class="age-bar">
+                                            <span class="age-label">51+ ans</span>
+                                            <div class="bar">
+                                                <div class="bar-fill" style="width: 71%;"></div>
+                                                <span class="bar-value">71%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="stat-card">
+                                    <h4>Participation par quartier</h4>
+                                    <div class="neighborhood-stats">
+                                        <div class="neighborhood-item">
+                                            <span class="neighborhood-name">Centre-ville</span>
+                                            <span class="neighborhood-percentage">85%</span>
+                                        </div>
+                                        <div class="neighborhood-item">
+                                            <span class="neighborhood-name">Quartier Nord</span>
+                                            <span class="neighborhood-percentage">72%</span>
+                                        </div>
+                                        <div class="neighborhood-item">
+                                            <span class="neighborhood-name">Zone Sud</span>
+                                            <span class="neighborhood-percentage">68%</span>
+                                        </div>
+                                        <div class="neighborhood-item">
+                                            <span class="neighborhood-name">Zone Est</span>
+                                            <span class="neighborhood-percentage">59%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Onglet: Participants -->
+                <div id="users-admin-tab" class="admin-tab-content">
+                    <div class="users-management">
+                        <div class="section-header">
+                            <h2>
+                                <i class="fas fa-users"></i>
+                                Gestion des participants
+                            </h2>
+                        </div>
+                        
+                        <!-- Statistiques utilisateurs -->
+                        <div class="users-stats">
+                            <div class="stats-row">
+                                <div class="stat-item">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-user-plus"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <div class="stat-value">3,247</div>
+                                        <div class="stat-label">Utilisateurs inscrits</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="stat-item">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-vote-yea"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <div class="stat-value">2,847</div>
+                                        <div class="stat-label">Ont voté</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="stat-item">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-project-diagram"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <div class="stat-value">124</div>
+                                        <div class="stat-label">Ont proposé un projet</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="stat-item">
+                                    <div class="stat-icon">
+                                        <i class="fas fa-comments"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <div class="stat-value">1,856</div>
+                                        <div class="stat-label">Ont commenté</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Tableau des utilisateurs -->
+                        <div class="users-table-container">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Utilisateur</th>
+                                        <th>Statut</th>
+                                        <th>Participation</th>
+                                        <th>Projets</th>
+                                        <th>Commentaires</th>
+                                        <th>Dernière activité</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Exemples d'utilisateurs -->
+                                    <tr>
+                                        <td class="user-info-cell">
+                                            <div class="user-info">
+                                                <div class="user-avatar">
+                                                    <span class="avatar-placeholder">MC</span>
+                                                </div>
+                                                <div class="user-details">
+                                                    <h4>Marie Citoyenne</h4>
+                                                    <span>marie.citoyenne@email.com</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="status-badge status-active">
+                                                <i class="fas fa-check-circle"></i>
+                                                Actif
+                                            </span>
+                                        </td>
+                                        <td class="participation-cell">
+                                            <div class="participation-info">
+                                                <strong>3 votes</strong>
+                                                <span>100% de participation</span>
+                                            </div>
+                                        </td>
+                                        <td class="projects-cell">2 proposés</td>
+                                        <td class="comments-cell">15 commentaires</td>
+                                        <td class="activity-cell">Il y a 2 heures</td>
+                                        <td class="actions-cell">
+                                            <div class="action-buttons">
+                                                <button class="action-btn" title="Profil" onclick="viewUserProfile('marie.citoyenne')">
+                                                    <i class="fas fa-user"></i>
+                                                </button>
+                                                <button class="action-btn" title="Activité" onclick="viewUserActivity('marie.citoyenne')">
+                                                    <i class="fas fa-chart-line"></i>
+                                                </button>
+                                                <button class="action-btn" title="Message" onclick="sendMessage('marie.citoyenne')">
+                                                    <i class="fas fa-envelope"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Onglet: Configuration -->
+                <div id="settings-admin-tab" class="admin-tab-content">
+                    <div class="settings-management">
+                        <div class="section-header">
+                            <h2>
+                                <i class="fas fa-cog"></i>
+                                Configuration système
+                            </h2>
+                        </div>
+                        
+                        <!-- Paramètres généraux -->
+                        <div class="settings-section">
+                            <h3>Paramètres généraux</h3>
+                            
+                            <form class="settings-form" id="general-settings-form">
+                                <div class="form-group">
+                                    <label for="default-budget-duration">Durée par défaut des votes (jours)</label>
+                                    <input type="number" id="default-budget-duration" class="form-control" value="30" min="1" max="365">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="max-projects-per-budget">Nombre maximum de projets par budget</label>
+                                    <input type="number" id="max-projects-per-budget" class="form-control" value="50" min="1" max="500">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="min-project-cost">Coût minimum d'un projet (€)</label>
+                                    <input type="number" id="min-project-cost" class="form-control" value="1000" min="0">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="max-project-cost">Coût maximum d'un projet (€)</label>
+                                    <input type="number" id="max-project-cost" class="form-control" value="100000" min="0">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="require-verification" checked>
+                                        <span class="checkmark"></span>
+                                        Exiger la vérification d'identité pour voter
+                                    </label>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="allow-project-comments" checked>
+                                        <span class="checkmark"></span>
+                                        Autoriser les commentaires sur les projets
+                                    </label>
+                                </div>
+                                
+                                <div class="form-actions">
+                                    <button type="submit" class="btn-refonte">
+                                        <i class="fas fa-save"></i>
+                                        Sauvegarder
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <!-- Configuration UMan API -->
+                        <div class="settings-section">
+                            <h3>Configuration UMan API</h3>
+                            
+                            <form class="settings-form" id="uman-settings-form">
+                                <div class="form-group">
+                                    <label for="uman-endpoint">Point d'accès API UMan</label>
+                                    <input type="url" id="uman-endpoint" class="form-control" 
+                                           value="https://api.uman-international.com/v2" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="uman-api-key">Clé API</label>
+                                    <input type="password" id="uman-api-key" class="form-control" 
+                                           value="••••••••••••••••••••" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="signature-algorithm">Algorithme de signature</label>
+                                    <select id="signature-algorithm" class="form-control">
+                                        <option value="RSA-SHA256" selected>RSA-SHA256</option>
+                                        <option value="ECDSA-SHA256">ECDSA-SHA256</option>
+                                        <option value="EdDSA">EdDSA</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="enable-blockchain" checked>
+                                        <span class="checkmark"></span>
+                                        Activer la blockchain des votes
+                                    </label>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="require-external-audit" checked>
+                                        <span class="checkmark"></span>
+                                        Exiger un audit externe
+                                    </label>
+                                </div>
+                                
+                                <div class="form-actions">
+                                    <button type="button" class="btn-refonte btn-secondary" onclick="testUmanConnection()">
+                                        <i class="fas fa-plug"></i>
+                                        Tester la connexion
+                                    </button>
+                                    <button type="submit" class="btn-refonte">
+                                        <i class="fas fa-save"></i>
+                                        Sauvegarder
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <!-- Notifications -->
+                        <div class="settings-section">
+                            <h3>Notifications automatiques</h3>
+                            
+                            <form class="settings-form" id="notifications-settings-form">
+                                <div class="form-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="notify-new-project" checked>
+                                        <span class="checkmark"></span>
+                                        Nouveau projet soumis
+                                    </label>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="notify-vote-start" checked>
+                                        <span class="checkmark"></span>
+                                        Début des votes
+                                    </label>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="notify-vote-reminder" checked>
+                                        <span class="checkmark"></span>
+                                        Rappel de vote (3 jours avant la fin)
+                                    </label>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="notify-results" checked>
+                                        <span class="checkmark"></span>
+                                        Publication des résultats
+                                    </label>
+                                </div>
+                                
+                                <div class="form-actions">
+                                    <button type="submit" class="btn-refonte">
+                                        <i class="fas fa-save"></i>
+                                        Sauvegarder
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Créer un nouveau budget -->
+<div class="modal" id="createBudgetModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus"></i>
+                    Créer un nouveau budget participatif
+                </h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="create-budget-form">
+                    <div class="form-group">
+                        <label for="budget-title">Titre du budget *</label>
+                        <input type="text" id="budget-title" class="form-control" required
+                               placeholder="Ex: Budget Quartier Centre 2025">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="budget-description">Description</label>
+                        <textarea id="budget-description" class="form-control" rows="4"
+                                  placeholder="Décrivez les objectifs et le périmètre de ce budget participatif..."></textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="budget-amount">Montant total (€) *</label>
+                                <input type="number" id="budget-amount" class="form-control" required
+                                       min="1000" step="1000" placeholder="300000">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="budget-scope">Périmètre</label>
+                                <select id="budget-scope" class="form-control">
+                                    <option value="city">Ville entière</option>
+                                    <option value="district">Arrondissement</option>
+                                    <option value="neighborhood">Quartier</option>
+                                    <option value="thematic">Thématique</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="voting-start">Début des votes</label>
+                                <input type="date" id="voting-start" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="voting-end">Fin des votes</label>
+                                <input type="date" id="voting-end" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="voting-rules">Règles de vote</label>
+                        <select id="voting-rules" class="form-control">
+                            <option value="simple">Vote simple (un projet par personne)</option>
+                            <option value="multiple">Vote multiple (plusieurs projets)</option>
+                            <option value="ranked">Vote par ordre de préférence</option>
+                            <option value="budget-constraint">Vote avec contrainte budgétaire</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-refonte btn-secondary" data-dismiss="modal">
+                    Annuler
+                </button>
+                <button type="button" class="btn-refonte" onclick="createBudget()">
+                    <i class="fas fa-plus"></i>
+                    Créer le budget
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Traçabilité UMan API -->
+<div class="traceability-section">
+    <div class="container">
+        <div class="traceability-info">
+            <div class="trace-header">
+                <h4>
+                    <i class="fas fa-shield-alt"></i>
+                    Traçabilité UMan API - Administration
+                </h4>
+                <span class="trace-score">Score: 100%</span>
+            </div>
+            
+            <div class="trace-details">
+                <div class="trace-item">
+                    <span class="trace-label">Actions administrateur:</span>
+                    <code class="trace-value">{{ admin_actions_count }} enregistrées</code>
+                </div>
+                <div class="trace-item">
+                    <span class="trace-label">Audit trail:</span>
+                    <span class="trace-value verified">
+                        <i class="fas fa-certificate"></i>
+                        Complet et vérifiable
+                    </span>
+                </div>
+                <div class="trace-item">
+                    <span class="trace-label">Intégrité système:</span>
+                    <span class="trace-value verified">
+                        <i class="fas fa-check-shield"></i>
+                        Validée en continu
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Variables globales d'administration
+const adminData = {
+    budgets: {{ budgets|tojson }},
+    projects: {{ projects|tojson }},
+    users: {{ users|tojson }},
+    settings: {{ settings|tojson }}
+};
+
+// Initialisation
+document.addEventListener('DOMContentLoaded', function() {
+    initializeAdminInterface();
+    loadAdminStatistics();
+    setupAdminEventListeners();
+});
+
+// Gestion des onglets d'administration
+function showAdminTab(tabName) {
+    // Masquer tous les onglets
+    document.querySelectorAll('.admin-tab-content').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    
+    // Désactiver tous les boutons d'onglet
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Afficher l'onglet sélectionné
+    const targetTab = document.getElementById(tabName + '-admin-tab');
+    if (targetTab) {
+        targetTab.classList.add('active');
+    }
+    
+    // Activer le bouton correspondant
+    event.target.classList.add('active');
+}
+
+// Fonctions de gestion des budgets
+function showCreateBudgetModal() {
+    $('#createBudgetModal').modal('show');
+}
+
+function createBudget() {
+    // Logique de création de budget
+}
+
+function updateBudgetStatus(budgetId, newStatus) {
+    // Mise à jour du statut du budget
+}
+
+// Sera complété par budgets_surveys.js
+</script>
+{% endblock %}

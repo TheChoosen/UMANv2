@@ -1,0 +1,441 @@
+<!-- Invite User Modal -->
+<div class="modal fade" id="inviteUserModal" tabindex="-1" role="dialog" aria-labelledby="inviteUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content modal-glass-refonte">
+            <div class="modal-header">
+                <h5 class="modal-title" id="inviteUserModalLabel">
+                    <i class="fas fa-user-plus text-primary"></i>
+                    Inviter un utilisateur
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            
+            <form id="inviteUserForm" method="POST" action="/admin/system/users/invite">
+                <div class="modal-body">
+                    <!-- Invite Type Selection -->
+                    <div class="admin-form-group">
+                        <label class="admin-form-label">Type d'invitation</label>
+                        <div class="admin-radio-group">
+                            <label class="admin-radio">
+                                <input type="radio" name="invite_type" value="single" checked onchange="toggleInviteType()">
+                                <span class="admin-radio-mark"></span>
+                                <div class="admin-radio-content">
+                                    <strong>Invitation individuelle</strong>
+                                    <small>Inviter un utilisateur spécifique</small>
+                                </div>
+                            </label>
+                            <label class="admin-radio">
+                                <input type="radio" name="invite_type" value="bulk" onchange="toggleInviteType()">
+                                <span class="admin-radio-mark"></span>
+                                <div class="admin-radio-content">
+                                    <strong>Invitations en masse</strong>
+                                    <small>Inviter plusieurs utilisateurs à la fois</small>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Single Invite Form -->
+                    <div id="single-invite" class="invite-form-section">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="admin-form-group">
+                                    <label for="user_email" class="admin-form-label required">
+                                        Adresse email
+                                    </label>
+                                    <input type="email" class="admin-form-control" id="user_email" name="email" 
+                                           required placeholder="utilisateur@exemple.com">
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="admin-form-group">
+                                    <label for="user_name" class="admin-form-label">
+                                        Nom complet
+                                    </label>
+                                    <input type="text" class="admin-form-control" id="user_name" name="name" 
+                                           placeholder="Nom Prénom (optionnel)">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="admin-form-group">
+                                    <label for="system_role" class="admin-form-label required">
+                                        Rôle système
+                                    </label>
+                                    <select class="admin-form-control" id="system_role" name="system_role" required>
+                                        <option value="">Sélectionner un rôle</option>
+                                        <option value="user">Utilisateur standard</option>
+                                        <option value="manager">Gestionnaire</option>
+                                        <option value="admin">Administrateur</option>
+                                        <option value="system_admin">Super Administrateur</option>
+                                    </select>
+                                    <div class="admin-form-help">
+                                        Le rôle détermine les permissions système globales
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="admin-form-group">
+                                    <label for="default_organization" class="admin-form-label">
+                                        Organisation par défaut
+                                    </label>
+                                    <select class="admin-form-control" id="default_organization" name="default_organization">
+                                        <option value="">Aucune organisation</option>
+                                        {% for org in organizations %}
+                                        <option value="{{ org.id }}">{{ org.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="admin-form-group">
+                            <label for="invite_message" class="admin-form-label">
+                                Message d'invitation personnalisé
+                            </label>
+                            <textarea class="admin-form-control" id="invite_message" name="message" 
+                                      rows="3" placeholder="Message optionnel à inclure dans l'invitation..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <!-- Bulk Invite Form -->
+                    <div id="bulk-invite" class="invite-form-section" style="display: none;">
+                        <div class="admin-form-group">
+                            <label class="admin-form-label">Méthode d'invitation en masse</label>
+                            <div class="admin-radio-group">
+                                <label class="admin-radio">
+                                    <input type="radio" name="bulk_method" value="textarea" checked onchange="toggleBulkMethod()">
+                                    <span class="admin-radio-mark"></span>
+                                    <div class="admin-radio-content">
+                                        <strong>Saisie manuelle</strong>
+                                        <small>Saisir les emails directement</small>
+                                    </div>
+                                </label>
+                                <label class="admin-radio">
+                                    <input type="radio" name="bulk_method" value="csv" onchange="toggleBulkMethod()">
+                                    <span class="admin-radio-mark"></span>
+                                    <div class="admin-radio-content">
+                                        <strong>Import CSV</strong>
+                                        <small>Importer depuis un fichier CSV</small>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div id="bulk-textarea-method">
+                            <div class="admin-form-group">
+                                <label for="bulk_emails" class="admin-form-label required">
+                                    Adresses email
+                                </label>
+                                <textarea class="admin-form-control" id="bulk_emails" name="bulk_emails" 
+                                          rows="6" placeholder="Saisir une adresse email par ligne:&#10;utilisateur1@exemple.com&#10;utilisateur2@exemple.com&#10;utilisateur3@exemple.com"></textarea>
+                                <div class="admin-form-help">
+                                    Une adresse email par ligne. Format accepté : email ou "Nom &lt;email@exemple.com&gt;"
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="bulk-csv-method" style="display: none;">
+                            <div class="admin-form-group">
+                                <label for="csv_file" class="admin-form-label required">
+                                    Fichier CSV
+                                </label>
+                                <div class="admin-file-upload">
+                                    <input type="file" id="csv_file" name="csv_file" accept=".csv" onchange="previewCSV(this)">
+                                    <div class="admin-file-upload-area" onclick="document.getElementById('csv_file').click()">
+                                        <div class="admin-file-preview" id="csv-preview">
+                                            <i class="fas fa-file-csv"></i>
+                                            <p>Cliquez pour sélectionner un fichier CSV</p>
+                                            <small>Format : email,nom,organisation (optionnel)</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="admin-alert admin-alert-info">
+                                <i class="fas fa-info-circle"></i>
+                                <div>
+                                    <strong>Format CSV attendu :</strong>
+                                    <p>email,nom,organisation (optionnel)</p>
+                                    <code>
+                                        user1@exemple.com,Jean Dupont,Ville de Montréal<br>
+                                        user2@exemple.com,Marie Martin,<br>
+                                        user3@exemple.com,Pierre Durand,CEGEP
+                                    </code>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="admin-form-group">
+                                    <label for="bulk_system_role" class="admin-form-label required">
+                                        Rôle système par défaut
+                                    </label>
+                                    <select class="admin-form-control" id="bulk_system_role" name="bulk_system_role" required>
+                                        <option value="user" selected>Utilisateur standard</option>
+                                        <option value="manager">Gestionnaire</option>
+                                        <option value="admin">Administrateur</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="admin-form-group">
+                                    <label for="bulk_default_organization" class="admin-form-label">
+                                        Organisation par défaut
+                                    </label>
+                                    <select class="admin-form-control" id="bulk_default_organization" name="bulk_default_organization">
+                                        <option value="">Aucune organisation</option>
+                                        {% for org in organizations %}
+                                        <option value="{{ org.id }}">{{ org.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="admin-form-group">
+                            <label for="bulk_invite_message" class="admin-form-label">
+                                Message d'invitation personnalisé
+                            </label>
+                            <textarea class="admin-form-control" id="bulk_invite_message" name="bulk_message" 
+                                      rows="3" placeholder="Message optionnel à inclure dans toutes les invitations..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <!-- Advanced Options -->
+                    <div class="admin-form-section">
+                        <h6>Options avancées</h6>
+                        
+                        <div class="admin-checkbox-group">
+                            <label class="admin-checkbox">
+                                <input type="checkbox" name="send_immediately" value="1" checked>
+                                <span class="admin-checkbox-mark"></span>
+                                Envoyer l'invitation immédiatement
+                            </label>
+                            <label class="admin-checkbox">
+                                <input type="checkbox" name="require_verification" value="1" checked>
+                                <span class="admin-checkbox-mark"></span>
+                                Exiger la vérification email
+                            </label>
+                            <label class="admin-checkbox">
+                                <input type="checkbox" name="force_password_change" value="1">
+                                <span class="admin-checkbox-mark"></span>
+                                Forcer le changement de mot de passe à la première connexion
+                            </label>
+                        </div>
+                        
+                        <div class="admin-form-group">
+                            <label for="invitation_expires" class="admin-form-label">
+                                Expiration de l'invitation
+                            </label>
+                            <select class="admin-form-control" id="invitation_expires" name="invitation_expires">
+                                <option value="24">24 heures</option>
+                                <option value="72">3 jours</option>
+                                <option value="168" selected>1 semaine</option>
+                                <option value="336">2 semaines</option>
+                                <option value="720">1 mois</option>
+                                <option value="0">Jamais</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn-refonte btn-refonte-secondary" data-dismiss="modal">
+                        Annuler
+                    </button>
+                    <button type="submit" class="btn-refonte btn-refonte-primary" id="send-invites">
+                        <i class="fas fa-paper-plane"></i>
+                        <span id="invite-btn-text">Envoyer l'invitation</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleInviteType() {
+    const inviteType = document.querySelector('input[name="invite_type"]:checked').value;
+    const singleInvite = document.getElementById('single-invite');
+    const bulkInvite = document.getElementById('bulk-invite');
+    const btnText = document.getElementById('invite-btn-text');
+    
+    if (inviteType === 'single') {
+        singleInvite.style.display = 'block';
+        bulkInvite.style.display = 'none';
+        btnText.textContent = 'Envoyer l\'invitation';
+        
+        // Required fields
+        document.getElementById('user_email').required = true;
+        document.getElementById('system_role').required = true;
+        document.getElementById('bulk_emails').required = false;
+        document.getElementById('bulk_system_role').required = false;
+    } else {
+        singleInvite.style.display = 'none';
+        bulkInvite.style.display = 'block';
+        btnText.textContent = 'Envoyer les invitations';
+        
+        // Required fields
+        document.getElementById('user_email').required = false;
+        document.getElementById('system_role').required = false;
+        document.getElementById('bulk_system_role').required = true;
+        
+        // Check bulk method
+        toggleBulkMethod();
+    }
+}
+
+function toggleBulkMethod() {
+    const bulkMethod = document.querySelector('input[name="bulk_method"]:checked')?.value;
+    const textareaMethod = document.getElementById('bulk-textarea-method');
+    const csvMethod = document.getElementById('bulk-csv-method');
+    
+    if (bulkMethod === 'textarea') {
+        textareaMethod.style.display = 'block';
+        csvMethod.style.display = 'none';
+        document.getElementById('bulk_emails').required = true;
+        document.getElementById('csv_file').required = false;
+    } else if (bulkMethod === 'csv') {
+        textareaMethod.style.display = 'none';
+        csvMethod.style.display = 'block';
+        document.getElementById('bulk_emails').required = false;
+        document.getElementById('csv_file').required = true;
+    }
+}
+
+function previewCSV(input) {
+    const preview = document.getElementById('csv-preview');
+    
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        preview.innerHTML = `
+            <i class="fas fa-file-csv text-success"></i>
+            <p><strong>${file.name}</strong></p>
+            <small>${(file.size / 1024).toFixed(1)} KB</small>
+        `;
+        
+        // Read and validate CSV
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const csv = e.target.result;
+            const lines = csv.split('\n').filter(line => line.trim());
+            const validEmails = lines.filter(line => {
+                const email = line.split(',')[0];
+                return /\S+@\S+\.\S+/.test(email);
+            });
+            
+            preview.innerHTML += `<div class="csv-stats"><small>${validEmails.length} email(s) valide(s) détecté(s)</small></div>`;
+        };
+        reader.readAsText(file);
+    }
+}
+
+// Form submission
+document.getElementById('inviteUserForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const sendBtn = document.getElementById('send-invites');
+    const btnText = document.getElementById('invite-btn-text');
+    const originalText = btnText.textContent;
+    
+    // Validate based on invite type
+    const inviteType = document.querySelector('input[name="invite_type"]:checked').value;
+    
+    if (inviteType === 'single') {
+        if (!document.getElementById('user_email').value || !document.getElementById('system_role').value) {
+            showNotification('Veuillez remplir tous les champs requis', 'error');
+            return;
+        }
+    } else {
+        const bulkMethod = document.querySelector('input[name="bulk_method"]:checked').value;
+        if (bulkMethod === 'textarea' && !document.getElementById('bulk_emails').value) {
+            showNotification('Veuillez saisir au moins une adresse email', 'error');
+            return;
+        } else if (bulkMethod === 'csv' && !document.getElementById('csv_file').files[0]) {
+            showNotification('Veuillez sélectionner un fichier CSV', 'error');
+            return;
+        }
+    }
+    
+    sendBtn.disabled = true;
+    btnText.textContent = 'Envoi en cours...';
+    sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + btnText.textContent;
+    
+    fetch('/admin/system/users/invite', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            $('#inviteUserModal').modal('hide');
+            
+            if (data.results) {
+                // Bulk invite results
+                const successCount = data.results.success?.length || 0;
+                const errorCount = data.results.errors?.length || 0;
+                
+                let message = `${successCount} invitation(s) envoyée(s)`;
+                if (errorCount > 0) {
+                    message += `, ${errorCount} erreur(s)`;
+                }
+                
+                showNotification(message, successCount > 0 ? 'success' : 'warning');
+                
+                // Show detailed results if there are errors
+                if (errorCount > 0) {
+                    console.log('Erreurs d\'invitation:', data.results.errors);
+                }
+            } else {
+                showNotification('Invitation envoyée avec succès', 'success');
+            }
+            
+            setTimeout(() => window.location.reload(), 1000);
+        } else {
+            showNotification(data.message || 'Erreur lors de l\'envoi des invitations', 'error');
+        }
+    })
+    .catch(error => {
+        showNotification('Erreur lors de l\'envoi des invitations', 'error');
+    })
+    .finally(() => {
+        sendBtn.disabled = false;
+        btnText.textContent = originalText;
+        sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> ' + originalText;
+    });
+});
+
+// Reset modal on close
+$('#inviteUserModal').on('hidden.bs.modal', function() {
+    document.getElementById('inviteUserForm').reset();
+    
+    // Reset to single invite
+    document.querySelector('input[name="invite_type"][value="single"]').checked = true;
+    toggleInviteType();
+    
+    // Reset CSV preview
+    document.getElementById('csv-preview').innerHTML = `
+        <i class="fas fa-file-csv"></i>
+        <p>Cliquez pour sélectionner un fichier CSV</p>
+        <small>Format : email,nom,organisation (optionnel)</small>
+    `;
+});
+
+// Initialize on load
+document.addEventListener('DOMContentLoaded', function() {
+    toggleInviteType();
+});
+</script>

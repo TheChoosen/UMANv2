@@ -1,0 +1,594 @@
+{% extends "base.html" %}
+
+{% block title %}Préférences de notifications — {{ organization.name }}{% endblock %}
+
+{% block meta %}
+<link rel="stylesheet" href="{{ url_for('static', filename='refonte.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='notifications.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="preferences-layout">
+    <div class="container">
+        <div class="preferences-header">
+            <div class="header-nav">
+                <a href="{{ url_for('notifications.index') }}" class="back-link">
+                    <i class="fas fa-arrow-left"></i>
+                    Retour aux notifications
+                </a>
+            </div>
+            
+            <h1>
+                <i class="fas fa-cog"></i>
+                Préférences de notifications
+            </h1>
+            <p>Configurez comment et quand vous souhaitez recevoir des notifications</p>
+        </div>
+        
+        <form id="preferences-form" method="POST" action="{{ url_for('notifications.save_preferences') }}">
+            <div class="preferences-content">
+                <!-- General Settings -->
+                <div class="preferences-section card-glass-refonte">
+                    <div class="section-header">
+                        <h3>
+                            <i class="fas fa-bell"></i>
+                            Paramètres généraux
+                        </h3>
+                        <p>Configuration globale des notifications</p>
+                    </div>
+                    
+                    <div class="preferences-grid">
+                        <div class="preference-item">
+                            <div class="preference-control">
+                                <label class="preference-switch">
+                                    <input type="checkbox" name="notifications_enabled" 
+                                           {{ 'checked' if preferences.notifications_enabled else '' }}>
+                                    <span class="switch-slider"></span>
+                                </label>
+                            </div>
+                            <div class="preference-info">
+                                <strong>Activer les notifications</strong>
+                                <span>Recevoir des notifications sur cette plateforme</span>
+                            </div>
+                        </div>
+                        
+                        <div class="preference-item">
+                            <div class="preference-control">
+                                <label class="preference-switch">
+                                    <input type="checkbox" name="email_notifications" 
+                                           {{ 'checked' if preferences.email_notifications else '' }}>
+                                    <span class="switch-slider"></span>
+                                </label>
+                            </div>
+                            <div class="preference-info">
+                                <strong>Notifications par email</strong>
+                                <span>Recevoir des notifications par email</span>
+                            </div>
+                        </div>
+                        
+                        <div class="preference-item">
+                            <div class="preference-control">
+                                <select name="email_frequency" class="form-control">
+                                    <option value="immediate" {{ 'selected' if preferences.email_frequency == 'immediate' else '' }}>
+                                        Immédiatement
+                                    </option>
+                                    <option value="hourly" {{ 'selected' if preferences.email_frequency == 'hourly' else '' }}>
+                                        Toutes les heures
+                                    </option>
+                                    <option value="daily" {{ 'selected' if preferences.email_frequency == 'daily' else '' }}>
+                                        Une fois par jour
+                                    </option>
+                                    <option value="weekly" {{ 'selected' if preferences.email_frequency == 'weekly' else '' }}>
+                                        Une fois par semaine
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="preference-info">
+                                <strong>Fréquence des emails</strong>
+                                <span>À quelle fréquence recevoir les emails de notification</span>
+                            </div>
+                        </div>
+                        
+                        <div class="preference-item">
+                            <div class="preference-control">
+                                <select name="email_time" class="form-control">
+                                    {% for hour in range(6, 23) %}
+                                    <option value="{{ hour }}:00" {{ 'selected' if preferences.email_time == hour ~ ':00' else '' }}>
+                                        {{ hour }}:00
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="preference-info">
+                                <strong>Heure d'envoi préférée</strong>
+                                <span>Heure préférée pour recevoir les résumés quotidiens/hebdomadaires</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Participation Notifications -->
+                <div class="preferences-section card-glass-refonte">
+                    <div class="section-header">
+                        <h3>
+                            <i class="fas fa-hand-paper"></i>
+                            Notifications de participation
+                        </h3>
+                        <p>Notifications liées à vos participations</p>
+                    </div>
+                    
+                    <div class="notification-types">
+                        <div class="notification-type">
+                            <div class="type-header">
+                                <h4>
+                                    <i class="fas fa-comments"></i>
+                                    Commentaires et mentions
+                                </h4>
+                            </div>
+                            
+                            <div class="type-preferences">
+                                <div class="preference-row">
+                                    <span class="preference-label">Réponses à mes commentaires</span>
+                                    <div class="preference-channels">
+                                        <label class="channel-option">
+                                            <input type="checkbox" name="comments_replies_web" 
+                                                   {{ 'checked' if preferences.comments_replies_web else '' }}>
+                                            <span>Web</span>
+                                        </label>
+                                        <label class="channel-option">
+                                            <input type="checkbox" name="comments_replies_email" 
+                                                   {{ 'checked' if preferences.comments_replies_email else '' }}>
+                                            <span>Email</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="preference-row">
+                                    <span class="preference-label">Mentions dans les commentaires</span>
+                                    <div class="preference-channels">
+                                        <label class="channel-option">
+                                            <input type="checkbox" name="mentions_web" 
+                                                   {{ 'checked' if preferences.mentions_web else '' }}>
+                                            <span>Web</span>
+                                        </label>
+                                        <label class="channel-option">
+                                            <input type="checkbox" name="mentions_email" 
+                                                   {{ 'checked' if preferences.mentions_email else '' }}>
+                                            <span>Email</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="preference-row">
+                                    <span class="preference-label">Commentaires sur mes propositions</span>
+                                    <div class="preference-channels">
+                                        <label class="channel-option">
+                                            <input type="checkbox" name="proposal_comments_web" 
+                                                   {{ 'checked' if preferences.proposal_comments_web else '' }}>
+                                            <span>Web</span>
+                                        </label>
+                                        <label class="channel-option">
+                                            <input type="checkbox" name="proposal_comments_email" 
+                                                   {{ 'checked' if preferences.proposal_comments_email else '' }}>
+                                            <span>Email</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="notification-type">
+                            <div class="type-header">
+                                <h4>
+                                    <i class="fas fa-project-diagram"></i>
+                                    Processus participatifs
+                                </h4>
+                            </div>
+                            
+                            <div class="type-preferences">
+                                <div class="preference-row">
+                                    <span class="preference-label">Nouvelles phases des processus suivis</span>
+                                    <div class="preference-channels">
+                                        <label class="channel-option">
+                                            <input type="checkbox" name="process_phases_web" 
+                                                   {{ 'checked' if preferences.process_phases_web else '' }}>
+                                            <span>Web</span>
+                                        </label>
+                                        <label class="channel-option">
+                                            <input type="checkbox" name="process_phases_email" 
+                                                   {{ 'checked' if preferences.process_phases_email else '' }}>
+                                            <span>Email</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="preference-row">
+                                    <span class="preference-label">Résultats des processus</span>
+                                    <div class="preference-channels">
+                                        <label class="channel-option">
+                                            <input type="checkbox" name="process_results_web" 
+                                                   {{ 'checked' if preferences.process_results_web else '' }}>
+                                            <span>Web</span>
+                                        </label>
+                                        <label class="channel-option">
+                                            <input type="checkbox" name="process_results_email" 
+                                                   {{ 'checked' if preferences.process_results_email else '' }}>
+                                            <span>Email</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="preference-row">
+                                    <span class="preference-label">Propositions liées à mes intérêts</span>
+                                    <div class="preference-channels">
+                                        <label class="channel-option">
+                                            <input type="checkbox" name="related_proposals_web" 
+                                                   {{ 'checked' if preferences.related_proposals_web else '' }}>
+                                            <span>Web</span>
+                                        </label>
+                                        <label class="channel-option">
+                                            <input type="checkbox" name="related_proposals_email" 
+                                                   {{ 'checked' if preferences.related_proposals_email else '' }}>
+                                            <span>Email</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="notification-type">
+                            <div class="type-header">
+                                <h4>
+                                    <i class="fas fa-users"></i>
+                                    Assemblées et réunions
+                                </h4>
+                            </div>
+                            
+                            <div class="type-preferences">
+                                <div class="preference-row">
+                                    <span class="preference-label">Nouvelles réunions des assemblées suivies</span>
+                                    <div class="preference-channels">
+                                        <label class="channel-option">
+                                            <input type="checkbox" name="assembly_meetings_web" 
+                                                   {{ 'checked' if preferences.assembly_meetings_web else '' }}>
+                                            <span>Web</span>
+                                        </label>
+                                        <label class="channel-option">
+                                            <input type="checkbox" name="assembly_meetings_email" 
+                                                   {{ 'checked' if preferences.assembly_meetings_email else '' }}>
+                                            <span>Email</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="preference-row">
+                                    <span class="preference-label">Rappels de réunions</span>
+                                    <div class="preference-channels">
+                                        <label class="channel-option">
+                                            <input type="checkbox" name="meeting_reminders_web" 
+                                                   {{ 'checked' if preferences.meeting_reminders_web else '' }}>
+                                            <span>Web</span>
+                                        </label>
+                                        <label class="channel-option">
+                                            <input type="checkbox" name="meeting_reminders_email" 
+                                                   {{ 'checked' if preferences.meeting_reminders_email else '' }}>
+                                            <span>Email</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="preference-row">
+                                    <span class="preference-label">Comptes-rendus de réunions</span>
+                                    <div class="preference-channels">
+                                        <label class="channel-option">
+                                            <input type="checkbox" name="meeting_reports_web" 
+                                                   {{ 'checked' if preferences.meeting_reports_web else '' }}>
+                                            <span>Web</span>
+                                        </label>
+                                        <label class="channel-option">
+                                            <input type="checkbox" name="meeting_reports_email" 
+                                                   {{ 'checked' if preferences.meeting_reports_email else '' }}>
+                                            <span>Email</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- System Notifications -->
+                <div class="preferences-section card-glass-refonte">
+                    <div class="section-header">
+                        <h3>
+                            <i class="fas fa-cogs"></i>
+                            Notifications système
+                        </h3>
+                        <p>Notifications administratives et de sécurité</p>
+                    </div>
+                    
+                    <div class="notification-types">
+                        <div class="notification-type">
+                            <div class="type-preferences">
+                                <div class="preference-row">
+                                    <span class="preference-label">Annonces importantes</span>
+                                    <div class="preference-channels">
+                                        <label class="channel-option">
+                                            <input type="checkbox" name="announcements_web" 
+                                                   {{ 'checked' if preferences.announcements_web else '' }}>
+                                            <span>Web</span>
+                                        </label>
+                                        <label class="channel-option">
+                                            <input type="checkbox" name="announcements_email" 
+                                                   {{ 'checked' if preferences.announcements_email else '' }}>
+                                            <span>Email</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="preference-row">
+                                    <span class="preference-label">Mises à jour de sécurité</span>
+                                    <div class="preference-channels">
+                                        <label class="channel-option">
+                                            <input type="checkbox" name="security_updates_web" 
+                                                   {{ 'checked' if preferences.security_updates_web else '' }}>
+                                            <span>Web</span>
+                                        </label>
+                                        <label class="channel-option">
+                                            <input type="checkbox" name="security_updates_email" 
+                                                   {{ 'checked' if preferences.security_updates_email else '' }}>
+                                            <span>Email</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="preference-row">
+                                    <span class="preference-label">Newsletter et actualités</span>
+                                    <div class="preference-channels">
+                                        <label class="channel-option">
+                                            <input type="checkbox" name="newsletter_web" 
+                                                   {{ 'checked' if preferences.newsletter_web else '' }}>
+                                            <span>Web</span>
+                                        </label>
+                                        <label class="channel-option">
+                                            <input type="checkbox" name="newsletter_email" 
+                                                   {{ 'checked' if preferences.newsletter_email else '' }}>
+                                            <span>Email</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quiet Hours -->
+                <div class="preferences-section card-glass-refonte">
+                    <div class="section-header">
+                        <h3>
+                            <i class="fas fa-moon"></i>
+                            Heures de silence
+                        </h3>
+                        <p>Configurez les heures pendant lesquelles vous ne souhaitez pas recevoir de notifications</p>
+                    </div>
+                    
+                    <div class="quiet-hours-settings">
+                        <div class="preference-item">
+                            <div class="preference-control">
+                                <label class="preference-switch">
+                                    <input type="checkbox" name="quiet_hours_enabled" 
+                                           {{ 'checked' if preferences.quiet_hours_enabled else '' }}
+                                           onchange="toggleQuietHours()">
+                                    <span class="switch-slider"></span>
+                                </label>
+                            </div>
+                            <div class="preference-info">
+                                <strong>Activer les heures de silence</strong>
+                                <span>Ne pas recevoir de notifications pendant certaines heures</span>
+                            </div>
+                        </div>
+                        
+                        <div class="quiet-hours-config" id="quiet-hours-config" 
+                             style="{{ 'display: block;' if preferences.quiet_hours_enabled else 'display: none;' }}">
+                            <div class="time-range">
+                                <div class="time-input">
+                                    <label>De :</label>
+                                    <input type="time" name="quiet_hours_start" 
+                                           value="{{ preferences.quiet_hours_start or '22:00' }}" class="form-control">
+                                </div>
+                                <div class="time-input">
+                                    <label>À :</label>
+                                    <input type="time" name="quiet_hours_end" 
+                                           value="{{ preferences.quiet_hours_end or '08:00' }}" class="form-control">
+                                </div>
+                            </div>
+                            
+                            <div class="quiet-hours-days">
+                                <span>Jours de la semaine :</span>
+                                <div class="days-checkboxes">
+                                    {% set days = [
+                                        ('monday', 'Lun'),
+                                        ('tuesday', 'Mar'),
+                                        ('wednesday', 'Mer'),
+                                        ('thursday', 'Jeu'),
+                                        ('friday', 'Ven'),
+                                        ('saturday', 'Sam'),
+                                        ('sunday', 'Dim')
+                                    ] %}
+                                    
+                                    {% for day_key, day_label in days %}
+                                    <label class="day-checkbox">
+                                        <input type="checkbox" name="quiet_hours_{{ day_key }}" 
+                                               {{ 'checked' if preferences.get('quiet_hours_' + day_key, True) else '' }}>
+                                        <span>{{ day_label }}</span>
+                                    </label>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Form Actions -->
+            <div class="preferences-actions">
+                <button type="button" class="btn-refonte btn-refonte-secondary" onclick="resetToDefaults()">
+                    <i class="fas fa-undo"></i>
+                    Restaurer les paramètres par défaut
+                </button>
+                
+                <button type="submit" class="btn-refonte btn-refonte-primary">
+                    <i class="fas fa-save"></i>
+                    Enregistrer les préférences
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Preferences functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Form submission
+    document.getElementById('preferences-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        savePreferences();
+    });
+    
+    // Real-time validation
+    validateForm();
+});
+
+// Toggle quiet hours configuration
+function toggleQuietHours() {
+    const checkbox = document.querySelector('input[name="quiet_hours_enabled"]');
+    const config = document.getElementById('quiet-hours-config');
+    
+    config.style.display = checkbox.checked ? 'block' : 'none';
+}
+
+// Save preferences
+function savePreferences() {
+    const form = document.getElementById('preferences-form');
+    const formData = new FormData(form);
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enregistrement...';
+    
+    fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('Préférences enregistrées avec succès', 'success');
+            
+            // Update any UI elements if needed
+            if (data.preferences) {
+                updateUIWithPreferences(data.preferences);
+            }
+        } else {
+            showNotification(data.message || 'Erreur lors de l\'enregistrement', 'error');
+        }
+    })
+    .catch(error => {
+        showNotification('Erreur lors de l\'enregistrement', 'error');
+    })
+    .finally(() => {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+    });
+}
+
+// Reset to defaults
+function resetToDefaults() {
+    if (confirm('Restaurer tous les paramètres par défaut ? Cette action ne peut pas être annulée.')) {
+        fetch('/api/notifications/preferences/reset', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Reload the page to show default values
+                window.location.reload();
+            } else {
+                showNotification('Erreur lors de la réinitialisation', 'error');
+            }
+        });
+    }
+}
+
+// Validate form
+function validateForm() {
+    // Check if email notifications are disabled but email-only options are enabled
+    const emailEnabled = document.querySelector('input[name="email_notifications"]');
+    const emailOnlyOptions = document.querySelectorAll('input[name$="_email"]');
+    
+    function updateEmailOptions() {
+        emailOnlyOptions.forEach(option => {
+            option.disabled = !emailEnabled.checked;
+            if (!emailEnabled.checked) {
+                option.checked = false;
+            }
+        });
+    }
+    
+    emailEnabled.addEventListener('change', updateEmailOptions);
+    updateEmailOptions(); // Initial call
+}
+
+// Update UI with preferences
+function updateUIWithPreferences(preferences) {
+    // Update any real-time UI elements based on new preferences
+    // This could include updating notification badges, etc.
+}
+
+// Show notification
+function showNotification(message, type = 'info') {
+    // Implementation depends on your notification system
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type}`;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 5000);
+}
+
+// Auto-save functionality (optional)
+let autoSaveTimeout;
+
+function scheduleAutoSave() {
+    clearTimeout(autoSaveTimeout);
+    autoSaveTimeout = setTimeout(() => {
+        const form = document.getElementById('preferences-form');
+        const formData = new FormData(form);
+        
+        fetch('/api/notifications/preferences/autosave', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+    }, 2000);
+}
+
+// Add auto-save to form inputs
+document.querySelectorAll('#preferences-form input, #preferences-form select').forEach(input => {
+    input.addEventListener('change', scheduleAutoSave);
+});
+</script>
+{% endblock %}

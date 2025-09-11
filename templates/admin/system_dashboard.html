@@ -1,0 +1,406 @@
+{% extends "base.html" %}
+
+{% block title %}UMan API System — Administration Multitenant{% endblock %}
+
+{% block meta %}
+<meta name="robots" content="noindex, nofollow">
+<link rel="stylesheet" href="{{ url_for('static', filename='refonte.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- ============================= -->
+<!-- SYSTEM DASHBOARD (REFONTE)    -->
+<!-- ============================= -->
+<div class="admin-layout">
+    <!-- Sidebar Navigation -->
+    <nav class="admin-sidebar">
+        <div class="admin-sidebar-header">
+            <div class="admin-logo">
+                <i class="fas fa-cogs text-primary"></i>
+                <span>UMan System</span>
+            </div>
+        </div>
+        
+        <div class="admin-nav">
+            <div class="admin-nav-section">
+                <h4>Multitenant</h4>
+                <ul>
+                    <li class="active">
+                        <a href="/admin/system/dashboard">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Vue d'ensemble</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/system/organizations">
+                            <i class="fas fa-building"></i>
+                            <span>Organisations</span>
+                            <span class="badge badge-primary">{{ organizations_count or 0 }}</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/system/domains">
+                            <i class="fas fa-globe"></i>
+                            <span>Domaines</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="admin-nav-section">
+                <h4>Utilisateurs & Rôles</h4>
+                <ul>
+                    <li>
+                        <a href="/admin/system/users">
+                            <i class="fas fa-users"></i>
+                            <span>Utilisateurs système</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/system/roles">
+                            <i class="fas fa-user-shield"></i>
+                            <span>Rôles & Permissions</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/system/verifications">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Vérifications</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="admin-nav-section">
+                <h4>API & Données</h4>
+                <ul>
+                    <li>
+                        <a href="/admin/system/api">
+                            <i class="fas fa-code"></i>
+                            <span>API GraphQL</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/system/opendata">
+                            <i class="fas fa-database"></i>
+                            <span>Open Data</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/system/audit">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Journal d'audit</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="admin-nav-section">
+                <h4>Configuration</h4>
+                <ul>
+                    <li>
+                        <a href="/admin/system/i18n">
+                            <i class="fas fa-language"></i>
+                            <span>Internationalisation</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/system/privacy">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>RGPD & Loi 25</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/system/monitoring">
+                            <i class="fas fa-heartbeat"></i>
+                            <span>Monitoring</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="admin-sidebar-footer">
+            <div class="admin-user-info">
+                <div class="admin-user-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="admin-user-details">
+                    <span class="admin-user-name">{{ current_user.name or 'System Admin' }}</span>
+                    <span class="admin-user-role">Super Administrateur</span>
+                </div>
+            </div>
+            <a href="/logout" class="admin-logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+            </a>
+        </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <main class="admin-main">
+        <!-- Header -->
+        <header class="admin-header">
+            <div class="admin-header-content">
+                <h1>Dashboard Système</h1>
+                <p>Administration multitenant — Vue d'ensemble des organisations et performances</p>
+            </div>
+            <div class="admin-header-actions">
+                <button class="btn-refonte btn-refonte-primary" data-toggle="modal" data-target="#createOrgModal">
+                    <i class="fas fa-plus"></i>
+                    <span>Nouvelle organisation</span>
+                </button>
+            </div>
+        </header>
+        
+        <!-- KPIs Cards -->
+        <section class="admin-kpis">
+            <div class="admin-kpi-grid">
+                <div class="admin-kpi-card card-glass-refonte">
+                    <div class="admin-kpi-icon">
+                        <i class="fas fa-building text-primary"></i>
+                    </div>
+                    <div class="admin-kpi-content">
+                        <div class="admin-kpi-value">{{ organizations_count or 0 }}</div>
+                        <div class="admin-kpi-label">Organisations actives</div>
+                        <div class="admin-kpi-change positive">+2 ce mois</div>
+                    </div>
+                </div>
+                
+                <div class="admin-kpi-card card-glass-refonte">
+                    <div class="admin-kpi-icon">
+                        <i class="fas fa-users text-success"></i>
+                    </div>
+                    <div class="admin-kpi-content">
+                        <div class="admin-kpi-value">{{ total_users or 0 }}</div>
+                        <div class="admin-kpi-label">Utilisateurs totaux</div>
+                        <div class="admin-kpi-change positive">+47 cette semaine</div>
+                    </div>
+                </div>
+                
+                <div class="admin-kpi-card card-glass-refonte">
+                    <div class="admin-kpi-icon">
+                        <i class="fas fa-chart-line text-info"></i>
+                    </div>
+                    <div class="admin-kpi-content">
+                        <div class="admin-kpi-value">{{ api_requests_today or 0 }}</div>
+                        <div class="admin-kpi-label">Requêtes API (24h)</div>
+                        <div class="admin-kpi-change neutral">99.9% uptime</div>
+                    </div>
+                </div>
+                
+                <div class="admin-kpi-card card-glass-refonte">
+                    <div class="admin-kpi-icon">
+                        <i class="fas fa-database text-warning"></i>
+                    </div>
+                    <div class="admin-kpi-content">
+                        <div class="admin-kpi-value">{{ storage_used_gb or 0 }}GB</div>
+                        <div class="admin-kpi-label">Stockage utilisé</div>
+                        <div class="admin-kpi-change neutral">{{ (storage_used_gb / storage_total_gb * 100) | round }}% du quota</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Organizations Overview -->
+        <section class="admin-section">
+            <div class="admin-section-header">
+                <h2>Organisations récentes</h2>
+                <a href="/admin/system/organizations" class="btn-refonte btn-refonte-secondary">
+                    Voir toutes
+                </a>
+            </div>
+            
+            <div class="admin-table-container card-glass-refonte">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Organisation</th>
+                            <th>Domaine</th>
+                            <th>Utilisateurs</th>
+                            <th>Créée le</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for org in recent_organizations %}
+                        <tr>
+                            <td>
+                                <div class="admin-org-info">
+                                    <div class="admin-org-avatar">
+                                        {% if org.logo %}
+                                        <img src="{{ org.logo }}" alt="{{ org.name }}">
+                                        {% else %}
+                                        <i class="fas fa-building"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <strong>{{ org.name }}</strong>
+                                        <div class="admin-org-subtitle">{{ org.description or 'Aucune description' }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <code>{{ org.domain }}</code>
+                            </td>
+                            <td>{{ org.users_count or 0 }}</td>
+                            <td>{{ org.created_at.strftime('%d/%m/%Y') if org.created_at else '-' }}</td>
+                            <td>
+                                <span class="admin-status-badge {{ 'active' if org.is_active else 'inactive' }}">
+                                    {{ 'Actif' if org.is_active else 'Inactif' }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="admin-actions">
+                                    <a href="/admin/system/organizations/{{ org.id }}" class="admin-action-btn">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="/admin/system/organizations/{{ org.id }}/edit" class="admin-action-btn">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="admin-empty-state">
+                                <i class="fas fa-building"></i>
+                                <p>Aucune organisation créée</p>
+                                <button class="btn-refonte btn-refonte-primary" data-toggle="modal" data-target="#createOrgModal">
+                                    Créer la première organisation
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        
+        <!-- System Health -->
+        <section class="admin-section">
+            <div class="admin-section-header">
+                <h2>Santé du système</h2>
+            </div>
+            
+            <div class="admin-health-grid">
+                <div class="admin-health-card card-glass-refonte">
+                    <h3>Services</h3>
+                    <div class="admin-health-items">
+                        <div class="admin-health-item">
+                            <span class="admin-health-status healthy"></span>
+                            <span>API GraphQL</span>
+                            <span class="admin-health-value">200ms</span>
+                        </div>
+                        <div class="admin-health-item">
+                            <span class="admin-health-status healthy"></span>
+                            <span>Base de données</span>
+                            <span class="admin-health-value">45ms</span>
+                        </div>
+                        <div class="admin-health-item">
+                            <span class="admin-health-status warning"></span>
+                            <span>Stockage fichiers</span>
+                            <span class="admin-health-value">1.2s</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="admin-health-card card-glass-refonte">
+                    <h3>Conformité</h3>
+                    <div class="admin-health-items">
+                        <div class="admin-health-item">
+                            <span class="admin-health-status healthy"></span>
+                            <span>RGPD</span>
+                            <span class="admin-health-value">Conforme</span>
+                        </div>
+                        <div class="admin-health-item">
+                            <span class="admin-health-status healthy"></span>
+                            <span>Loi 25 (Québec)</span>
+                            <span class="admin-health-value">Conforme</span>
+                        </div>
+                        <div class="admin-health-item">
+                            <span class="admin-health-status healthy"></span>
+                            <span>Audit logs</span>
+                            <span class="admin-health-value">Actifs</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<!-- Modal Create Organization -->
+<div class="modal fade" id="createOrgModal" tabindex="-1" role="dialog" aria-labelledby="createOrgModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content glassmorphism">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createOrgModalLabel">
+                    <i class="fas fa-plus text-primary"></i>
+                    Nouvelle organisation
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="/admin/system/organizations" method="POST" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="admin-form-group">
+                        <label for="org-name">Nom de l'organisation *</label>
+                        <input type="text" id="org-name" name="name" class="admin-form-control" required>
+                    </div>
+                    
+                    <div class="admin-form-group">
+                        <label for="org-domain">Domaine *</label>
+                        <div class="admin-form-input-group">
+                            <input type="text" id="org-domain" name="domain" class="admin-form-control" placeholder="ma-ville" required>
+                            <span class="admin-form-input-addon">.decidim.local</span>
+                        </div>
+                        <small class="admin-form-help">Ce domaine sera utilisé pour accéder à l'organisation</small>
+                    </div>
+                    
+                    <div class="admin-form-group">
+                        <label for="org-description">Description</label>
+                        <textarea id="org-description" name="description" class="admin-form-control" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="admin-form-group">
+                        <label for="org-logo">Logo</label>
+                        <input type="file" id="org-logo" name="logo" class="admin-form-control" accept="image/*">
+                    </div>
+                    
+                    <div class="admin-form-group">
+                        <label for="org-admin-email">Email administrateur *</label>
+                        <input type="email" id="org-admin-email" name="admin_email" class="admin-form-control" required>
+                        <small class="admin-form-help">Cette personne deviendra administrateur de l'organisation</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn-refonte btn-refonte-primary">
+                        <i class="fas fa-plus"></i>
+                        Créer l'organisation
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-generate domain from organization name
+    const nameInput = document.getElementById('org-name');
+    const domainInput = document.getElementById('org-domain');
+    
+    nameInput.addEventListener('input', function() {
+        const name = this.value.toLowerCase()
+            .replace(/[^a-z0-9]/g, '-')
+            .replace(/-+/g, '-')
+            .replace(/^-|-$/g, '');
+        domainInput.value = name;
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,890 @@
+{% extends "base.html" %}
+
+{% block title %}Accountability - Suivi des résultats - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="accountability-layout">
+    <div class="container">
+        <div class="accountability-container">
+            <!-- En-tête Accountability -->
+            <div class="accountability-header">
+                <div class="hero-section">
+                    <div class="hero-content">
+                        <h1>
+                            <i class="fas fa-tasks"></i>
+                            Accountability - Suivi des résultats
+                        </h1>
+                        <p class="hero-description">
+                            Suivez la mise en œuvre des propositions, projets de budget participatif 
+                            et décisions prises dans les espaces participatifs. Transparence totale sur l'exécution.
+                        </p>
+                        
+                        <div class="hero-stats">
+                            <div class="stat-item">
+                                <div class="stat-value">{{ total_results }}</div>
+                                <div class="stat-label">Résultats suivis</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">{{ completed_percentage }}%</div>
+                                <div class="stat-label">Taux de réalisation</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">{{ active_projects }}</div>
+                                <div class="stat-label">Projets actifs</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="hero-actions">
+                        {% if user_can_create_results %}
+                        <button class="btn-refonte" onclick="showCreateResultModal()">
+                            <i class="fas fa-plus"></i>
+                            Nouveau résultat
+                        </button>
+                        {% endif %}
+                        <button class="btn-refonte btn-secondary" onclick="exportAccountability()">
+                            <i class="fas fa-download"></i>
+                            Export suivi
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtres et navigation -->
+            <div class="accountability-filters">
+                <div class="filters-container">
+                    <div class="filter-group">
+                        <label for="status-filter">Statut</label>
+                        <select class="filter-select" id="status-filter" onchange="filterResults()">
+                            <option value="">Tous les statuts</option>
+                            <option value="not-started">Non commencé</option>
+                            <option value="in-progress">En cours</option>
+                            <option value="completed">Terminé</option>
+                            <option value="on-hold">En pause</option>
+                            <option value="cancelled">Annulé</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="type-filter">Type de source</label>
+                        <select class="filter-select" id="type-filter" onchange="filterResults()">
+                            <option value="">Tous les types</option>
+                            <option value="proposal">Propositions</option>
+                            <option value="budget-project">Projet budget</option>
+                            <option value="meeting-decision">Décision réunion</option>
+                            <option value="sortition-result">Résultat sortition</option>
+                            <option value="other">Autre</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="space-filter">Espace participatif</label>
+                        <select class="filter-select" id="space-filter" onchange="filterResults()">
+                            <option value="">Tous les espaces</option>
+                            {% for space in spaces %}
+                            <option value="{{ space.id }}">{{ space.title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="progress-filter">Avancement</label>
+                        <select class="filter-select" id="progress-filter" onchange="filterResults()">
+                            <option value="">Tous les avancements</option>
+                            <option value="0-25">0-25%</option>
+                            <option value="25-50">25-50%</option>
+                            <option value="50-75">50-75%</option>
+                            <option value="75-100">75-100%</option>
+                        </select>
+                    </div>
+                    
+                    <div class="search-group">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="search-input" placeholder="Rechercher un résultat..." 
+                                   onkeyup="searchResults()" autocomplete="off">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vue d'ensemble et métriques -->
+            <div class="accountability-overview">
+                <div class="overview-cards">
+                    <div class="overview-card">
+                        <div class="card-header">
+                            <h3>
+                                <i class="fas fa-chart-pie"></i>
+                                Répartition par statut
+                            </h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="status-distribution">
+                                <div class="status-item">
+                                    <div class="status-bar in-progress" style="width: 45%;"></div>
+                                    <span class="status-label">En cours (45%)</span>
+                                </div>
+                                <div class="status-item">
+                                    <div class="status-bar completed" style="width: 30%;"></div>
+                                    <span class="status-label">Terminé (30%)</span>
+                                </div>
+                                <div class="status-item">
+                                    <div class="status-bar not-started" style="width: 20%;"></div>
+                                    <span class="status-label">Non commencé (20%)</span>
+                                </div>
+                                <div class="status-item">
+                                    <div class="status-bar on-hold" style="width: 5%;"></div>
+                                    <span class="status-label">En pause (5%)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="overview-card">
+                        <div class="card-header">
+                            <h3>
+                                <i class="fas fa-clock"></i>
+                                Échéances critiques
+                            </h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="critical-deadlines">
+                                <div class="deadline-item urgent">
+                                    <div class="deadline-info">
+                                        <strong>Aire de jeux inclusive</strong>
+                                        <span>Livraison prévue dans 5 jours</span>
+                                    </div>
+                                    <div class="deadline-progress">75%</div>
+                                </div>
+                                <div class="deadline-item warning">
+                                    <div class="deadline-info">
+                                        <strong>Piste cyclable sécurisée</strong>
+                                        <span>Démarrage retardé de 2 semaines</span>
+                                    </div>
+                                    <div class="deadline-progress">25%</div>
+                                </div>
+                                <div class="deadline-item normal">
+                                    <div class="deadline-info">
+                                        <strong>Jardin partagé</strong>
+                                        <span>Dans les temps (90% réalisé)</span>
+                                    </div>
+                                    <div class="deadline-progress">90%</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Liste des résultats avec suivi -->
+            <div class="results-section">
+                <div class="section-header">
+                    <h2>
+                        <i class="fas fa-list"></i>
+                        Résultats et projets en cours
+                        <span class="results-count">({{ results|length }})</span>
+                    </h2>
+                    
+                    <div class="section-actions">
+                        <div class="view-toggle-group">
+                            <button class="view-toggle active" data-view="cards" onclick="toggleView('cards')">
+                                <i class="fas fa-th"></i>
+                            </button>
+                            <button class="view-toggle" data-view="timeline" onclick="toggleView('timeline')">
+                                <i class="fas fa-project-diagram"></i>
+                            </button>
+                            <button class="view-toggle" data-view="table" onclick="toggleView('table')">
+                                <i class="fas fa-table"></i>
+                            </button>
+                        </div>
+                        
+                        <select class="sort-select" id="sort-select" onchange="sortResults()">
+                            <option value="progress-desc">Plus avancés</option>
+                            <option value="progress-asc">Moins avancés</option>
+                            <option value="deadline-asc">Échéance proche</option>
+                            <option value="newest">Plus récents</option>
+                            <option value="alphabetical">Alphabétique</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Vue cartes -->
+                <div class="results-container view-cards" id="results-container">
+                    <!-- Résultat 1 - Projet budget participatif en cours -->
+                    <div class="result-card" data-status="in-progress" data-type="budget-project" data-progress="75">
+                        <div class="result-header">
+                            <div class="result-badges">
+                                <span class="type-badge type-budget-project">
+                                    <i class="fas fa-coins"></i>
+                                    Projet budget
+                                </span>
+                                <span class="status-badge status-in-progress">
+                                    <i class="fas fa-cog"></i>
+                                    En cours
+                                </span>
+                            </div>
+                            
+                            <div class="result-actions">
+                                <button class="action-btn" title="Modifier" onclick="editResult(1)">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="action-btn" title="Historique" onclick="showResultHistory(1)">
+                                    <i class="fas fa-history"></i>
+                                </button>
+                                <button class="action-btn" title="Partager" onclick="shareResult(1)">
+                                    <i class="fas fa-share-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="result-content">
+                            <h3 class="result-title">Aire de jeux inclusive - Parc des Tilleuls</h3>
+                            <p class="result-description">
+                                Création d'une aire de jeux accessible à tous les enfants, 
+                                y compris ceux en situation de handicap, avec équipements adaptés et sol sécurisé.
+                            </p>
+                            
+                            <div class="source-link">
+                                <div class="source-info">
+                                    <i class="fas fa-link"></i>
+                                    <span>Lié à:</span>
+                                    <a href="/proposals/142" class="source-title">
+                                        Proposition #142 - Aire de jeux inclusive
+                                    </a>
+                                </div>
+                                <div class="source-meta">
+                                    <span>342 votes • Budget Quartier Centre 2025</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="result-progress">
+                            <div class="progress-header">
+                                <div class="progress-info">
+                                    <span>Avancement global</span>
+                                    <span class="progress-percentage">75%</span>
+                                </div>
+                                <div class="progress-deadline">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span>Livraison: 15 mai 2025</span>
+                                </div>
+                            </div>
+                            
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 75%;"></div>
+                            </div>
+                            
+                            <div class="progress-details">
+                                <div class="detail-item completed">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Études techniques (100%)</span>
+                                </div>
+                                <div class="detail-item completed">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Obtention des permis (100%)</span>
+                                </div>
+                                <div class="detail-item active">
+                                    <i class="fas fa-cog"></i>
+                                    <span>Installation équipements (75%)</span>
+                                </div>
+                                <div class="detail-item pending">
+                                    <i class="fas fa-clock"></i>
+                                    <span>Réception et inauguration (0%)</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="result-timeline">
+                            <div class="timeline-header">
+                                <h4>
+                                    <i class="fas fa-history"></i>
+                                    Dernières mises à jour
+                                </h4>
+                                <button class="timeline-toggle" onclick="toggleTimeline(1)">
+                                    <i class="fas fa-chevron-down"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="timeline-content collapsed" id="timeline-1">
+                                <div class="timeline-item">
+                                    <div class="timeline-date">23 janvier 2025</div>
+                                    <div class="timeline-update">
+                                        <strong>Installation des équipements en cours</strong>
+                                        <p>Début de l'installation des structures de jeu. Les équipements adaptés 
+                                        pour enfants en situation de handicap sont arrivés sur site.</p>
+                                        <span class="timeline-author">Par: Service Espaces Verts</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="timeline-item">
+                                    <div class="timeline-date">10 janvier 2025</div>
+                                    <div class="timeline-update">
+                                        <strong>Permis de construire obtenu</strong>
+                                        <p>Validation finale des plans par les services municipaux. 
+                                        Autorisation d'engager les travaux d'installation.</p>
+                                        <span class="timeline-author">Par: Service Urbanisme</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="timeline-item">
+                                    <div class="timeline-date">15 décembre 2024</div>
+                                    <div class="timeline-update">
+                                        <strong>Études techniques finalisées</strong>
+                                        <p>Validation de la faisabilité technique et sécuritaire du projet. 
+                                        Choix des équipements certifiés EN 1176.</p>
+                                        <span class="timeline-author">Par: Bureau d'études Playground+</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="result-footer">
+                            <div class="result-team">
+                                <div class="team-info">
+                                    <strong>Responsable:</strong>
+                                    <span>Service Espaces Verts</span>
+                                </div>
+                                <div class="team-contact">
+                                    <button class="contact-btn" onclick="contactTeam(1)">
+                                        <i class="fas fa-envelope"></i>
+                                        Contacter
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="result-links">
+                                <button class="btn-refonte btn-sm" onclick="viewResultDetails(1)">
+                                    <i class="fas fa-eye"></i>
+                                    Voir détail
+                                </button>
+                                <button class="btn-refonte btn-sm btn-secondary" onclick="updateProgress(1)">
+                                    <i class="fas fa-edit"></i>
+                                    Mettre à jour
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Résultat 2 - Proposition implémentée -->
+                    <div class="result-card" data-status="completed" data-type="proposal" data-progress="100">
+                        <div class="result-header">
+                            <div class="result-badges">
+                                <span class="type-badge type-proposal">
+                                    <i class="fas fa-lightbulb"></i>
+                                    Proposition
+                                </span>
+                                <span class="status-badge status-completed">
+                                    <i class="fas fa-check-circle"></i>
+                                    Terminé
+                                </span>
+                            </div>
+                            
+                            <div class="result-actions">
+                                <button class="action-btn" title="Évaluation" onclick="showEvaluation(2)">
+                                    <i class="fas fa-star"></i>
+                                </button>
+                                <button class="action-btn" title="Partager" onclick="shareResult(2)">
+                                    <i class="fas fa-share-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="result-content">
+                            <h3 class="result-title">Extension horaires bibliothèque municipale</h3>
+                            <p class="result-description">
+                                Ouverture de la bibliothèque en soirée jusqu'à 20h du mardi au jeudi 
+                                et le samedi matin pour répondre aux besoins des travailleurs et étudiants.
+                            </p>
+                            
+                            <div class="source-link">
+                                <div class="source-info">
+                                    <i class="fas fa-link"></i>
+                                    <span>Lié à:</span>
+                                    <a href="/proposals/89" class="source-title">
+                                        Proposition #89 - Horaires bibliothèque
+                                    </a>
+                                </div>
+                                <div class="source-meta">
+                                    <span>156 soutiens • Processus Services Publics</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="result-progress completed">
+                            <div class="progress-header">
+                                <div class="progress-info">
+                                    <span>Projet réalisé</span>
+                                    <span class="progress-percentage">100%</span>
+                                </div>
+                                <div class="completion-date">
+                                    <i class="fas fa-calendar-check"></i>
+                                    <span>Terminé le: 5 janvier 2025</span>
+                                </div>
+                            </div>
+                            
+                            <div class="progress-bar completed">
+                                <div class="progress-fill" style="width: 100%;"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="result-impact">
+                            <div class="impact-header">
+                                <h4>
+                                    <i class="fas fa-chart-line"></i>
+                                    Impact mesuré
+                                </h4>
+                            </div>
+                            
+                            <div class="impact-metrics">
+                                <div class="metric-item">
+                                    <div class="metric-value">+47%</div>
+                                    <div class="metric-label">Fréquentation soirée</div>
+                                </div>
+                                <div class="metric-item">
+                                    <div class="metric-value">+23%</div>
+                                    <div class="metric-label">Inscriptions nouvelles</div>
+                                </div>
+                                <div class="metric-item">
+                                    <div class="metric-value">4.8/5</div>
+                                    <div class="metric-label">Satisfaction usagers</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="result-footer">
+                            <div class="result-team">
+                                <div class="team-info">
+                                    <strong>Réalisé par:</strong>
+                                    <span>Direction de la Culture</span>
+                                </div>
+                            </div>
+                            
+                            <div class="result-links">
+                                <button class="btn-refonte btn-sm" onclick="viewResultDetails(2)">
+                                    <i class="fas fa-eye"></i>
+                                    Voir détail
+                                </button>
+                                <button class="btn-refonte btn-sm btn-secondary" onclick="showFeedback(2)">
+                                    <i class="fas fa-comments"></i>
+                                    Retours citoyens
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Résultat 3 - En attente de démarrage -->
+                    <div class="result-card" data-status="not-started" data-type="meeting-decision" data-progress="0">
+                        <div class="result-header">
+                            <div class="result-badges">
+                                <span class="type-badge type-meeting-decision">
+                                    <i class="fas fa-users"></i>
+                                    Décision réunion
+                                </span>
+                                <span class="status-badge status-not-started">
+                                    <i class="fas fa-pause-circle"></i>
+                                    Non commencé
+                                </span>
+                            </div>
+                            
+                            <div class="result-actions">
+                                <button class="action-btn" title="Démarrer" onclick="startResult(3)">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                                <button class="action-btn" title="Modifier" onclick="editResult(3)">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="result-content">
+                            <h3 class="result-title">Étude faisabilité piscine écologique</h3>
+                            <p class="result-description">
+                                Lancement d'une étude de faisabilité pour la création d'une piscine naturelle 
+                                communautaire utilisant la filtration biologique.
+                            </p>
+                            
+                            <div class="source-link">
+                                <div class="source-info">
+                                    <i class="fas fa-link"></i>
+                                    <span>Lié à:</span>
+                                    <a href="/meetings/23" class="source-title">
+                                        Décision Assemblée Environnement - 12/01/2025
+                                    </a>
+                                </div>
+                                <div class="source-meta">
+                                    <span>Vote unanime • 15 membres présents</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="result-planning">
+                            <div class="planning-header">
+                                <h4>
+                                    <i class="fas fa-calendar-alt"></i>
+                                    Planning prévisionnel
+                                </h4>
+                            </div>
+                            
+                            <div class="planning-phases">
+                                <div class="phase-item upcoming">
+                                    <div class="phase-dot"></div>
+                                    <div class="phase-content">
+                                        <strong>Phase 1: Sélection bureau d'études</strong>
+                                        <span>Mars 2025 - 2 mois</span>
+                                    </div>
+                                </div>
+                                <div class="phase-item upcoming">
+                                    <div class="phase-dot"></div>
+                                    <div class="phase-content">
+                                        <strong>Phase 2: Étude technique et environnementale</strong>
+                                        <span>Mai 2025 - 4 mois</span>
+                                    </div>
+                                </div>
+                                <div class="phase-item upcoming">
+                                    <div class="phase-dot"></div>
+                                    <div class="phase-content">
+                                        <strong>Phase 3: Présentation résultats et décision</strong>
+                                        <span>Septembre 2025 - 1 mois</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="result-footer">
+                            <div class="result-team">
+                                <div class="team-info">
+                                    <strong>À affecter à:</strong>
+                                    <span class="team-pending">En attente d'attribution</span>
+                                </div>
+                            </div>
+                            
+                            <div class="result-links">
+                                <button class="btn-refonte btn-sm" onclick="assignTeam(3)">
+                                    <i class="fas fa-user-plus"></i>
+                                    Affecter équipe
+                                </button>
+                                <button class="btn-refonte btn-sm btn-secondary" onclick="viewResultDetails(3)">
+                                    <i class="fas fa-info-circle"></i>
+                                    Détails
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section statistiques détaillées -->
+            <div class="detailed-stats-section">
+                <div class="section-header">
+                    <h2>
+                        <i class="fas fa-chart-bar"></i>
+                        Statistiques de réalisation
+                    </h2>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <h3>Taux de réalisation par type</h3>
+                        </div>
+                        <div class="stat-content">
+                            <div class="type-stats">
+                                <div class="type-stat">
+                                    <div class="type-label">Propositions</div>
+                                    <div class="type-bar">
+                                        <div class="type-fill" style="width: 78%;"></div>
+                                        <span class="type-value">78%</span>
+                                    </div>
+                                </div>
+                                <div class="type-stat">
+                                    <div class="type-label">Projets budget</div>
+                                    <div class="type-bar">
+                                        <div class="type-fill" style="width: 65%;"></div>
+                                        <span class="type-value">65%</span>
+                                    </div>
+                                </div>
+                                <div class="type-stat">
+                                    <div class="type-label">Décisions réunions</div>
+                                    <div class="type-bar">
+                                        <div class="type-fill" style="width: 82%;"></div>
+                                        <span class="type-value">82%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <h3>Délais de réalisation</h3>
+                        </div>
+                        <div class="stat-content">
+                            <div class="delay-stats">
+                                <div class="delay-item good">
+                                    <div class="delay-label">Dans les temps</div>
+                                    <div class="delay-value">67%</div>
+                                </div>
+                                <div class="delay-item warning">
+                                    <div class="delay-label">Léger retard</div>
+                                    <div class="delay-value">25%</div>
+                                </div>
+                                <div class="delay-item danger">
+                                    <div class="delay-label">Retard important</div>
+                                    <div class="delay-value">8%</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <h3>Budget alloué vs dépensé</h3>
+                        </div>
+                        <div class="stat-content">
+                            <div class="budget-comparison">
+                                <div class="budget-item">
+                                    <div class="budget-label">Budget alloué</div>
+                                    <div class="budget-value">1,2M €</div>
+                                </div>
+                                <div class="budget-item">
+                                    <div class="budget-label">Budget dépensé</div>
+                                    <div class="budget-value">847k €</div>
+                                </div>
+                                <div class="budget-item">
+                                    <div class="budget-label">Taux d'exécution</div>
+                                    <div class="budget-value success">70.6%</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Créer un résultat -->
+{% if user_can_create_results %}
+<div class="modal" id="createResultModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus"></i>
+                    Créer un nouveau résultat/projet
+                </h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="create-result-form">
+                    <div class="form-group">
+                        <label for="result-title">Titre du résultat/projet *</label>
+                        <input type="text" id="result-title" class="form-control" required
+                               placeholder="Ex: Rénovation salle des fêtes">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="result-description">Description</label>
+                        <textarea id="result-description" class="form-control" rows="4"
+                                  placeholder="Décrivez le projet ou résultat à suivre..."></textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="result-type">Type de source *</label>
+                                <select id="result-type" class="form-control" required>
+                                    <option value="">Sélectionnez le type</option>
+                                    <option value="proposal">Proposition</option>
+                                    <option value="budget-project">Projet de budget participatif</option>
+                                    <option value="meeting-decision">Décision de réunion</option>
+                                    <option value="sortition-result">Résultat de sortition</option>
+                                    <option value="other">Autre</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="result-status">Statut initial</label>
+                                <select id="result-status" class="form-control">
+                                    <option value="not-started">Non commencé</option>
+                                    <option value="in-progress">En cours</option>
+                                    <option value="completed">Terminé</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="source-link">Lien vers l'élément source</label>
+                        <input type="url" id="source-link" class="form-control" 
+                               placeholder="https://... (proposition, projet, réunion)">
+                        <div class="form-help">URL vers la proposition, projet ou réunion d'origine</div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="start-date">Date de début prévue</label>
+                                <input type="date" id="start-date" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="end-date">Date de fin prévue</label>
+                                <input type="date" id="end-date" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="responsible-team">Équipe responsable</label>
+                        <input type="text" id="responsible-team" class="form-control" 
+                               placeholder="Ex: Service des Travaux Publics">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="budget-allocated">Budget alloué (€)</label>
+                        <input type="number" id="budget-allocated" class="form-control" 
+                               min="0" step="100" placeholder="45000">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-refonte btn-secondary" data-dismiss="modal">
+                    Annuler
+                </button>
+                <button type="button" class="btn-refonte" onclick="createResult()">
+                    <i class="fas fa-plus"></i>
+                    Créer le résultat
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Traçabilité UMan API -->
+<div class="traceability-section">
+    <div class="container">
+        <div class="traceability-info">
+            <div class="trace-header">
+                <h4>
+                    <i class="fas fa-shield-alt"></i>
+                    Traçabilité UMan API - Accountability
+                </h4>
+                <span class="trace-score">Score: 100%</span>
+            </div>
+            
+            <div class="trace-details">
+                <div class="trace-item">
+                    <span class="trace-label">Résultats suivis:</span>
+                    <code class="trace-value">{{ total_results }} journalisés</code>
+                </div>
+                <div class="trace-item">
+                    <span class="trace-label">Liens bidirectionnels:</span>
+                    <span class="trace-value verified">
+                        <i class="fas fa-link"></i>
+                        100% tracés
+                    </span>
+                </div>
+                <div class="trace-item">
+                    <span class="trace-label">Mises à jour:</span>
+                    <span class="trace-value verified">
+                        <i class="fas fa-history"></i>
+                        {{ total_updates }} horodatées
+                    </span>
+                </div>
+                <div class="trace-item">
+                    <span class="trace-label">Audit de réalisation:</span>
+                    <span class="trace-value">Dernière vérification: {{ last_audit_date|format_datetime }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Variables globales pour l'accountability
+const accountabilityData = {
+    results: {{ results|tojson }},
+    spaces: {{ spaces|tojson }},
+    statistics: {{ statistics|tojson }}
+};
+
+// Initialisation
+document.addEventListener('DOMContentLoaded', function() {
+    initializeAccountabilityInterface();
+    loadAccountabilityData();
+    setupAccountabilityEventListeners();
+});
+
+// Fonctions de filtrage et recherche
+function filterResults() {
+    // Logique de filtrage des résultats
+}
+
+function searchResults() {
+    // Logique de recherche
+}
+
+function sortResults() {
+    // Logique de tri des résultats
+}
+
+function toggleView(viewType) {
+    // Basculer entre vue cartes, timeline et tableau
+}
+
+// Fonctions d'actions sur les résultats
+function showCreateResultModal() {
+    $('#createResultModal').modal('show');
+}
+
+function createResult() {
+    // Logique de création de résultat
+}
+
+function editResult(resultId) {
+    // Modifier un résultat
+    window.location.href = `/accountability/${resultId}/edit`;
+}
+
+function updateProgress(resultId) {
+    // Mettre à jour l'avancement
+    window.location.href = `/accountability/${resultId}/update`;
+}
+
+function viewResultDetails(resultId) {
+    // Voir les détails d'un résultat
+    window.location.href = `/accountability/${resultId}`;
+}
+
+// Fonctions utilitaires
+function toggleTimeline(resultId) {
+    const timeline = document.getElementById(`timeline-${resultId}`);
+    const button = timeline.previousElementSibling.querySelector('.timeline-toggle i');
+    
+    if (timeline.classList.contains('collapsed')) {
+        timeline.classList.remove('collapsed');
+        button.classList.remove('fa-chevron-down');
+        button.classList.add('fa-chevron-up');
+    } else {
+        timeline.classList.add('collapsed');
+        button.classList.remove('fa-chevron-up');
+        button.classList.add('fa-chevron-down');
+    }
+}
+
+function exportAccountability() {
+    // Export du suivi accountability
+    window.location.href = '/accountability/export';
+}
+
+// Sera complété par accountability.js
+</script>
+{% endblock %}

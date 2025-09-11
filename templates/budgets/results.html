@@ -1,0 +1,1211 @@
+{% extends "base.html" %}
+
+{% block title %}Résultats - {{ budget.title }} - Budget Participatif - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="budget-results-layout">
+    <div class="container">
+        <div class="budget-results-container">
+            <!-- En-tête des résultats -->
+            <div class="results-header">
+                <div class="breadcrumb">
+                    <a href="/budgets">Budgets participatifs</a>
+                    <i class="fas fa-chevron-right"></i>
+                    <a href="/budgets/{{ budget.id }}">{{ budget.title }}</a>
+                    <i class="fas fa-chevron-right"></i>
+                    <span>Résultats</span>
+                </div>
+                
+                <div class="results-title-section">
+                    <div class="title-group">
+                        <h1>
+                            <i class="fas fa-chart-bar"></i>
+                            Résultats du {{ budget.title }}
+                        </h1>
+                        <div class="results-subtitle">
+                            Période de vote: {{ budget.voting_start_date|format_date }} - {{ budget.voting_end_date|format_date }}
+                        </div>
+                    </div>
+                    
+                    <div class="results-actions">
+                        <button class="btn-refonte btn-secondary" onclick="exportResults()">
+                            <i class="fas fa-download"></i>
+                            Exporter CSV
+                        </button>
+                        <button class="btn-refonte" onclick="shareResults()">
+                            <i class="fas fa-share-alt"></i>
+                            Partager
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="results-summary">
+                    <div class="summary-stats">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-value">{{ budget.total_votes }}</div>
+                                <div class="stat-label">Votes exprimés</div>
+                                <div class="stat-extra">{{ budget.participation_rate }}% de participation</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-project-diagram"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-value">{{ budget.total_projects }}</div>
+                                <div class="stat-label">Projets soumis</div>
+                                <div class="stat-extra">{{ budget.winner_projects|length }} financés</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-coins"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-value">{{ budget.total_amount|format_currency }} €</div>
+                                <div class="stat-label">Budget alloué</div>
+                                <div class="stat-extra">{{ budget.spent_amount|format_currency }} € utilisés</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-trophy"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-value">{{ budget.winner_projects|length }}</div>
+                                <div class="stat-label">Projets lauréats</div>
+                                <div class="stat-extra">{{ ((budget.winner_projects|length / budget.total_projects) * 100)|round(1) }}% sélectionnés</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation des résultats -->
+            <div class="results-navigation">
+                <nav class="results-tabs">
+                    <button class="tab-btn active" onclick="showTab('winners')">
+                        <i class="fas fa-trophy"></i>
+                        Projets lauréats
+                    </button>
+                    <button class="tab-btn" onclick="showTab('all-results')">
+                        <i class="fas fa-chart-bar"></i>
+                        Tous les résultats
+                    </button>
+                    <button class="tab-btn" onclick="showTab('statistics')">
+                        <i class="fas fa-analytics"></i>
+                        Statistiques
+                    </button>
+                    <button class="tab-btn" onclick="showTab('implementation')">
+                        <i class="fas fa-tasks"></i>
+                        Mise en œuvre
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Contenu des onglets -->
+            <div class="results-content">
+                <!-- Onglet: Projets lauréats -->
+                <div id="winners-tab" class="tab-content active">
+                    <div class="winners-section">
+                        <div class="section-header">
+                            <h2>
+                                <i class="fas fa-trophy"></i>
+                                Projets lauréats ({{ budget.winner_projects|length }})
+                            </h2>
+                            <p class="section-description">
+                                Ces projets ont été sélectionnés par les citoyens et seront mis en œuvre avec le budget alloué.
+                            </p>
+                        </div>
+                        
+                        <!-- Budget restant -->
+                        {% if budget.remaining_amount > 0 %}
+                        <div class="remaining-budget-alert">
+                            <div class="alert-content">
+                                <i class="fas fa-info-circle"></i>
+                                <div>
+                                    <strong>Budget restant:</strong> {{ budget.remaining_amount|format_currency }} €
+                                    <p>Ce montant sera reporté sur le prochain budget participatif ou utilisé pour des compléments aux projets sélectionnés.</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Liste des projets lauréats -->
+                        <div class="winners-grid">
+                            <!-- Projet lauréat 1 -->
+                            <div class="winner-card rank-1">
+                                <div class="winner-header">
+                                    <div class="winner-rank">
+                                        <div class="rank-badge rank-gold">
+                                            <i class="fas fa-trophy"></i>
+                                            <span>1er</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="winner-badges">
+                                        <span class="category-badge category-infrastructure">
+                                            <i class="fas fa-hard-hat"></i>
+                                            Infrastructure
+                                        </span>
+                                        <span class="winner-badge">
+                                            <i class="fas fa-medal"></i>
+                                            Lauréat
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div class="winner-content">
+                                    <div class="winner-image">
+                                        <img src="/static/image/project-playground.jpg" alt="Aire de jeux inclusive">
+                                        <div class="winner-overlay">
+                                            <div class="winner-stats">
+                                                <div class="stat">
+                                                    <strong>342</strong>
+                                                    <span>votes</span>
+                                                </div>
+                                                <div class="stat">
+                                                    <strong>28.5%</strong>
+                                                    <span>des suffrages</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="winner-info">
+                                        <h3 class="winner-title">Aire de jeux inclusive</h3>
+                                        <p class="winner-description">
+                                            Création d'une aire de jeux accessible à tous les enfants, 
+                                            y compris ceux en situation de handicap, avec équipements adaptés.
+                                        </p>
+                                        
+                                        <div class="winner-details">
+                                            <div class="detail-grid">
+                                                <div class="detail-item">
+                                                    <i class="fas fa-coins"></i>
+                                                    <span>45 000 €</span>
+                                                </div>
+                                                <div class="detail-item">
+                                                    <i class="fas fa-map-marker-alt"></i>
+                                                    <span>Parc des Tilleuls</span>
+                                                </div>
+                                                <div class="detail-item">
+                                                    <i class="fas fa-calendar"></i>
+                                                    <span>3 mois de travaux</span>
+                                                </div>
+                                                <div class="detail-item">
+                                                    <i class="fas fa-users"></i>
+                                                    <span>200+ familles</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="implementation-timeline">
+                                            <h4>
+                                                <i class="fas fa-calendar-alt"></i>
+                                                Planning de réalisation
+                                            </h4>
+                                            <div class="timeline">
+                                                <div class="timeline-item completed">
+                                                    <div class="timeline-marker"></div>
+                                                    <div class="timeline-content">
+                                                        <strong>Janvier 2025</strong>
+                                                        <span>Études techniques et permis</span>
+                                                    </div>
+                                                </div>
+                                                <div class="timeline-item active">
+                                                    <div class="timeline-marker"></div>
+                                                    <div class="timeline-content">
+                                                        <strong>Février 2025</strong>
+                                                        <span>Début des travaux</span>
+                                                    </div>
+                                                </div>
+                                                <div class="timeline-item">
+                                                    <div class="timeline-marker"></div>
+                                                    <div class="timeline-content">
+                                                        <strong>Mai 2025</strong>
+                                                        <span>Inauguration</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="winner-footer">
+                                    <div class="proposer-info">
+                                        <div class="proposer-avatar">
+                                            <span class="avatar-placeholder">AP</span>
+                                        </div>
+                                        <div class="proposer-details">
+                                            <strong>Association Parents</strong>
+                                            <span>Proposant du projet</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="winner-actions">
+                                        <button class="action-btn" onclick="showImplementationDetails(1)">
+                                            <i class="fas fa-info-circle"></i>
+                                            Suivi du projet
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Projet lauréat 2 -->
+                            <div class="winner-card rank-2">
+                                <div class="winner-header">
+                                    <div class="winner-rank">
+                                        <div class="rank-badge rank-silver">
+                                            <i class="fas fa-medal"></i>
+                                            <span>2ème</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="winner-badges">
+                                        <span class="category-badge category-mobility">
+                                            <i class="fas fa-bicycle"></i>
+                                            Mobilité
+                                        </span>
+                                        <span class="winner-badge">
+                                            <i class="fas fa-medal"></i>
+                                            Lauréat
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div class="winner-content">
+                                    <div class="winner-image">
+                                        <img src="/static/image/project-bike-lane.jpg" alt="Piste cyclable sécurisée">
+                                        <div class="winner-overlay">
+                                            <div class="winner-stats">
+                                                <div class="stat">
+                                                    <strong>267</strong>
+                                                    <span>votes</span>
+                                                </div>
+                                                <div class="stat">
+                                                    <strong>22.3%</strong>
+                                                    <span>des suffrages</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="winner-info">
+                                        <h3 class="winner-title">Piste cyclable sécurisée</h3>
+                                        <p class="winner-description">
+                                            Aménagement d'une piste cyclable protégée de 2km reliant le centre-ville 
+                                            aux écoles, avec signalisation et éclairage LED.
+                                        </p>
+                                        
+                                        <div class="winner-details">
+                                            <div class="detail-grid">
+                                                <div class="detail-item">
+                                                    <i class="fas fa-coins"></i>
+                                                    <span>85 000 €</span>
+                                                </div>
+                                                <div class="detail-item">
+                                                    <i class="fas fa-route"></i>
+                                                    <span>Avenue de la République</span>
+                                                </div>
+                                                <div class="detail-item">
+                                                    <i class="fas fa-calendar"></i>
+                                                    <span>6 mois de travaux</span>
+                                                </div>
+                                                <div class="detail-item">
+                                                    <i class="fas fa-bicycle"></i>
+                                                    <span>500+ cyclistes/jour</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="implementation-timeline">
+                                            <h4>
+                                                <i class="fas fa-calendar-alt"></i>
+                                                Planning de réalisation
+                                            </h4>
+                                            <div class="timeline">
+                                                <div class="timeline-item">
+                                                    <div class="timeline-marker"></div>
+                                                    <div class="timeline-content">
+                                                        <strong>Mars 2025</strong>
+                                                        <span>Conception détaillée</span>
+                                                    </div>
+                                                </div>
+                                                <div class="timeline-item">
+                                                    <div class="timeline-marker"></div>
+                                                    <div class="timeline-content">
+                                                        <strong>Juin 2025</strong>
+                                                        <span>Début des travaux</span>
+                                                    </div>
+                                                </div>
+                                                <div class="timeline-item">
+                                                    <div class="timeline-marker"></div>
+                                                    <div class="timeline-content">
+                                                        <strong>Décembre 2025</strong>
+                                                        <span>Mise en service</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="winner-footer">
+                                    <div class="proposer-info">
+                                        <div class="proposer-avatar">
+                                            <span class="avatar-placeholder">CV</span>
+                                        </div>
+                                        <div class="proposer-details">
+                                            <strong>Collectif Vélo</strong>
+                                            <span>Association proposante</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="winner-actions">
+                                        <button class="action-btn" onclick="showImplementationDetails(2)">
+                                            <i class="fas fa-info-circle"></i>
+                                            Suivi du projet
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Projet lauréat 3 -->
+                            <div class="winner-card rank-3">
+                                <div class="winner-header">
+                                    <div class="winner-rank">
+                                        <div class="rank-badge rank-bronze">
+                                            <i class="fas fa-award"></i>
+                                            <span>3ème</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="winner-badges">
+                                        <span class="category-badge category-environment">
+                                            <i class="fas fa-leaf"></i>
+                                            Environnement
+                                        </span>
+                                        <span class="winner-badge">
+                                            <i class="fas fa-medal"></i>
+                                            Lauréat
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div class="winner-content">
+                                    <div class="winner-image">
+                                        <img src="/static/image/project-garden.jpg" alt="Jardin partagé">
+                                        <div class="winner-overlay">
+                                            <div class="winner-stats">
+                                                <div class="stat">
+                                                    <strong>198</strong>
+                                                    <span>votes</span>
+                                                </div>
+                                                <div class="stat">
+                                                    <strong>16.5%</strong>
+                                                    <span>des suffrages</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="winner-info">
+                                        <h3 class="winner-title">Jardin partagé du quartier</h3>
+                                        <p class="winner-description">
+                                            Création d'un jardin communautaire avec parcelles individuelles, 
+                                            compost collectif et abri à outils pour développer le lien social.
+                                        </p>
+                                        
+                                        <div class="winner-details">
+                                            <div class="detail-grid">
+                                                <div class="detail-item">
+                                                    <i class="fas fa-coins"></i>
+                                                    <span>32 000 €</span>
+                                                </div>
+                                                <div class="detail-item">
+                                                    <i class="fas fa-map-marker-alt"></i>
+                                                    <span>Rue Pasteur</span>
+                                                </div>
+                                                <div class="detail-item">
+                                                    <i class="fas fa-calendar"></i>
+                                                    <span>2 mois d'aménagement</span>
+                                                </div>
+                                                <div class="detail-item">
+                                                    <i class="fas fa-users"></i>
+                                                    <span>50 familles</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="implementation-timeline">
+                                            <h4>
+                                                <i class="fas fa-calendar-alt"></i>
+                                                Planning de réalisation
+                                            </h4>
+                                            <div class="timeline">
+                                                <div class="timeline-item completed">
+                                                    <div class="timeline-marker"></div>
+                                                    <div class="timeline-content">
+                                                        <strong>Février 2025</strong>
+                                                        <span>Préparation du terrain</span>
+                                                    </div>
+                                                </div>
+                                                <div class="timeline-item completed">
+                                                    <div class="timeline-marker"></div>
+                                                    <div class="timeline-content">
+                                                        <strong>Mars 2025</strong>
+                                                        <span>Installation des infrastructures</span>
+                                                    </div>
+                                                </div>
+                                                <div class="timeline-item active">
+                                                    <div class="timeline-marker"></div>
+                                                    <div class="timeline-content">
+                                                        <strong>Avril 2025</strong>
+                                                        <span>Ouverture aux familles</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="winner-footer">
+                                    <div class="proposer-info">
+                                        <div class="proposer-avatar">
+                                            <span class="avatar-placeholder">JV</span>
+                                        </div>
+                                        <div class="proposer-details">
+                                            <strong>Jardins Verts</strong>
+                                            <span>Collectif citoyen</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="winner-actions">
+                                        <button class="action-btn" onclick="showImplementationDetails(3)">
+                                            <i class="fas fa-info-circle"></i>
+                                            Suivi du projet
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Onglet: Tous les résultats -->
+                <div id="all-results-tab" class="tab-content">
+                    <div class="all-results-section">
+                        <div class="section-header">
+                            <h2>
+                                <i class="fas fa-chart-bar"></i>
+                                Classement complet des projets
+                            </h2>
+                            
+                            <div class="results-filters">
+                                <select class="filter-select" id="category-filter">
+                                    <option value="">Toutes les catégories</option>
+                                    <option value="infrastructure">Infrastructure</option>
+                                    <option value="environment">Environnement</option>
+                                    <option value="mobility">Mobilité</option>
+                                    <option value="culture">Culture</option>
+                                    <option value="social">Social</option>
+                                </select>
+                                
+                                <select class="filter-select" id="status-filter">
+                                    <option value="">Tous les statuts</option>
+                                    <option value="winner">Lauréats</option>
+                                    <option value="runner-up">Finalistes</option>
+                                    <option value="not-selected">Non sélectionnés</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Tableau des résultats -->
+                        <div class="results-table-container">
+                            <table class="results-table">
+                                <thead>
+                                    <tr>
+                                        <th class="sortable" data-sort="rank">
+                                            <span>Rang</span>
+                                            <i class="fas fa-sort"></i>
+                                        </th>
+                                        <th>Projet</th>
+                                        <th>Catégorie</th>
+                                        <th class="sortable" data-sort="votes">
+                                            <span>Votes</span>
+                                            <i class="fas fa-sort"></i>
+                                        </th>
+                                        <th class="sortable" data-sort="percentage">
+                                            <span>%</span>
+                                            <i class="fas fa-sort"></i>
+                                        </th>
+                                        <th class="sortable" data-sort="cost">
+                                            <span>Coût</span>
+                                            <i class="fas fa-sort"></i>
+                                        </th>
+                                        <th>Statut</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Résultat 1 -->
+                                    <tr class="result-row winner">
+                                        <td class="rank-cell">
+                                            <div class="rank-badge rank-gold">
+                                                <i class="fas fa-trophy"></i>
+                                                <span>1</span>
+                                            </div>
+                                        </td>
+                                        <td class="project-cell">
+                                            <div class="project-info">
+                                                <div class="project-image-small">
+                                                    <img src="/static/image/project-playground.jpg" alt="">
+                                                </div>
+                                                <div class="project-details">
+                                                    <h4>Aire de jeux inclusive</h4>
+                                                    <span>Parc des Tilleuls</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="category-badge category-infrastructure">
+                                                <i class="fas fa-hard-hat"></i>
+                                                Infrastructure
+                                            </span>
+                                        </td>
+                                        <td class="votes-cell">
+                                            <strong>342</strong>
+                                            <div class="vote-bar">
+                                                <div class="vote-fill" style="width: 100%;"></div>
+                                            </div>
+                                        </td>
+                                        <td class="percentage-cell">28.5%</td>
+                                        <td class="cost-cell">45 000 €</td>
+                                        <td>
+                                            <span class="status-badge status-winner">
+                                                <i class="fas fa-trophy"></i>
+                                                Lauréat
+                                            </span>
+                                        </td>
+                                        <td class="actions-cell">
+                                            <button class="action-btn" onclick="showProjectDetails(1)">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="action-btn" onclick="showImplementationDetails(1)">
+                                                <i class="fas fa-tasks"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    
+                                    <!-- Résultat 2 -->
+                                    <tr class="result-row winner">
+                                        <td class="rank-cell">
+                                            <div class="rank-badge rank-silver">
+                                                <i class="fas fa-medal"></i>
+                                                <span>2</span>
+                                            </div>
+                                        </td>
+                                        <td class="project-cell">
+                                            <div class="project-info">
+                                                <div class="project-image-small">
+                                                    <img src="/static/image/project-bike-lane.jpg" alt="">
+                                                </div>
+                                                <div class="project-details">
+                                                    <h4>Piste cyclable sécurisée</h4>
+                                                    <span>Avenue de la République</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="category-badge category-mobility">
+                                                <i class="fas fa-bicycle"></i>
+                                                Mobilité
+                                            </span>
+                                        </td>
+                                        <td class="votes-cell">
+                                            <strong>267</strong>
+                                            <div class="vote-bar">
+                                                <div class="vote-fill" style="width: 78%;"></div>
+                                            </div>
+                                        </td>
+                                        <td class="percentage-cell">22.3%</td>
+                                        <td class="cost-cell">85 000 €</td>
+                                        <td>
+                                            <span class="status-badge status-winner">
+                                                <i class="fas fa-trophy"></i>
+                                                Lauréat
+                                            </span>
+                                        </td>
+                                        <td class="actions-cell">
+                                            <button class="action-btn" onclick="showProjectDetails(2)">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="action-btn" onclick="showImplementationDetails(2)">
+                                                <i class="fas fa-tasks"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    
+                                    <!-- Résultat 3 -->
+                                    <tr class="result-row winner">
+                                        <td class="rank-cell">
+                                            <div class="rank-badge rank-bronze">
+                                                <i class="fas fa-award"></i>
+                                                <span>3</span>
+                                            </div>
+                                        </td>
+                                        <td class="project-cell">
+                                            <div class="project-info">
+                                                <div class="project-image-small">
+                                                    <img src="/static/image/project-garden.jpg" alt="">
+                                                </div>
+                                                <div class="project-details">
+                                                    <h4>Jardin partagé du quartier</h4>
+                                                    <span>Terrain rue Pasteur</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="category-badge category-environment">
+                                                <i class="fas fa-leaf"></i>
+                                                Environnement
+                                            </span>
+                                        </td>
+                                        <td class="votes-cell">
+                                            <strong>198</strong>
+                                            <div class="vote-bar">
+                                                <div class="vote-fill" style="width: 58%;"></div>
+                                            </div>
+                                        </td>
+                                        <td class="percentage-cell">16.5%</td>
+                                        <td class="cost-cell">32 000 €</td>
+                                        <td>
+                                            <span class="status-badge status-winner">
+                                                <i class="fas fa-trophy"></i>
+                                                Lauréat
+                                            </span>
+                                        </td>
+                                        <td class="actions-cell">
+                                            <button class="action-btn" onclick="showProjectDetails(3)">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="action-btn" onclick="showImplementationDetails(3)">
+                                                <i class="fas fa-tasks"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    
+                                    <!-- Résultat 4 -->
+                                    <tr class="result-row runner-up">
+                                        <td class="rank-cell">
+                                            <div class="rank-badge">
+                                                <span>4</span>
+                                            </div>
+                                        </td>
+                                        <td class="project-cell">
+                                            <div class="project-info">
+                                                <div class="project-image-small">
+                                                    <img src="/static/image/project-library.jpg" alt="">
+                                                </div>
+                                                <div class="project-details">
+                                                    <h4>Espace co-working municipal</h4>
+                                                    <span>Ancien bâtiment postal</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="category-badge category-social">
+                                                <i class="fas fa-users"></i>
+                                                Social
+                                            </span>
+                                        </td>
+                                        <td class="votes-cell">
+                                            <strong>156</strong>
+                                            <div class="vote-bar">
+                                                <div class="vote-fill" style="width: 46%;"></div>
+                                            </div>
+                                        </td>
+                                        <td class="percentage-cell">13.0%</td>
+                                        <td class="cost-cell">95 000 €</td>
+                                        <td>
+                                            <span class="status-badge status-runner-up">
+                                                <i class="fas fa-medal"></i>
+                                                Finaliste
+                                            </span>
+                                        </td>
+                                        <td class="actions-cell">
+                                            <button class="action-btn" onclick="showProjectDetails(4)">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    
+                                    <!-- Plus de résultats... -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Onglet: Statistiques -->
+                <div id="statistics-tab" class="tab-content">
+                    <div class="statistics-section">
+                        <div class="section-header">
+                            <h2>
+                                <i class="fas fa-analytics"></i>
+                                Analyse détaillée du vote
+                            </h2>
+                        </div>
+                        
+                        <!-- Graphiques statistiques -->
+                        <div class="charts-grid">
+                            <!-- Graphique participation -->
+                            <div class="chart-card">
+                                <div class="chart-header">
+                                    <h3>
+                                        <i class="fas fa-chart-pie"></i>
+                                        Répartition des votes par catégorie
+                                    </h3>
+                                </div>
+                                <div class="chart-content">
+                                    <div class="pie-chart" id="categoryChart">
+                                        <!-- Le graphique sera généré par Chart.js -->
+                                        <canvas id="categoryCanvas"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Évolution de la participation -->
+                            <div class="chart-card">
+                                <div class="chart-header">
+                                    <h3>
+                                        <i class="fas fa-chart-line"></i>
+                                        Évolution de la participation
+                                    </h3>
+                                </div>
+                                <div class="chart-content">
+                                    <div class="line-chart" id="participationChart">
+                                        <canvas id="participationCanvas"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Votes par tranche d'âge -->
+                            <div class="chart-card">
+                                <div class="chart-header">
+                                    <h3>
+                                        <i class="fas fa-chart-bar"></i>
+                                        Participation par tranche d'âge
+                                    </h3>
+                                </div>
+                                <div class="chart-content">
+                                    <div class="bar-chart" id="ageChart">
+                                        <canvas id="ageCanvas"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Votes par quartier -->
+                            <div class="chart-card">
+                                <div class="chart-header">
+                                    <h3>
+                                        <i class="fas fa-map-marked-alt"></i>
+                                        Participation par quartier
+                                    </h3>
+                                </div>
+                                <div class="chart-content">
+                                    <div class="map-chart" id="neighborhoodChart">
+                                        <!-- Carte interactive des quartiers -->
+                                        <div class="neighborhood-list">
+                                            <div class="neighborhood-item">
+                                                <div class="neighborhood-name">Centre-ville</div>
+                                                <div class="neighborhood-bar">
+                                                    <div class="bar-fill" style="width: 85%;"></div>
+                                                    <span class="bar-value">85%</span>
+                                                </div>
+                                            </div>
+                                            <div class="neighborhood-item">
+                                                <div class="neighborhood-name">Quartier Nord</div>
+                                                <div class="neighborhood-bar">
+                                                    <div class="bar-fill" style="width: 72%;"></div>
+                                                    <span class="bar-value">72%</span>
+                                                </div>
+                                            </div>
+                                            <div class="neighborhood-item">
+                                                <div class="neighborhood-name">Zone Sud</div>
+                                                <div class="neighborhood-bar">
+                                                    <div class="bar-fill" style="width: 68%;"></div>
+                                                    <span class="bar-value">68%</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Métriques détaillées -->
+                        <div class="detailed-metrics">
+                            <h3>Métriques détaillées</h3>
+                            <div class="metrics-grid">
+                                <div class="metric-card">
+                                    <div class="metric-icon">
+                                        <i class="fas fa-clock"></i>
+                                    </div>
+                                    <div class="metric-content">
+                                        <div class="metric-value">3.2 min</div>
+                                        <div class="metric-label">Temps moyen de vote</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="metric-card">
+                                    <div class="metric-icon">
+                                        <i class="fas fa-mobile-alt"></i>
+                                    </div>
+                                    <div class="metric-content">
+                                        <div class="metric-value">68%</div>
+                                        <div class="metric-label">Votes sur mobile</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="metric-card">
+                                    <div class="metric-icon">
+                                        <i class="fas fa-redo"></i>
+                                    </div>
+                                    <div class="metric-content">
+                                        <div class="metric-value">12%</div>
+                                        <div class="metric-label">Taux d'abandon</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="metric-card">
+                                    <div class="metric-icon">
+                                        <i class="fas fa-star"></i>
+                                    </div>
+                                    <div class="metric-content">
+                                        <div class="metric-value">4.6/5</div>
+                                        <div class="metric-label">Satisfaction moyenne</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Onglet: Mise en œuvre -->
+                <div id="implementation-tab" class="tab-content">
+                    <div class="implementation-section">
+                        <div class="section-header">
+                            <h2>
+                                <i class="fas fa-tasks"></i>
+                                Suivi de la mise en œuvre
+                            </h2>
+                            <p class="section-description">
+                                Suivez l'avancement des projets lauréats du budget participatif.
+                            </p>
+                        </div>
+                        
+                        <!-- Timeline globale -->
+                        <div class="global-timeline">
+                            <h3>Planning général</h3>
+                            <div class="timeline-container">
+                                <div class="timeline-item completed">
+                                    <div class="timeline-marker">
+                                        <i class="fas fa-check"></i>
+                                    </div>
+                                    <div class="timeline-content">
+                                        <h4>Validation des projets</h4>
+                                        <p>Étude de faisabilité et validation technique</p>
+                                        <span class="timeline-date">Janvier 2025</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="timeline-item active">
+                                    <div class="timeline-marker">
+                                        <i class="fas fa-cog"></i>
+                                    </div>
+                                    <div class="timeline-content">
+                                        <h4>Lancement des projets</h4>
+                                        <p>Début des travaux et réalisations</p>
+                                        <span class="timeline-date">Février 2025</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="timeline-item">
+                                    <div class="timeline-marker">
+                                        <i class="fas fa-flag-checkered"></i>
+                                    </div>
+                                    <div class="timeline-content">
+                                        <h4>Finalisation</h4>
+                                        <p>Livraison et inauguration des projets</p>
+                                        <span class="timeline-date">Mai 2025</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Suivi par projet -->
+                        <div class="projects-tracking">
+                            <h3>Avancement par projet</h3>
+                            
+                            <!-- Projet 1 -->
+                            <div class="tracking-card">
+                                <div class="tracking-header">
+                                    <div class="project-title">
+                                        <h4>Aire de jeux inclusive</h4>
+                                        <span class="project-budget">45 000 €</span>
+                                    </div>
+                                    <div class="progress-indicator">
+                                        <div class="progress-circle" data-progress="75">
+                                            <span class="progress-text">75%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="tracking-content">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 75%;"></div>
+                                        <div class="progress-labels">
+                                            <span>Conception</span>
+                                            <span>Travaux</span>
+                                            <span>Livraison</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="tracking-details">
+                                        <div class="detail-item">
+                                            <i class="fas fa-calendar-check"></i>
+                                            <span><strong>Prochaine étape:</strong> Installation des équipements</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <i class="fas fa-clock"></i>
+                                            <span><strong>Livraison prévue:</strong> Mai 2025</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <i class="fas fa-user-hard-hat"></i>
+                                            <span><strong>Responsable:</strong> Service Espaces Verts</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="latest-update">
+                                        <h5>Dernière mise à jour</h5>
+                                        <p>Le terrassement est terminé. L'installation des équipements de jeu commence la semaine prochaine. Le projet avance selon le planning prévu.</p>
+                                        <span class="update-date">Il y a 2 jours</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Projet 2 -->
+                            <div class="tracking-card">
+                                <div class="tracking-header">
+                                    <div class="project-title">
+                                        <h4>Piste cyclable sécurisée</h4>
+                                        <span class="project-budget">85 000 €</span>
+                                    </div>
+                                    <div class="progress-indicator">
+                                        <div class="progress-circle" data-progress="25">
+                                            <span class="progress-text">25%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="tracking-content">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 25%;"></div>
+                                        <div class="progress-labels">
+                                            <span>Conception</span>
+                                            <span>Travaux</span>
+                                            <span>Livraison</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="tracking-details">
+                                        <div class="detail-item">
+                                            <i class="fas fa-calendar-check"></i>
+                                            <span><strong>Prochaine étape:</strong> Études de circulation</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <i class="fas fa-clock"></i>
+                                            <span><strong>Livraison prévue:</strong> Décembre 2025</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <i class="fas fa-user-hard-hat"></i>
+                                            <span><strong>Responsable:</strong> Service Voirie</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="latest-update">
+                                        <h5>Dernière mise à jour</h5>
+                                        <p>Les études préliminaires sont en cours. Consultation des riverains prévue en mars pour finaliser le tracé optimal de la piste.</p>
+                                        <span class="update-date">Il y a 5 jours</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Projet 3 -->
+                            <div class="tracking-card">
+                                <div class="tracking-header">
+                                    <div class="project-title">
+                                        <h4>Jardin partagé du quartier</h4>
+                                        <span class="project-budget">32 000 €</span>
+                                    </div>
+                                    <div class="progress-indicator">
+                                        <div class="progress-circle" data-progress="90">
+                                            <span class="progress-text">90%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="tracking-content">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 90%;"></div>
+                                        <div class="progress-labels">
+                                            <span>Conception</span>
+                                            <span>Travaux</span>
+                                            <span>Livraison</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="tracking-details">
+                                        <div class="detail-item">
+                                            <i class="fas fa-calendar-check"></i>
+                                            <span><strong>Prochaine étape:</strong> Formation des jardiniers</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <i class="fas fa-clock"></i>
+                                            <span><strong>Livraison prévue:</strong> Avril 2025</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <i class="fas fa-user-hard-hat"></i>
+                                            <span><strong>Responsable:</strong> Association Jardins Verts</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="latest-update">
+                                        <h5>Dernière mise à jour</h5>
+                                        <p>L'abri à outils est installé et les parcelles sont délimitées. Préparation de l'atelier d'initiation au jardinage pour les nouvelles familles.</p>
+                                        <span class="update-date">Hier</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Traçabilité UMan API -->
+<div class="traceability-section">
+    <div class="container">
+        <div class="traceability-info">
+            <div class="trace-header">
+                <h4>
+                    <i class="fas fa-shield-alt"></i>
+                    Traçabilité UMan API - Résultats
+                </h4>
+                <span class="trace-score">Score: 100%</span>
+            </div>
+            
+            <div class="trace-details">
+                <div class="trace-item">
+                    <span class="trace-label">Hash des résultats:</span>
+                    <code class="trace-value">r3s1u2l4t5s6...</code>
+                </div>
+                <div class="trace-item">
+                    <span class="trace-label">Signature des votes:</span>
+                    <span class="trace-value verified">
+                        <i class="fas fa-certificate"></i>
+                        {{ budget.total_votes }} signatures vérifiées
+                    </span>
+                </div>
+                <div class="trace-item">
+                    <span class="trace-label">Audit indépendant:</span>
+                    <span class="trace-value verified">
+                        <i class="fas fa-check-shield"></i>
+                        Validé par bureau de vote
+                    </span>
+                </div>
+                <div class="trace-item">
+                    <span class="trace-label">Publication:</span>
+                    <span class="trace-value">{{ budget.results_published_date|format_datetime }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Variables pour les résultats
+const budgetData = {
+    results: {{ budget.results|tojson }},
+    statistics: {{ budget.statistics|tojson }},
+    implementation: {{ budget.implementation_tracking|tojson }}
+};
+
+// Initialisation
+document.addEventListener('DOMContentLoaded', function() {
+    initializeResultsTabs();
+    initializeCharts();
+    initializeImplementationTracking();
+});
+
+// Fonctions de gestion des onglets
+function showTab(tabName) {
+    // Masquer tous les onglets
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    
+    // Désactiver tous les boutons d'onglet
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Afficher l'onglet sélectionné
+    const targetTab = document.getElementById(tabName + '-tab');
+    if (targetTab) {
+        targetTab.classList.add('active');
+    }
+    
+    // Activer le bouton correspondant
+    event.target.classList.add('active');
+}
+
+// Fonctions d'export et de partage
+function exportResults() {
+    // Export CSV des résultats
+    window.location.href = `/budgets/{{ budget.id }}/results/export`;
+}
+
+function shareResults() {
+    // Partage des résultats
+    const url = window.location.href;
+    if (navigator.share) {
+        navigator.share({
+            title: 'Résultats - {{ budget.title }}',
+            text: 'Découvrez les résultats du budget participatif',
+            url: url
+        });
+    } else {
+        // Copie dans le presse-papier
+        navigator.clipboard.writeText(url);
+        showNotification('Lien copié dans le presse-papier');
+    }
+}
+
+// Sera complété par budgets_surveys.js
+</script>
+{% endblock %}

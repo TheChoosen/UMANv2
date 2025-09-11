@@ -1,0 +1,504 @@
+{% extends "base.html" %}
+
+{% block title %}Utilisateurs système — UMan API System{% endblock %}
+
+{% block meta %}
+<meta name="robots" content="noindex, nofollow">
+<link rel="stylesheet" href="{{ url_for('static', filename='refonte.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="admin-layout">
+    <!-- Sidebar Navigation -->
+    <nav class="admin-sidebar">
+        <div class="admin-sidebar-header">
+            <div class="admin-logo">
+                <i class="fas fa-cogs text-primary"></i>
+                <span>UMan System</span>
+            </div>
+        </div>
+        
+        <div class="admin-nav">
+            <div class="admin-nav-section">
+                <h4>Multitenant</h4>
+                <ul>
+                    <li>
+                        <a href="/admin/system/dashboard">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Vue d'ensemble</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/system/organizations">
+                            <i class="fas fa-building"></i>
+                            <span>Organisations</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/system/domains">
+                            <i class="fas fa-globe"></i>
+                            <span>Domaines</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="admin-nav-section">
+                <h4>Utilisateurs & Rôles</h4>
+                <ul>
+                    <li class="active">
+                        <a href="/admin/system/users">
+                            <i class="fas fa-users"></i>
+                            <span>Utilisateurs système</span>
+                            <span class="badge badge-primary">{{ users.total if users else 0 }}</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/system/roles">
+                            <i class="fas fa-user-shield"></i>
+                            <span>Rôles & Permissions</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/system/verifications">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Vérifications</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="admin-nav-section">
+                <h4>API & Données</h4>
+                <ul>
+                    <li>
+                        <a href="/admin/system/api">
+                            <i class="fas fa-code"></i>
+                            <span>API GraphQL</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/system/opendata">
+                            <i class="fas fa-database"></i>
+                            <span>Open Data</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/system/audit">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Journal d'audit</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="admin-sidebar-footer">
+            <div class="admin-user-info">
+                <div class="admin-user-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="admin-user-details">
+                    <span class="admin-user-name">{{ current_user.name or 'System Admin' }}</span>
+                    <span class="admin-user-role">Super Administrateur</span>
+                </div>
+            </div>
+            <a href="/logout" class="admin-logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+            </a>
+        </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <main class="admin-main">
+        <!-- Header -->
+        <header class="admin-header">
+            <div class="admin-header-content">
+                <h1>Utilisateurs système</h1>
+                <p>Gestion des comptes administrateurs — {{ users.total if users else 0 }} utilisateur(s)</p>
+            </div>
+            <div class="admin-header-actions">
+                <button class="btn-refonte btn-refonte-secondary" onclick="exportUsers()">
+                    <i class="fas fa-download"></i>
+                    <span>Exporter</span>
+                </button>
+                <button class="btn-refonte btn-refonte-primary" data-toggle="modal" data-target="#inviteUserModal">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Inviter utilisateur</span>
+                </button>
+            </div>
+        </header>
+        
+        <!-- Stats Cards -->
+        <section class="admin-stats-grid">
+            <div class="admin-stat-card card-glass-refonte">
+                <div class="admin-stat-icon">
+                    <i class="fas fa-users text-primary"></i>
+                </div>
+                <div class="admin-stat-content">
+                    <div class="admin-stat-number">{{ stats.total_users or 0 }}</div>
+                    <div class="admin-stat-label">Total utilisateurs</div>
+                </div>
+            </div>
+            
+            <div class="admin-stat-card card-glass-refonte">
+                <div class="admin-stat-icon">
+                    <i class="fas fa-user-check text-success"></i>
+                </div>
+                <div class="admin-stat-content">
+                    <div class="admin-stat-number">{{ stats.active_users or 0 }}</div>
+                    <div class="admin-stat-label">Utilisateurs actifs</div>
+                </div>
+            </div>
+            
+            <div class="admin-stat-card card-glass-refonte">
+                <div class="admin-stat-icon">
+                    <i class="fas fa-user-shield text-warning"></i>
+                </div>
+                <div class="admin-stat-content">
+                    <div class="admin-stat-number">{{ stats.admin_users or 0 }}</div>
+                    <div class="admin-stat-label">Administrateurs</div>
+                </div>
+            </div>
+            
+            <div class="admin-stat-card card-glass-refonte">
+                <div class="admin-stat-icon">
+                    <i class="fas fa-clock text-info"></i>
+                </div>
+                <div class="admin-stat-content">
+                    <div class="admin-stat-number">{{ stats.pending_invites or 0 }}</div>
+                    <div class="admin-stat-label">Invitations en attente</div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Filters & Search -->
+        <section class="admin-filters">
+            <div class="admin-filters-container card-glass-refonte">
+                <form method="GET" class="admin-filters-form">
+                    <div class="admin-filter-group">
+                        <label for="search">Rechercher</label>
+                        <input type="text" id="search" name="search" class="admin-form-control" 
+                               placeholder="Nom, email..." value="{{ request.args.get('search', '') }}">
+                    </div>
+                    
+                    <div class="admin-filter-group">
+                        <label for="role">Rôle</label>
+                        <select id="role" name="role" class="admin-form-control">
+                            <option value="">Tous</option>
+                            <option value="system_admin" {% if request.args.get('role') == 'system_admin' %}selected{% endif %}>Super Admin</option>
+                            <option value="admin" {% if request.args.get('role') == 'admin' %}selected{% endif %}>Administrateur</option>
+                            <option value="manager" {% if request.args.get('role') == 'manager' %}selected{% endif %}>Gestionnaire</option>
+                            <option value="user" {% if request.args.get('role') == 'user' %}selected{% endif %}>Utilisateur</option>
+                        </select>
+                    </div>
+                    
+                    <div class="admin-filter-group">
+                        <label for="status">Statut</label>
+                        <select id="status" name="status" class="admin-form-control">
+                            <option value="">Tous</option>
+                            <option value="active" {% if request.args.get('status') == 'active' %}selected{% endif %}>Actif</option>
+                            <option value="inactive" {% if request.args.get('status') == 'inactive' %}selected{% endif %}>Inactif</option>
+                            <option value="pending" {% if request.args.get('status') == 'pending' %}selected{% endif %}>En attente</option>
+                            <option value="suspended" {% if request.args.get('status') == 'suspended' %}selected{% endif %}>Suspendu</option>
+                        </select>
+                    </div>
+                    
+                    <div class="admin-filter-group">
+                        <label for="organization">Organisation</label>
+                        <select id="organization" name="organization" class="admin-form-control">
+                            <option value="">Toutes</option>
+                            {% for org in organizations %}
+                            <option value="{{ org.id }}" {% if request.args.get('organization') == org.id|string %}selected{% endif %}>
+                                {{ org.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="admin-filter-actions">
+                        <button type="submit" class="btn-refonte btn-refonte-primary">
+                            <i class="fas fa-search"></i>
+                            Filtrer
+                        </button>
+                        <a href="/admin/system/users" class="btn-refonte btn-refonte-secondary">
+                            <i class="fas fa-times"></i>
+                            Réinitialiser
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </section>
+        
+        <!-- Users Table -->
+        <section class="admin-section">
+            <div class="admin-table-container card-glass-refonte">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>
+                                <input type="checkbox" id="select-all" onchange="toggleSelectAll()">
+                            </th>
+                            <th>Utilisateur</th>
+                            <th>Rôle système</th>
+                            <th>Organisations</th>
+                            <th>Dernière connexion</th>
+                            <th>Créé le</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users.items if users %}
+                        <tr>
+                            <td>
+                                <input type="checkbox" name="user_ids" value="{{ user.id }}" class="user-checkbox">
+                            </td>
+                            <td>
+                                <div class="admin-user-info">
+                                    <div class="admin-user-avatar">
+                                        {% if user.avatar %}
+                                        <img src="{{ user.avatar }}" alt="{{ user.name }}">
+                                        {% else %}
+                                        <i class="fas fa-user-circle"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <strong>{{ user.name or 'Nom non défini' }}</strong>
+                                        <div class="admin-user-email">{{ user.email }}</div>
+                                        {% if user.phone %}
+                                        <div class="admin-user-phone">
+                                            <i class="fas fa-phone"></i>
+                                            {{ user.phone }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="admin-role-badge {{ user.system_role }}">
+                                    {% if user.system_role == 'system_admin' %}
+                                    <i class="fas fa-crown"></i>
+                                    Super Admin
+                                    {% elif user.system_role == 'admin' %}
+                                    <i class="fas fa-user-shield"></i>
+                                    Administrateur
+                                    {% elif user.system_role == 'manager' %}
+                                    <i class="fas fa-user-tie"></i>
+                                    Gestionnaire
+                                    {% else %}
+                                    <i class="fas fa-user"></i>
+                                    Utilisateur
+                                    {% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="admin-user-orgs">
+                                    {% if user.organizations %}
+                                        {% for org in user.organizations[:2] %}
+                                        <span class="admin-org-tag">{{ org.name }}</span>
+                                        {% endfor %}
+                                        {% if user.organizations|length > 2 %}
+                                        <span class="admin-org-count">+{{ user.organizations|length - 2 }}</span>
+                                        {% endif %}
+                                    {% else %}
+                                    <span class="text-muted">Aucune</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td>
+                                {% if user.last_login %}
+                                {{ user.last_login.strftime('%d/%m/%Y %H:%M') }}
+                                <div class="admin-login-from">
+                                    {% if user.last_login_ip %}
+                                    <small>{{ user.last_login_ip }}</small>
+                                    {% endif %}
+                                </div>
+                                {% else %}
+                                <span class="text-muted">Jamais</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {{ user.created_at.strftime('%d/%m/%Y') if user.created_at else '-' }}
+                                <div class="admin-created-by">
+                                    {% if user.invited_by %}
+                                    <small>par {{ user.invited_by.name }}</small>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td>
+                                <span class="admin-status-badge {{ user.status }}">
+                                    {% if user.status == 'active' %}Actif
+                                    {% elif user.status == 'inactive' %}Inactif
+                                    {% elif user.status == 'pending' %}En attente
+                                    {% elif user.status == 'suspended' %}Suspendu
+                                    {% else %}{{ user.status|title }}
+                                    {% endif %}
+                                </span>
+                                
+                                {% if user.email_verified %}
+                                <div class="admin-verification-badge verified">
+                                    <i class="fas fa-check-circle"></i>
+                                    Email vérifié
+                                </div>
+                                {% else %}
+                                <div class="admin-verification-badge pending">
+                                    <i class="fas fa-clock"></i>
+                                    Email non vérifié
+                                </div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="admin-actions">
+                                    <a href="/admin/system/users/{{ user.id }}" class="admin-action-btn" title="Voir">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="/admin/system/users/{{ user.id }}/edit" class="admin-action-btn" title="Modifier">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    {% if user.id != current_user.id %}
+                                    <button class="admin-action-btn" onclick="loginAsUser({{ user.id }})" title="Se connecter en tant que">
+                                        <i class="fas fa-sign-in-alt"></i>
+                                    </button>
+                                    {% endif %}
+                                    <div class="admin-action-dropdown">
+                                        <button class="admin-action-btn" onclick="toggleDropdown({{ user.id }})">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <div class="admin-dropdown-menu" id="dropdown-{{ user.id }}">
+                                            {% if not user.email_verified %}
+                                            <button onclick="resendVerification({{ user.id }})">
+                                                <i class="fas fa-envelope"></i>
+                                                Renvoyer vérification
+                                            </button>
+                                            {% endif %}
+                                            
+                                            {% if user.status == 'active' %}
+                                            <button onclick="suspendUser({{ user.id }})">
+                                                <i class="fas fa-pause"></i>
+                                                Suspendre
+                                            </button>
+                                            {% elif user.status == 'suspended' %}
+                                            <button onclick="activateUser({{ user.id }})">
+                                                <i class="fas fa-play"></i>
+                                                Réactiver
+                                            </button>
+                                            {% endif %}
+                                            
+                                            <button onclick="resetPassword({{ user.id }})">
+                                                <i class="fas fa-key"></i>
+                                                Réinitialiser mot de passe
+                                            </button>
+                                            
+                                            <button onclick="viewAuditLog({{ user.id }})">
+                                                <i class="fas fa-history"></i>
+                                                Journal d'activité
+                                            </button>
+                                            
+                                            {% if user.id != current_user.id %}
+                                            <button onclick="deleteUser({{ user.id }})" class="text-danger">
+                                                <i class="fas fa-trash"></i>
+                                                Supprimer
+                                            </button>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="8" class="admin-empty-state">
+                                <i class="fas fa-users"></i>
+                                <p>Aucun utilisateur trouvé</p>
+                                {% if request.args.get('search') or request.args.get('role') or request.args.get('status') %}
+                                <a href="/admin/system/users" class="btn-refonte btn-refonte-secondary">
+                                    Voir tous les utilisateurs
+                                </a>
+                                {% else %}
+                                <button class="btn-refonte btn-refonte-primary" data-toggle="modal" data-target="#inviteUserModal">
+                                    Inviter le premier utilisateur
+                                </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            {% if users and users.pages > 1 %}
+            <div class="admin-pagination">
+                <div class="admin-pagination-info">
+                    Affichage {{ users.per_page * (users.page - 1) + 1 }} à 
+                    {{ users.per_page * users.page if users.page < users.pages else users.total }} 
+                    sur {{ users.total }} utilisateur(s)
+                </div>
+                <div class="admin-pagination-controls">
+                    {% if users.has_prev %}
+                    <a href="{{ url_for('admin.users', page=users.prev_num, **request.args) }}" class="admin-pagination-btn">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                    {% endif %}
+                    
+                    {% for page_num in users.iter_pages() %}
+                        {% if page_num %}
+                            {% if page_num != users.page %}
+                            <a href="{{ url_for('admin.users', page=page_num, **request.args) }}" class="admin-pagination-btn">
+                                {{ page_num }}
+                            </a>
+                            {% else %}
+                            <span class="admin-pagination-btn active">{{ page_num }}</span>
+                            {% endif %}
+                        {% else %}
+                        <span class="admin-pagination-ellipsis">…</span>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if users.has_next %}
+                    <a href="{{ url_for('admin.users', page=users.next_num, **request.args) }}" class="admin-pagination-btn">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </section>
+        
+        <!-- Bulk Actions -->
+        <div class="admin-bulk-actions" id="bulk-actions" style="display: none;">
+            <div class="admin-bulk-actions-content card-glass-refonte">
+                <span class="admin-bulk-count">0 utilisateur(s) sélectionné(s)</span>
+                <div class="admin-bulk-buttons">
+                    <button class="btn-refonte btn-refonte-secondary" onclick="bulkAction('activate')">
+                        <i class="fas fa-play"></i>
+                        Activer
+                    </button>
+                    <button class="btn-refonte btn-refonte-secondary" onclick="bulkAction('suspend')">
+                        <i class="fas fa-pause"></i>
+                        Suspendre
+                    </button>
+                    <button class="btn-refonte btn-refonte-secondary" onclick="bulkAction('resend_verification')">
+                        <i class="fas fa-envelope"></i>
+                        Renvoyer vérifications
+                    </button>
+                    <button class="btn-refonte btn-refonte-secondary" onclick="bulkAction('export')">
+                        <i class="fas fa-download"></i>
+                        Exporter
+                    </button>
+                    <button class="btn-refonte btn-refonte-secondary text-danger" onclick="bulkAction('delete')">
+                        <i class="fas fa-trash"></i>
+                        Supprimer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+{% include 'admin/modals/invite_user.html' %}
+
+<script src="{{ url_for('static', filename='admin/users.js') }}"></script>
+{% endblock %}
