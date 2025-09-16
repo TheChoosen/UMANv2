@@ -1,0 +1,14 @@
+To: test@exemple.com
+Subject: Votre code de connexion UMan
+
+Code: 854298
+
+Bonjour,
+
+Voici votre code de connexion UMan: 854298
+
+Ce code est valide pendant 15 minutes.
+
+Si vous n'avez pas demandé ce code, ignorez ce message.
+
+UMan API

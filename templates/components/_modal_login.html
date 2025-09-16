@@ -1,5 +1,7 @@
 {# Composant modal pour la page de connexion #}
 <!-- Modal Connexion -->
+{# Composant modal pour la page de connexion #}
+<!-- Modal Connexion -->
 <div class="modal fade" id="modalConnexion" tabindex="-1" role="dialog" aria-labelledby="modalConnexionLabel"
     aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
@@ -21,39 +23,68 @@
                                     <!-- Messages flash -->
                                     <div id="loginFlashMessages"></div>
 
-                                    <form id="modalLoginForm" method="POST" action="/login">
-                                        <div class="form-group">
-                                            <label for="modalLoginEmail" class="form-label">
-                                                <i class="fas fa-envelope mr-2"></i>Email
-                                            </label>
-                                            <input type="email" class="form-control" id="modalLoginEmail" name="email"
-                                                required>
-                                            <div class="form-text">
-                                                Entrez votre email. Si vous n'avez pas de compte, il sera créé
-                                                automatiquement.
+                                    <!-- Étape 1: Saisie de l'email -->
+                                    <div id="step1-email" class="login-step">
+                                        <div class="text-center mb-4">
+                                            <h6 class="text-muted">Étape 1 sur 2</h6>
+                                            <p class="mb-0">Entrez votre adresse email</p>
+                                        </div>
+                                        <form id="emailForm">
+                                            <div class="form-group">
+                                                <label for="modalLoginEmail" class="form-label">
+                                                    <i class="fas fa-envelope mr-2"></i>Email
+                                                </label>
+                                                <input type="email" class="form-control" id="modalLoginEmail" name="email"
+                                                    required>
+                                                <div class="form-text">
+                                                    Un code de sécurité à 6 chiffres sera envoyé à cette adresse.
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="modalLoginCode" class="form-label">
-                                                <i class="fas fa-key mr-2"></i>Code de sécurité (5 chiffres)
-                                            </label>
-                                            <input type="text" class="form-control" id="modalLoginCode"
-                                                name="security_code" pattern="[0-9]{5}" maxlength="5"
-                                                placeholder="12345" required>
-                                            <div class="form-text">
-                                                Code de sécurité à 5 chiffres fourni par l'administration.
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <button type="submit" class="btn hero-btn hero-btn--primary" id="sendCodeBtn">
+                                                    <i class="fas fa-paper-plane mr-2"></i>Envoyer le code
+                                                </button>
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                                    <i class="fas fa-times mr-2"></i>Annuler
+                                                </button>
                                             </div>
+                                        </form>
+                                    </div>
+
+                                    <!-- Étape 2: Saisie du code -->
+                                    <div id="step2-code" class="login-step" style="display: none;">
+                                        <div class="text-center mb-4">
+                                            <h6 class="text-muted">Étape 2 sur 2</h6>
+                                            <p class="mb-0">Entrez le code reçu par email</p>
+                                            <small id="emailSentTo" class="text-success"></small>
                                         </div>
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <button type="submit" class="btn hero-btn hero-btn--primary"
-                                                id="modalLoginBtn">
-                                                <i class="fas fa-sign-in-alt mr-2"></i>Se connecter
-                                            </button>
-                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                                                <i class="fas fa-times mr-2"></i>Annuler
-                                            </button>
-                                        </div>
-                                    </form>
+                                        <form id="codeForm">
+                                            <div class="form-group">
+                                                <label for="modalLoginCode" class="form-label">
+                                                    <i class="fas fa-key mr-2"></i>Code de sécurité (6 chiffres)
+                                                </label>
+                                                <input type="text" class="form-control text-center" id="modalLoginCode"
+                                                    name="security_code" pattern="[0-9]{6}" maxlength="6"
+                                                    placeholder="123456" required style="font-size: 1.2em; letter-spacing: 0.2em;">
+                                                <div class="form-text">
+                                                    Code à 6 chiffres envoyé par email. Vérifiez vos spams si nécessaire.
+                                                </div>
+                                            </div>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <button type="submit" class="btn hero-btn hero-btn--primary" id="modalLoginBtn">
+                                                        <i class="fas fa-sign-in-alt mr-2"></i>Se connecter
+                                                    </button>
+                                                    <button type="button" class="btn btn-link text-muted" id="resendCodeBtn">
+                                                        <i class="fas fa-redo mr-1"></i>Renvoyer le code
+                                                    </button>
+                                                </div>
+                                                <button type="button" class="btn btn-secondary" id="backToEmailBtn">
+                                                    <i class="fas fa-arrow-left mr-2"></i>Retour
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -66,88 +97,198 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const modalLoginForm = document.getElementById('modalLoginForm');
+        const step1 = document.getElementById('step1-email');
+        const step2 = document.getElementById('step2-code');
+        const emailForm = document.getElementById('emailForm');
+        const codeForm = document.getElementById('codeForm');
+        const sendCodeBtn = document.getElementById('sendCodeBtn');
         const modalLoginBtn = document.getElementById('modalLoginBtn');
+        const resendCodeBtn = document.getElementById('resendCodeBtn');
+        const backToEmailBtn = document.getElementById('backToEmailBtn');
         const loginFlashMessages = document.getElementById('loginFlashMessages');
+        const emailSentTo = document.getElementById('emailSentTo');
+        
+        let currentEmail = '';
 
-        if (modalLoginForm) {
-            modalLoginForm.addEventListener('submit', function (e) {
+        // Étape 1: Envoi du code par email
+        if (emailForm) {
+            emailForm.addEventListener('submit', function (e) {
                 e.preventDefault();
-
+                
+                const email = document.getElementById('modalLoginEmail').value;
+                currentEmail = email;
+                
                 // Désactiver le bouton pendant la requête
-                modalLoginBtn.disabled = true;
-                modalLoginBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Connexion...';
-
+                sendCodeBtn.disabled = true;
+                sendCodeBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Envoi...';
+                
                 // Effacer les messages précédents
                 loginFlashMessages.innerHTML = '';
 
-                const formData = new FormData(modalLoginForm);
-
-                fetch('/login', {
+                fetch('/send-login-code', {
                     method: 'POST',
-                    body: formData,
                     headers: {
+                        'Content-Type': 'application/json',
                         'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ email: email })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Passer à l'étape 2
+                        step1.style.display = 'none';
+                        step2.style.display = 'block';
+                        emailSentTo.textContent = `Code envoyé à ${email}`;
+                        
+                        // Focus sur le champ code
+                        setTimeout(() => {
+                            document.getElementById('modalLoginCode').focus();
+                        }, 300);
+                        
+                        // Message de succès
+                        loginFlashMessages.innerHTML = `
+                            <div class="alert alert-success" role="alert">
+                                <i class="fas fa-check-circle mr-2"></i>${data.message}
+                            </div>
+                        `;
+                    } else {
+                        // Afficher message d'erreur
+                        loginFlashMessages.innerHTML = `
+                            <div class="alert alert-danger" role="alert">
+                                <i class="fas fa-exclamation-triangle mr-2"></i>${data.message}
+                            </div>
+                        `;
                     }
                 })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            // Afficher message de succès
-                            loginFlashMessages.innerHTML = `
-                        <div class="alert alert-success" role="alert">
-                            <i class="fas fa-check-circle mr-2"></i>${data.message}
-                        </div>
-                    `;
-
-                            // Rediriger après un court délai
-                            setTimeout(() => {
-                                window.location.href = data.redirect || '/profil';
-                            }, 1500);
-                        } else {
-                            // Afficher message d'erreur
-                            loginFlashMessages.innerHTML = `
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    loginFlashMessages.innerHTML = `
                         <div class="alert alert-danger" role="alert">
-                            <i class="fas fa-exclamation-triangle mr-2"></i>${data.message}
+                            <i class="fas fa-exclamation-triangle mr-2"></i>Erreur lors de l'envoi. Veuillez réessayer.
                         </div>
                     `;
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Erreur:', error);
-                        loginFlashMessages.innerHTML = `
-                    <div class="alert alert-danger" role="alert">
-                        <i class="fas fa-exclamation-triangle mr-2"></i>Erreur de connexion. Veuillez réessayer.
-                    </div>
-                `;
-                    })
-                    .finally(() => {
-                        // Réactiver le bouton
-                        modalLoginBtn.disabled = false;
-                        modalLoginBtn.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i>Se connecter';
-                    });
-            });
-
-            // Validation en temps réel du code de sécurité
-            const securityCodeInput = document.getElementById('modalLoginCode');
-            if (securityCodeInput) {
-                securityCodeInput.addEventListener('input', function (e) {
-                    // Ne garder que les chiffres et limiter à 5 caractères
-                    let value = e.target.value.replace(/\D/g, '').substring(0, 5);
-                    e.target.value = value;
-
-                    // Validation visuelle
-                    if (value.length === 5) {
-                        e.target.classList.remove('is-invalid');
-                        e.target.classList.add('is-valid');
-                    } else {
-                        e.target.classList.remove('is-valid');
-                        if (value.length > 0) {
-                            e.target.classList.add('is-invalid');
-                        }
-                    }
+                })
+                .finally(() => {
+                    // Réactiver le bouton
+                    sendCodeBtn.disabled = false;
+                    sendCodeBtn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Envoyer le code';
                 });
-            }
+            });
         }
+
+        // Étape 2: Validation du code
+        if (codeForm) {
+            codeForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                
+                const code = document.getElementById('modalLoginCode').value;
+                
+                // Désactiver le bouton pendant la requête
+                modalLoginBtn.disabled = true;
+                modalLoginBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Connexion...';
+                
+                // Effacer les messages précédents
+                loginFlashMessages.innerHTML = '';
+
+                fetch('/verify-login-code', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ 
+                        email: currentEmail,
+                        code: code 
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Afficher message de succès
+                        loginFlashMessages.innerHTML = `
+                            <div class="alert alert-success" role="alert">
+                                <i class="fas fa-check-circle mr-2"></i>${data.message}
+                            </div>
+                        `;
+                        
+                        // Rediriger après un court délai
+                        setTimeout(() => {
+                            window.location.href = data.redirect || '/profil';
+                        }, 1500);
+                    } else {
+                        // Afficher message d'erreur
+                        loginFlashMessages.innerHTML = `
+                            <div class="alert alert-danger" role="alert">
+                                <i class="fas fa-exclamation-triangle mr-2"></i>${data.message}
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    loginFlashMessages.innerHTML = `
+                        <div class="alert alert-danger" role="alert">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>Erreur de connexion. Veuillez réessayer.
+                        </div>
+                    `;
+                })
+                .finally(() => {
+                    // Réactiver le bouton
+                    modalLoginBtn.disabled = false;
+                    modalLoginBtn.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i>Se connecter';
+                });
+            });
+        }
+
+        // Bouton retour à l'étape 1
+        if (backToEmailBtn) {
+            backToEmailBtn.addEventListener('click', function() {
+                step2.style.display = 'none';
+                step1.style.display = 'block';
+                loginFlashMessages.innerHTML = '';
+                document.getElementById('modalLoginCode').value = '';
+            });
+        }
+
+        // Bouton renvoyer le code
+        if (resendCodeBtn) {
+            resendCodeBtn.addEventListener('click', function() {
+                // Déclencher l'envoi d'un nouveau code
+                const event = new Event('submit');
+                emailForm.dispatchEvent(event);
+            });
+        }
+
+        // Validation en temps réel du code de sécurité (6 chiffres)
+        const securityCodeInput = document.getElementById('modalLoginCode');
+        if (securityCodeInput) {
+            securityCodeInput.addEventListener('input', function (e) {
+                // Ne garder que les chiffres et limiter à 6 caractères
+                let value = e.target.value.replace(/\D/g, '').substring(0, 6);
+                e.target.value = value;
+
+                // Validation visuelle
+                if (value.length === 6) {
+                    e.target.classList.remove('is-invalid');
+                    e.target.classList.add('is-valid');
+                } else {
+                    e.target.classList.remove('is-valid');
+                    if (value.length > 0) {
+                        e.target.classList.add('is-invalid');
+                    }
+                }
+            });
+        }
+
+        // Réinitialiser la modal quand elle se ferme
+        $('#modalConnexion').on('hidden.bs.modal', function () {
+            step2.style.display = 'none';
+            step1.style.display = 'block';
+            loginFlashMessages.innerHTML = '';
+            emailForm.reset();
+            if (codeForm) codeForm.reset();
+            currentEmail = '';
+        });
     });
 </script>

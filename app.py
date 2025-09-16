@@ -492,6 +492,128 @@ def login():
     return redirect(url_for('index'))  # Pour les requêtes GET, rediriger vers l'accueil
 
 
+@app.route('/send-login-code', methods=['POST'])
+def send_login_code():
+    """Envoie un code de connexion à 6 chiffres par email"""
+    data = request.get_json()
+    if not data:
+        return jsonify({'success': False, 'message': 'Données JSON requises.'}), 400
+    
+    email = data.get('email', '').strip().lower()
+    if not email:
+        return jsonify({'success': False, 'message': 'Email requis.'}), 400
+    
+    # Générer un code à 6 chiffres
+    code = ''.join([str(secrets.randbelow(10)) for _ in range(6)])
+    
+    # Stocker le code dans la session avec un timestamp
+    from datetime import datetime, timezone, timedelta
+    expires = datetime.now(timezone.utc) + timedelta(minutes=15)  # Code valide 15 minutes
+    
+    session['login_code'] = {
+        'code': hash_code(code),
+        'email': email,
+        'expires': expires.isoformat()
+    }
+    
+    try:
+        # Envoyer le code par email
+        send_login_code_email(email, code)
+        
+        return jsonify({
+            'success': True,
+            'message': f'Code envoyé à {email}. Vérifiez votre boîte de réception.'
+        })
+    except Exception as e:
+        logger.error(f'Erreur lors de l\'envoi du code: {e}')
+        return jsonify({
+            'success': False,
+            'message': 'Erreur lors de l\'envoi du code. Veuillez réessayer.'
+        }), 500
+
+
+@app.route('/verify-login-code', methods=['POST'])
+def verify_login_code():
+    """Vérifie le code de connexion et crée/connecte l'utilisateur"""
+    data = request.get_json()
+    if not data:
+        return jsonify({'success': False, 'message': 'Données JSON requises.'}), 400
+    
+    code = data.get('code', '').strip()
+    email = data.get('email', '').strip().lower()
+    
+    if not code or len(code) != 6 or not code.isdigit():
+        return jsonify({'success': False, 'message': 'Code à 6 chiffres requis.'}), 400
+    
+    # Vérifier le code stocké en session
+    stored_code_data = session.get('login_code')
+    if not stored_code_data:
+        return jsonify({'success': False, 'message': 'Aucun code en attente. Veuillez redemander un code.'}), 400
+    
+    # Vérifier l'expiration
+    from datetime import datetime, timezone
+    expires = datetime.fromisoformat(stored_code_data['expires'])
+    if datetime.now(timezone.utc) > expires:
+        session.pop('login_code', None)
+        return jsonify({'success': False, 'message': 'Code expiré. Veuillez redemander un code.'}), 400
+    
+    # Vérifier l'email et le code
+    if (stored_code_data['email'] != email or 
+        stored_code_data['code'] != hash_code(code)):
+        return jsonify({'success': False, 'message': 'Code invalide.'}), 400
+    
+    # Code valide - nettoyer la session
+    session.pop('login_code', None)
+    
+    # Vérifier si l'utilisateur existe ou le créer
+    db = get_mysql_db()
+    cur = db.cursor(dictionary=True)
+    
+    # Vérifier si l'utilisateur existe déjà
+    cur.execute('SELECT * FROM membres WHERE email = %s', (email,))
+    user = cur.fetchone()
+    
+    if user:
+        # Utilisateur existant - connexion directe
+        session['user_id'] = user['id']
+        session['user_email'] = user['email']
+        session['username'] = user['username'] or user['email']
+        session['is_admin'] = bool(user['is_admin'])
+        
+        return jsonify({
+            'success': True, 
+            'message': 'Connexion réussie!',
+            'redirect': url_for('profil')
+        })
+    else:
+        # Nouvel utilisateur - création automatique du compte
+        try:
+            username = email.split('@')[0]  # Utiliser la partie avant @ comme nom d'utilisateur
+            now = datetime.now(timezone.utc)
+            
+            cur.execute('''INSERT INTO membres (email, username, password, created_at, is_admin)
+                           VALUES (%s, %s, %s, %s, %s)''',
+                       (email, username, 'activated', now, False))
+            db.commit()
+            
+            # Récupérer l'utilisateur nouvellement créé
+            user_id = cur.lastrowid
+            session['user_id'] = user_id
+            session['user_email'] = email
+            session['username'] = username
+            session['is_admin'] = False
+            
+            return jsonify({
+                'success': True, 
+                'message': 'Compte créé et connexion réussie! Bienvenue!',
+                'redirect': url_for('profil')
+            })
+            
+        except Exception as e:
+            logger.error(f'Erreur lors de la création du compte: {e}')
+            return jsonify({'success': False, 'message': 'Erreur lors de la création du compte.'}), 500
+
+
 @app.route('/logout')
 def logout():
     """Route de déconnexion"""
@@ -1115,13 +1237,9 @@ def send_code_email(to_email: str, code: str):
                 'to': [to_email],
                 'subject': 'Votre code de confirmation UMan',
                 'html': html_body,
+                'text': text_body,
             }
-            # include plain text if SDK supports it (safe to include)
-            try:
-                params['text'] = text_body
-            except Exception:
-                pass
-            resend.Emails.send(params)
+            result = resend.Emails.send(params)
             logger.info('Email sent via Resend to %s', to_email)
             _email_status.update({
                 'last_provider': 'resend',
@@ -1174,6 +1292,112 @@ def send_code_email(to_email: str, code: str):
         })
         return
 
+    msg = EmailMessage()
+    msg['Subject'] = subject
+    msg['From'] = from_addr
+    msg['To'] = to_email
+    msg.set_content(body)
+
+    with smtplib.SMTP(smtp_host, smtp_port) as server:
+        server.starttls()
+        server.login(smtp_user, smtp_pass)
+        server.send_message(msg)
+    _email_status.update({
+        'last_provider': 'smtp',
+        'last_result': 'ok',
+        'last_detail': f'{smtp_host}:{smtp_port}',
+        'last_ts': datetime.now(timezone.utc).isoformat()
+    })
+
+
+def send_login_code_email(to_email: str, code: str):
+    """Envoie un code de connexion à 6 chiffres par email"""
+    from_addr = os.environ.get('SMTP_FROM', 'info@uman-api.com')
+    
+    subject = 'Votre code de connexion UMan'
+    body = f"Bonjour,\n\nVoici votre code de connexion UMan: {code}\n\nCe code est valide pendant 15 minutes.\n\nSi vous n'avez pas demandé ce code, ignorez ce message.\n\nUMan API"
+
+    # Staging mock: if UMAN_ENV=staging write a small file entry instead of sending
+    uenv = os.environ.get('UMAN_ENV', '').lower()
+    if uenv == 'staging':
+        out_dir = os.environ.get('UMAN_STAGING_OUT', os.path.join(os.path.dirname(__file__), 'tmp'))
+        os.makedirs(out_dir, exist_ok=True)
+        fname = os.path.join(out_dir, f"login_code_{datetime.now(timezone.utc).isoformat()}.txt")
+        with open(fname, 'w', encoding='utf-8') as f:
+            f.write(f"To: {to_email}\nSubject: {subject}\n\nCode: {code}\n\n{body}\n")
+        _email_status.update({
+            'last_provider': 'staging',
+            'last_result': 'ok',
+            'last_detail': fname,
+            'last_ts': datetime.now(timezone.utc).isoformat()
+        })
+        return
+
+    # Try Resend first if available
+    resend_api_key = os.environ.get('RESEND_API_KEY')
+    if resend_api_key and resend is not None:
+        try:
+            resend.api_key = resend_api_key
+            
+            # Créer le contenu HTML pour un meilleur rendu
+            html_body = f"""
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                <h2 style="color: #333;">Votre code de connexion UMan</h2>
+                <p>Bonjour,</p>
+                <p>Voici votre code de connexion UMan :</p>
+                <div style="background-color: #f4f4f4; padding: 20px; text-align: center; border-radius: 5px; margin: 20px 0;">
+                    <h1 style="color: #007bff; font-size: 32px; letter-spacing: 3px; margin: 0;">{code}</h1>
+                </div>
+                <p>Ce code est valide pendant <strong>15 minutes</strong>.</p>
+                <p>Si vous n'avez pas demandé ce code, ignorez ce message.</p>
+                <hr style="margin-top: 30px;">
+                <p style="color: #666; font-size: 12px;">UMan API</p>
+            </div>
+            """
+            
+            params = {
+                "from": from_addr,
+                "to": [to_email],
+                "subject": subject,
+                "html": html_body,
+                "text": body,  # Fallback texte
+            }
+            
+            result = resend.Emails.send(params)
+            logger.info(f'Code envoyé à {to_email} via Resend: {code}')
+            _email_status.update({
+                'last_provider': 'resend',
+                'last_result': 'ok',
+                'last_detail': str(result),
+                'last_ts': datetime.now(timezone.utc).isoformat()
+            })
+            return
+        except Exception as e:
+            logger.exception('Resend failed, falling back to SMTP: %s', e)
+            _email_status.update({
+                'last_provider': 'resend',
+                'last_result': 'error',
+                'last_detail': str(e),
+                'last_ts': datetime.now(timezone.utc).isoformat()
+            })
+
+    # Fallback to SMTP or console
+    smtp_host = os.environ.get('SMTP_HOST')
+    smtp_port = int(os.environ.get('SMTP_PORT', '587'))
+    smtp_user = os.environ.get('SMTP_USER')
+    smtp_pass = os.environ.get('SMTP_PASS')
+
+    if not smtp_host or not smtp_user or not smtp_pass:
+        print(f"[UMAN] Login code email to {to_email}: {body}")
+        _email_status.update({
+            'last_provider': 'console',
+            'last_result': 'ok',
+            'last_detail': 'console',
+            'last_ts': datetime.now(timezone.utc).isoformat()
+        })
+        return
+
+    # send via SMTP
     msg = EmailMessage()
     msg['Subject'] = subject
     msg['From'] = from_addr
